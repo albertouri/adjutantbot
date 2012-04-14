@@ -15,6 +15,9 @@ if "%ERRORLEVEL%" == "0" (
 	goto error
 )
 
+set k_originalDir=%CD%
+set k_originalPath=%PATH%
+
 if EXIST "C:\Program Files (x86)\Chaoslauncher" set k_chaosLauncherDir=C:\Program Files (x86)\Chaoslauncher
 if EXIST "C:\Program Files\Chaoslauncher" set k_chaosLauncherDir=C:\Program Files\Chaoslauncher
 
@@ -33,5 +36,7 @@ echo Errors have occurred.
 echo ************************
 
 :end
+cd /D "%k_originalDir%"
+set PATH=%k_originalPath%
 if NOT "%ERRORLEVEL%" == "0" pause
 exit /B %ERRORLEVEL%

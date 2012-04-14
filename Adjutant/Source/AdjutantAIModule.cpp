@@ -21,10 +21,16 @@ void AdjutantAIModule::onStart()
 	analyzed=false;
 	analysisJustFinished=false;
 
+	lastQueueCapture = -51;
+	showTerrain=true;
 	showBullets=false;
 	showVisibilityData=false;
 	isBotEnabled=true;
 	showStats=true;
+	showQueueStats=true;
+
+	//Initialize queue text vector
+	this->queueTextVector = new std::vector<std::string>();
 
 	if (Broodwar->isReplay())
 	{
@@ -102,56 +108,68 @@ void AdjutantAIModule::onFrame()
 	if (showVisibilityData) {drawVisibilityData();}
 	if (showBullets) {drawBullets();}	
 	if (showStats) { drawStats();}
-	if (analyzed && isShowTerrain) {drawTerrainData();}
+	if (analyzed && showTerrain) {drawTerrainData();}
 	if (Broodwar->isReplay()) {return;}
 
 	if (isBotEnabled)
 	{
-		if (Broodwar->getFrameCount()%5==0)
+		Unit* cc = NULL;
+		bool isQueueCaptured = false;
+
+		//manually assigning idle workers to mine
+		for(std::set<Unit*>::const_iterator unit=Broodwar->self()->getUnits().begin();unit!=Broodwar->self()->getUnits().end();unit++)
 		{
-			Unit* cc = NULL;
-
-			//manually assigning idle workers to mine
-			for(std::set<Unit*>::const_iterator unit=Broodwar->self()->getUnits().begin();unit!=Broodwar->self()->getUnits().end();unit++)
+			if ((*unit)->getType().isWorker() && (*unit)->isIdle())
 			{
-				if ((*unit)->getType().isWorker() && (*unit)->isIdle())
+						Unit* closestMineral=NULL;
+				for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++)
 				{
-							Unit* closestMineral=NULL;
-					for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++)
-					{
-						if (closestMineral==NULL || (*unit)->getDistance(*m) < (*unit)->getDistance(closestMineral))
-							closestMineral=*m;
-					}
-					if (closestMineral!=NULL)
-						(*unit)->rightClick(closestMineral);
+					if (closestMineral==NULL || (*unit)->getDistance(*m) < (*unit)->getDistance(closestMineral))
+						closestMineral=*m;
 				}
-
-				if ((*unit)->getType().isResourceDepot())
-				{
-					cc = (*unit);
-				}
+				if (closestMineral!=NULL)
+					(*unit)->rightClick(closestMineral);
 			}
 
-			if (! cc->isTraining() && Broodwar->self()->minerals() >= 50)
+			if ((*unit)->getType().isResourceDepot())
 			{
-				Action* a = new TrainUnitAction(50, cc, &Broodwar->self()->getRace().getWorker());
-				//Action* a = new Action();
-				actionQueue.push(a);
-			}
-
-			while(! actionQueue.empty())
-			{
-				Action* action = actionQueue.top();
-				
-
-				if (action->isReady())
-				{
-					action->execute();
-				}
-
-				actionQueue.pop();
+				cc = (*unit);
 			}
 		}
+
+		if (! cc->isTraining() && Broodwar->self()->minerals() >= 50)
+		{
+			Action* a = new TrainUnitAction(50, cc, &Broodwar->self()->getRace().getWorker());
+			actionQueue.push(a);
+		}
+
+		//Only capture every 50 frames when there is something in the queue
+		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 
+			! actionQueue.empty())
+		{
+			isQueueCaptured = true;
+			this->queueTextVector->clear();
+		}
+
+		while(! actionQueue.empty())
+		{
+			Action* action = actionQueue.top();
+			
+
+			if (action->isReady())
+			{
+				action->execute();
+			}
+			
+			if (isQueueCaptured)
+			{
+				this->queueTextVector->push_back(action->toString());
+			}
+			actionQueue.pop();
+		}
+
+		if (showQueueStats) {drawQueueStats();}
+		if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
 
 		if (analyzed && Broodwar->getFrameCount()%30==0)
 		{
@@ -207,9 +225,13 @@ void AdjutantAIModule::onSendText(std::string text)
 	{
 		showStats = !showStats;
 	}
+	else if (text=="/show queue")
+	{
+		showQueueStats = !showQueueStats;
+	}
 	else if (text=="/show terrain")
 	{
-		isShowTerrain = !isShowTerrain;
+		showTerrain = !showTerrain;
 	} 
 	else if (text=="/show players")
 	{
@@ -373,6 +395,17 @@ void AdjutantAIModule::drawStats()
 	{
 		Broodwar->drawTextScreen(5,16*line,"- %d %ss",(*i).second, (*i).first.getName().c_str());
 		line++;
+	}
+}
+
+void AdjutantAIModule::drawQueueStats()
+{
+	Broodwar->drawTextScreen(200,0,"Priority Queue(%d) at frame %d Now=%d:",
+		this->queueTextVector->size(), this->lastQueueCapture, Broodwar->getFrameCount());
+	
+	for(int i=0; i<(int)queueTextVector->size(); i++)
+	{
+		Broodwar->drawTextScreen(200,16*(i+1),this->queueTextVector->at(i).c_str());
 	}
 }
 

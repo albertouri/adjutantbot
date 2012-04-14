@@ -34,17 +34,26 @@ public:
 	virtual void onUnitRenegade(BWAPI::Unit* unit);
 	virtual void onSaveGame(std::string gameName);
 	virtual void onUnitComplete(BWAPI::Unit *unit);
-	void drawStats(); //not part of BWAPI::AIModule
+
+	//not part of BWAPI::AIModule
+	void drawStats(); 
+	void drawQueueStats();
 	void drawBullets();
 	void drawVisibilityData();
 	void drawTerrainData();
 	void showPlayers();
 	void showForces();
+
+	//Mark the last time we captured the queue to display it to the screen
+	int lastQueueCapture;
+
 	bool showBullets;
 	bool showStats;
-	bool isShowTerrain;
+	bool showQueueStats;
+	bool showTerrain;
 	bool isBotEnabled;
 	bool showVisibilityData;
 	
 	std::priority_queue<Action*, std::vector<Action*>, ActionComparator> actionQueue;
+	std::vector<std::string>* queueTextVector;
 };

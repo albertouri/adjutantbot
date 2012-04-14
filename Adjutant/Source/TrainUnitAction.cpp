@@ -43,3 +43,20 @@ void TrainUnitAction::execute()
 {
 	this->building->train(*this->unitType);
 }
+
+std::string TrainUnitAction::toString()
+{
+	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
+	std::string isReadyText = (this->isReady() ? "T" : "F");
+	std::string priorityText;
+
+	std::stringstream stream;
+	stream << this->priority;
+	priorityText = stream.str();
+
+	return "[P:" + priorityText + "]"
+		+ "[R:" + isReadyText + "]"
+		+ "[V:" + isStillValidText + "]"
+		+ " TrainUnitAction"
+		+ " " + this->unitType->c_str();
+}
