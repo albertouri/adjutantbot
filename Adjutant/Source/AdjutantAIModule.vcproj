@@ -45,7 +45,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ADJUTANTAIMODULE_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -177,11 +177,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Source\AIModule.cpp"
+				RelativePath=".\Action.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\Dll.cpp"
+				RelativePath=".\ActionComparator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AdjutantAIModule.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Dll.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.cpp"
 				>
 			</File>
 		</Filter>
@@ -191,7 +203,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Source\AIModule.h"
+				RelativePath=".\Action.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionComparator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AdjutantAIModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.h"
 				>
 			</File>
 		</Filter>

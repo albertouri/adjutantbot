@@ -49,7 +49,7 @@ call "%k_vsDir%\vcvarsall.bat"
 set PATH=%PATH%;%CD%\BWAPI 3.7.2\WINDOWS
 
 ::Build Adjutant
-devenv "%k_projectFolder%\Adjutant.sln" /build Release
+devenv "%k_projectFolder%\Adjutant.sln" /build Debug
 if NOT "%ERRORLEVEL%" == "0" (
 	echo Unable to compile Adjutant solution
 	goto error
