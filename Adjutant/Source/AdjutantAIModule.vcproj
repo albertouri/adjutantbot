@@ -193,7 +193,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MacroModule.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\TrainUnitAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WorldModel.cpp"
 				>
 			</File>
 		</Filter>
@@ -215,7 +223,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MacroModule.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TrainUnitAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WorldModel.h"
 				>
 			</File>
 		</Filter>

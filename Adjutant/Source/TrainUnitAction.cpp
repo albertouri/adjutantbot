@@ -1,6 +1,6 @@
 #include "TrainUnitAction.h"
 
-TrainUnitAction::TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::UnitType* unitType)
+TrainUnitAction::TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::UnitType unitType)
 {
 	this->priority = priority;
 	this->building = building;
@@ -9,13 +9,13 @@ TrainUnitAction::TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::Uni
 
 bool TrainUnitAction::isReady()
 {
-	if (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed() < unitType->supplyRequired())
+	if (BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed() < unitType.supplyRequired())
 	{
 		//If there is not enough supply
 		return false;
 	}
-	else if (BWAPI::Broodwar->self()->minerals() < unitType->mineralPrice()
-		&& BWAPI::Broodwar->self()->gas() < unitType->gasPrice())
+	else if (BWAPI::Broodwar->self()->minerals() < unitType.mineralPrice()
+		&& BWAPI::Broodwar->self()->gas() < unitType.gasPrice())
 	{
 		//If there is not enough resources
 		return false;
@@ -41,7 +41,7 @@ bool TrainUnitAction::isStillValid()
 
 void TrainUnitAction::execute()
 {
-	this->building->train(*this->unitType);
+	this->building->train(this->unitType);
 }
 
 std::string TrainUnitAction::toString()
@@ -58,5 +58,5 @@ std::string TrainUnitAction::toString()
 		+ "[R:" + isReadyText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " TrainUnitAction"
-		+ " " + this->unitType->c_str();
+		+ " " + this->unitType.c_str();
 }

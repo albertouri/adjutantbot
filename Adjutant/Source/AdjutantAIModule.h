@@ -6,7 +6,9 @@
 #include <vector>
 #include "Action.h"
 #include "ActionComparator.h"
+#include "MacroModule.h"
 #include "TrainUnitAction.h"
+#include "WorldModel.h"
 
 extern bool analyzed;
 extern bool analysisJustFinished;
@@ -54,6 +56,8 @@ public:
 	bool isBotEnabled;
 	bool showVisibilityData;
 	
+	WorldModel* worldModel;
+	MacroModule* macroModule;
 	std::priority_queue<Action*, std::vector<Action*>, ActionComparator> actionQueue;
 	std::vector<std::string>* queueTextVector;
 };

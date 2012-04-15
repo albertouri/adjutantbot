@@ -6,7 +6,7 @@
 class TrainUnitAction : public Action
 {
 public:
-	TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::UnitType* unitType);
+	TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::UnitType unitType);
 	~TrainUnitAction(void);
 	bool isReady();
 	bool isStillValid();
@@ -14,5 +14,5 @@ public:
 	std::string toString();
 protected:
 	BWAPI::Unit* building;
-	BWAPI::UnitType* unitType;
+	BWAPI::UnitType unitType;
 };

@@ -29,8 +29,10 @@ void AdjutantAIModule::onStart()
 	showStats=true;
 	showQueueStats=true;
 
-	//Initialize queue text vector
+	//Initialize member variables
 	this->queueTextVector = new std::vector<std::string>();
+	this->worldModel = new WorldModel();
+	this->macroModule = new MacroModule();
 
 	if (Broodwar->isReplay())
 	{
@@ -54,44 +56,6 @@ void AdjutantAIModule::onStart()
 			Broodwar->printf("The Adjutant bot can only play as Terran");
 			isBotEnabled = false;
 		}
-
-		if (isBotEnabled)
-		{
-			/*
-			//send each worker to the mineral field that is closest to it
-			for(std::set<Unit*>::const_iterator unit=Broodwar->self()->getUnits().begin();unit!=Broodwar->self()->getUnits().end();unit++)
-			{
-				if ((*unit)->getType().isWorker())
-				{
-					Unit* closestMineral=NULL;
-					for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++)
-					{
-						if (closestMineral==NULL || (*unit)->getDistance(*m) < (*unit)->getDistance(closestMineral))
-							closestMineral=*m;
-					}
-					if (closestMineral!=NULL)
-						(*unit)->rightClick(closestMineral);
-				}
-				else if ((*unit)->getType().isResourceDepot())
-				{
-					//if this is a center, tell it to build the appropiate type of worker
-					if ((*unit)->getType().getRace()!=Races::Zerg)
-					{
-						(*unit)->train(Broodwar->self()->getRace().getWorker());
-					}
-					else //if we are Zerg, we need to select a larva and morph it into a drone
-					{
-						std::set<Unit*> myLarva=(*unit)->getLarva();
-						if (myLarva.size()>0)
-						{
-							Unit* larva=*myLarva.begin();
-							larva->morph(UnitTypes::Zerg_Drone);
-						}
-					}
-				}
-			}
-			*/
-		}
 	}
 }
 
@@ -101,6 +65,11 @@ void AdjutantAIModule::onEnd(bool isWinner)
 	{
 		//log win to file
 	}
+
+	delete this->queueTextVector;
+	delete this->macroModule;
+	delete this->worldModel;
+
 }
 
 void AdjutantAIModule::onFrame()
@@ -113,35 +82,13 @@ void AdjutantAIModule::onFrame()
 
 	if (isBotEnabled)
 	{
-		Unit* cc = NULL;
 		bool isQueueCaptured = false;
 
-		//manually assigning idle workers to mine
-		for(std::set<Unit*>::const_iterator unit=Broodwar->self()->getUnits().begin();unit!=Broodwar->self()->getUnits().end();unit++)
-		{
-			if ((*unit)->getType().isWorker() && (*unit)->isIdle())
-			{
-						Unit* closestMineral=NULL;
-				for(std::set<Unit*>::iterator m=Broodwar->getMinerals().begin();m!=Broodwar->getMinerals().end();m++)
-				{
-					if (closestMineral==NULL || (*unit)->getDistance(*m) < (*unit)->getDistance(closestMineral))
-						closestMineral=*m;
-				}
-				if (closestMineral!=NULL)
-					(*unit)->rightClick(closestMineral);
-			}
+		//Update world model
+		this->worldModel->update();
 
-			if ((*unit)->getType().isResourceDepot())
-			{
-				cc = (*unit);
-			}
-		}
-
-		if (! cc->isTraining() && Broodwar->self()->minerals() >= 50)
-		{
-			Action* a = new TrainUnitAction(50, cc, &Broodwar->self()->getRace().getWorker());
-			actionQueue.push(a);
-		}
+		//Generate actions
+		this->macroModule->evalute(worldModel, &actionQueue);
 
 		//Only capture every 50 frames when there is something in the queue
 		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 
@@ -151,6 +98,7 @@ void AdjutantAIModule::onFrame()
 			this->queueTextVector->clear();
 		}
 
+		//For right now, we throw away any actions that are not ready
 		while(! actionQueue.empty())
 		{
 			Action* action = actionQueue.top();
@@ -166,6 +114,7 @@ void AdjutantAIModule::onFrame()
 				this->queueTextVector->push_back(action->toString());
 			}
 			actionQueue.pop();
+			delete action;
 		}
 
 		if (showQueueStats) {drawQueueStats();}
@@ -280,26 +229,26 @@ void AdjutantAIModule::onNukeDetect(BWAPI::Position target)
 
 void AdjutantAIModule::onUnitDiscover(BWAPI::Unit* unit)
 {
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+	//	Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitEvade(BWAPI::Unit* unit)
 {
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+	//	Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitShow(BWAPI::Unit* unit)
 {
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+	//	Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitHide(BWAPI::Unit* unit)
 {
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+	//	Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitCreate(BWAPI::Unit* unit)
@@ -307,7 +256,9 @@ void AdjutantAIModule::onUnitCreate(BWAPI::Unit* unit)
 	if (Broodwar->getFrameCount()>1)
 	{
 		if (!Broodwar->isReplay())
-			Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+		{
+			//Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+		}
 		else
 		{
 			/*if we are in a replay, then we will print out the build order
