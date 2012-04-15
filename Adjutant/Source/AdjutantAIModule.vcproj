@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AwarenessModule.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ConstructBuildingAction.cpp"
 				>
 			</File>
@@ -202,6 +206,10 @@
 			</File>
 			<File
 				RelativePath=".\MacroModule.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MoveAction.cpp"
 				>
 			</File>
 			<File
@@ -231,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AwarenessModule.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ConstructBuildingAction.h"
 				>
 			</File>
@@ -243,7 +255,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MoveAction.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TrainUnitAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utils.h"
 				>
 			</File>
 			<File

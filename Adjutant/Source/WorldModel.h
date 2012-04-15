@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+#include "BWTA.h"
 #include <vector>
 
 class WorldModel
@@ -8,10 +9,13 @@ public:
 	WorldModel(void);
 	~WorldModel(void);
 
-	void update();
+	void update(bool isTerrainAnalyzed);
 
 	//*****Our Units*****
 	
+	//Home base region
+	BWTA::Region* homeRegion;
+
 	//Map of all of our available units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> myUnitMap;
 
@@ -26,8 +30,9 @@ public:
 	std::vector<BWAPI::Unit*>* myArmyVector;
 
 	//*****Misc Data****
-	//Potential Expansions
+	//Is BWTA finished?
+	bool isTerrainAnalyzed;
 
-private:
-	void handleOurUnitCompleted(BWAPI::Unit* unit);
+	void handleOurUnitCreated(BWAPI::Unit* unit);
+
 };

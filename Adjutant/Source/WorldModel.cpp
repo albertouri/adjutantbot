@@ -3,26 +3,25 @@
 WorldModel::WorldModel(void)
 {
 	//Initialize command center vector
-	this->myWorkerVector = new std::vector<BWAPI::Unit*>();
+	this->isTerrainAnalyzed = false;
 	this->myArmyVector = new std::vector<BWAPI::Unit*>();
+	this->myScoutVector = new std::vector<BWAPI::Unit*>();
+	this->myWorkerVector = new std::vector<BWAPI::Unit*>();	
 }
 
-void WorldModel::update()
+void WorldModel::update(bool isTerrainAnalyzed)
 {
-	std::set<int> test;
-	std::vector<int> test2;
-	
 	for each(BWAPI::Event gameEvent in BWAPI::Broodwar->getEvents())
 	{
 		BWAPI::Unit* unit = gameEvent.getUnit();
-
+		
 		switch(gameEvent.getType())
 		{
 			case BWAPI::EventType::UnitComplete:
 				
 				if (unit->getPlayer() == BWAPI::Broodwar->self())
 				{
-					handleOurUnitCompleted(unit);
+					handleOurUnitCreated(unit);
 				}
 
 				break;
@@ -30,7 +29,7 @@ void WorldModel::update()
 			case BWAPI::EventType::UnitMorph:
 				if (unit->getPlayer() == BWAPI::Broodwar->self())
 				{
-					handleOurUnitCompleted(unit);
+					handleOurUnitCreated(unit);
 				}
 				break;
 			default:
@@ -38,10 +37,19 @@ void WorldModel::update()
 				break;
 		}
 	}
+
+	if (isTerrainAnalyzed)
+	{
+		this->isTerrainAnalyzed = true;
+		if (BWTA::getStartLocation(BWAPI::Broodwar->self()) != NULL)
+		{
+			this->homeRegion = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
+		}
+	}
 }
 
 
-void WorldModel::handleOurUnitCompleted(BWAPI::Unit* unit)
+void WorldModel::handleOurUnitCreated(BWAPI::Unit* unit)
 {
 	BWAPI::UnitType type = unit->getType();
 
@@ -72,5 +80,6 @@ WorldModel::~WorldModel(void)
 	}
 
 	delete this->myWorkerVector;
+	delete this->myScoutVector;
 	delete this->myArmyVector;
 }

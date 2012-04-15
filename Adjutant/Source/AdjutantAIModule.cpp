@@ -3,8 +3,6 @@ using namespace BWAPI;
 
 bool analyzed;
 bool analysisJustFinished;
-BWTA::Region* home;
-BWTA::Region* enemy_base;
 
 void AdjutantAIModule::onStart()
 {
@@ -33,6 +31,7 @@ void AdjutantAIModule::onStart()
 	this->queueTextVector = new std::vector<std::string>();
 	this->worldModel = new WorldModel();
 	this->macroModule = new MacroModule();
+	this->awarenessModule = new AwarenessModule();
 
 	if (Broodwar->isReplay())
 	{
@@ -56,6 +55,21 @@ void AdjutantAIModule::onStart()
 			Broodwar->printf("The Adjutant bot can only play as Terran");
 			isBotEnabled = false;
 		}
+
+		if (isBotEnabled)
+		{
+			//Capture our initial set of units (we may be loading a saved game)
+			for(std::set<BWAPI::Unit*>::const_iterator unit=BWAPI::Broodwar->self()->getUnits().begin();unit!=BWAPI::Broodwar->self()->getUnits().end();unit++)
+			{
+				if ((*unit)->getPlayer() == Broodwar->self())
+				{
+					this->worldModel->handleOurUnitCreated(*unit);
+				}
+			}
+
+			//Start the map analysis
+			onSendText("/analyze");
+		}
 	}
 }
 
@@ -67,8 +81,9 @@ void AdjutantAIModule::onEnd(bool isWinner)
 	}
 
 	delete this->queueTextVector;
-	delete this->macroModule;
 	delete this->worldModel;
+	delete this->macroModule;
+	delete this->awarenessModule;
 
 }
 
@@ -80,15 +95,20 @@ void AdjutantAIModule::onFrame()
 	if (analyzed && showTerrain) {drawTerrainData();}
 	if (Broodwar->isReplay()) {return;}
 
-	if (isBotEnabled)
+	if (isBotEnabled && Broodwar->getFrameCount())
 	{
 		bool isQueueCaptured = false;
 
 		//Update world model
-		this->worldModel->update();
+		//The initial set of units is captured by the OnStart method (to account for loading files)
+		if (Broodwar->getFrameCount() > 30)
+		{
+			this->worldModel->update(analyzed);
+		}
 
 		//Generate actions
 		this->macroModule->evalute(worldModel, &actionQueue);
+		this->awarenessModule->evalute(worldModel, &actionQueue);
 
 		//Only capture every 50 frames when there is something in the queue
 		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 
@@ -119,39 +139,7 @@ void AdjutantAIModule::onFrame()
 
 		if (showQueueStats) {drawQueueStats();}
 		if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
-
-		if (analyzed && Broodwar->getFrameCount()%30==0)
-		{
-			//order one of our workers to guard our chokepoint.
-			for(std::set<Unit*>::const_iterator unit=Broodwar->self()->getUnits().begin();unit!=Broodwar->self()->getUnits().end();unit++)
-			{
-				if ((*unit)->getType().isWorker())
-				{
-					//get the chokepoints linked to our home region
-					std::set<BWTA::Chokepoint*> chokepoints= home->getChokepoints();
-					double min_length=10000;
-					BWTA::Chokepoint* choke=NULL;
-
-					//iterate through all chokepoints and look for the one with the smallest gap (least width)
-					for(std::set<BWTA::Chokepoint*>::iterator c=chokepoints.begin();c!=chokepoints.end();c++)
-					{
-						double length=(*c)->getWidth();
-						if (length<min_length || choke==NULL)
-						{
-							min_length=length;
-							choke=*c;
-						}
-					}
-
-					//order the worker to move to the center of the gap
-					(*unit)->rightClick(choke->getCenter());
-					break;
-				}
-			}
-		}
 	}
-
-
 
 	if (analysisJustFinished)
 	{
@@ -312,17 +300,6 @@ void AdjutantAIModule::onSaveGame(std::string gameName)
 DWORD WINAPI AnalyzeThread()
 {
 	BWTA::analyze();
-
-	//self start location only available if the map has base locations
-	if (BWTA::getStartLocation(BWAPI::Broodwar->self())!=NULL)
-	{
-		home			 = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
-	}
-	//enemy start location only available if Complete Map Information is enabled.
-	if (BWTA::getStartLocation(BWAPI::Broodwar->enemy())!=NULL)
-	{
-		enemy_base = BWTA::getStartLocation(BWAPI::Broodwar->enemy())->getRegion();
-	}
 	analyzed	 = true;
 	analysisJustFinished = true;
 	return 0;
