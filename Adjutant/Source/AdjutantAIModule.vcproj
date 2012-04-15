@@ -189,7 +189,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConstructBuildingAction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Dll.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GatherResourceAction.cpp"
 				>
 			</File>
 			<File
@@ -220,6 +228,14 @@
 			</File>
 			<File
 				RelativePath=".\AdjutantAIModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConstructBuildingAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GatherResourceAction.h"
 				>
 			</File>
 			<File

@@ -9,7 +9,8 @@ void MacroModule::evalute(WorldModel* worldModel, std::priority_queue<Action*, s
 	//examine world model
 	//add actions to actionQueue based on current state
 
-	//manually assigning idle workers to mine - update to use worldModel and actions instead
+	//manually assigning idle workers to mine
+	//TODO:Update to use worldModel and actions instead
 	BWAPI::Unit* cc = NULL;
 
 	for(std::set<BWAPI::Unit*>::const_iterator unit=BWAPI::Broodwar->self()->getUnits().begin();unit!=BWAPI::Broodwar->self()->getUnits().end();unit++)
@@ -37,6 +38,8 @@ void MacroModule::evalute(WorldModel* worldModel, std::priority_queue<Action*, s
 		//Initialize new action
 		actionQueue->push(new TrainUnitAction(50, cc, BWAPI::Broodwar->self()->getRace().getWorker()));
 	}
+
+	//TODO: Add logic for constructing supply depots and other buildings
 }
 
 MacroModule::~MacroModule(void)
