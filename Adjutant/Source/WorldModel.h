@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "UnitGroup.h"
 #include "Utils.h"
 #include <vector>
 
@@ -26,9 +27,11 @@ public:
 	//Scouts - SCVs or otherwise dedicated to scouting
 	std::vector<BWAPI::Unit*>* myScoutVector;
 
-	//Army
-	//TODO: one giant mob for now. Will need implement grouping... micro... etc...
+	//Army - all units
 	std::vector<BWAPI::Unit*>* myArmyVector;
+
+	//Army - split into groups
+	std::vector<UnitGroup*>* myArmyGroups;
 
 	//*****Opponent Model*****
 	//Enemy

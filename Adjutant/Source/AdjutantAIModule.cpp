@@ -33,6 +33,7 @@ void AdjutantAIModule::onStart()
 	this->worldModel = new WorldModel();
 	this->macroModule = new MacroModule();
 	this->awarenessModule = new AwarenessModule();
+	this->microModule = new MicroModule();
 
 	if (Broodwar->isReplay())
 	{
@@ -74,6 +75,7 @@ void AdjutantAIModule::onEnd(bool isWinner)
 
 	delete this->queueTextVector;
 	delete this->worldModel;
+	delete this->microModule;
 	delete this->macroModule;
 	delete this->awarenessModule;
 
@@ -97,6 +99,7 @@ void AdjutantAIModule::onFrame()
 		//Generate actions
 		this->macroModule->evalute(worldModel, &actionQueue);
 		this->awarenessModule->evalute(worldModel, &actionQueue);
+		this->microModule->evalute(worldModel, &actionQueue);
 
 		//Only capture every 50 frames when there is something in the queue
 		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 

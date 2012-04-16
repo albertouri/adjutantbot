@@ -8,6 +8,7 @@
 #include "ActionComparator.h"
 #include "AwarenessModule.h"
 #include "MacroModule.h"
+#include "MicroModule.h"
 #include "TrainUnitAction.h"
 #include "Utils.h"
 #include "WorldModel.h"
@@ -61,6 +62,7 @@ public:
 	WorldModel* worldModel;
 	AwarenessModule* awarenessModule;
 	MacroModule* macroModule;
+	MicroModule* microModule;
 
 	std::priority_queue<Action*, std::vector<Action*>, ActionComparator> actionQueue;
 	std::vector<std::string>* queueTextVector;

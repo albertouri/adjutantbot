@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AttackAction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\AwarenessModule.cpp"
 				>
 			</File>
@@ -209,11 +213,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MicroModule.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MoveAction.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\TrainUnitAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UnitGroup.cpp"
 				>
 			</File>
 			<File
@@ -239,6 +251,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AttackAction.h"
+				>
+			</File>
+			<File
 				RelativePath=".\AwarenessModule.h"
 				>
 			</File>
@@ -255,11 +271,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MicroModule.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MoveAction.h"
 				>
 			</File>
 			<File
 				RelativePath=".\TrainUnitAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UnitGroup.h"
 				>
 			</File>
 			<File

@@ -4,9 +4,12 @@ WorldModel::WorldModel(void)
 {
 	//Initialize command center vector
 	this->isTerrainAnalyzed = false;
+	this->myArmyGroups = new std::vector<UnitGroup*>();
 	this->myArmyVector = new std::vector<BWAPI::Unit*>();
 	this->myScoutVector = new std::vector<BWAPI::Unit*>();
 	this->myWorkerVector = new std::vector<BWAPI::Unit*>();	
+
+	this->myArmyGroups->push_back(new UnitGroup());
 
 	for each (BWAPI::Player* player in BWAPI::Broodwar->getPlayers())
 	{
@@ -67,6 +70,15 @@ void WorldModel::update(bool isTerrainAnalyzed)
 						BWAPI::Broodwar->sendText("New Worker");
 						this->myWorkerVector->push_back(unit);
 					}
+					else if (unit->getType().canMove())
+					{
+						BWAPI::Broodwar->sendText("New Army Unit");
+						this->myArmyVector->push_back(unit);
+
+						//We always add units to the "0th" group - micro manager might split army using other groups
+						this->myArmyGroups->front()->addUnit(unit);
+					}
+
 					break;
 				
 				case BWAPI::EventType::UnitDestroy:
@@ -75,6 +87,11 @@ void WorldModel::update(bool isTerrainAnalyzed)
 					wasRemoved = Utils::vectorRemoveElement(this->myWorkerVector, unit);
 					if (!wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myScoutVector, unit);}
 					if (!wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myArmyVector, unit);}
+					
+					for each (UnitGroup* group in (*this->myArmyGroups))
+					{
+						if (group->removeUnit(unit)) {break;}
+					}
 
 					if (wasRemoved)
 					{
@@ -106,11 +123,11 @@ void WorldModel::update(bool isTerrainAnalyzed)
 
 	if (isTerrainAnalyzed)
 	{
-		this->isTerrainAnalyzed = true;
 		if (BWTA::getStartLocation(BWAPI::Broodwar->self()) != NULL)
 		{
 			this->myHomeRegion = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
 		}
+		this->isTerrainAnalyzed = true;
 	}
 }
 
@@ -122,4 +139,5 @@ WorldModel::~WorldModel(void)
 	delete this->myWorkerVector;
 	delete this->myScoutVector;
 	delete this->myArmyVector;
+	delete this->myArmyGroups;
 }
