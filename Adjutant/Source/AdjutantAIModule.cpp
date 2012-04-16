@@ -3,6 +3,7 @@ using namespace BWAPI;
 
 bool analyzed;
 bool analysisJustFinished;
+bool displayOnEventMessages = false;
 
 void AdjutantAIModule::onStart()
 {
@@ -58,15 +59,6 @@ void AdjutantAIModule::onStart()
 
 		if (isBotEnabled)
 		{
-			//Capture our initial set of units (we may be loading a saved game)
-			for(std::set<BWAPI::Unit*>::const_iterator unit=BWAPI::Broodwar->self()->getUnits().begin();unit!=BWAPI::Broodwar->self()->getUnits().end();unit++)
-			{
-				if ((*unit)->getPlayer() == Broodwar->self())
-				{
-					this->worldModel->handleOurUnitCreated(*unit);
-				}
-			}
-
 			//Start the map analysis
 			onSendText("/analyze");
 		}
@@ -100,11 +92,7 @@ void AdjutantAIModule::onFrame()
 		bool isQueueCaptured = false;
 
 		//Update world model
-		//The initial set of units is captured by the OnStart method (to account for loading files)
-		if (Broodwar->getFrameCount() > 30)
-		{
-			this->worldModel->update(analyzed);
-		}
+		this->worldModel->update(analyzed);
 
 		//Generate actions
 		this->macroModule->evalute(worldModel, &actionQueue);
@@ -199,16 +187,22 @@ void AdjutantAIModule::onSendText(std::string text)
 
 void AdjutantAIModule::onReceiveText(BWAPI::Player* player, std::string text)
 {
+	if (!displayOnEventMessages) {return;}
+
 	Broodwar->printf("%s said '%s'", player->getName().c_str(), text.c_str());
 }
 
 void AdjutantAIModule::onPlayerLeft(BWAPI::Player* player)
 {
+	if (!displayOnEventMessages) {return;}
+
 	Broodwar->sendText("%s left the game.",player->getName().c_str());
 }
 
 void AdjutantAIModule::onNukeDetect(BWAPI::Position target)
 {
+	if (!displayOnEventMessages) {return;}
+
 	if (target!=Positions::Unknown)
 		Broodwar->printf("Nuclear Launch Detected at (%d,%d)",target.x(),target.y());
 	else
@@ -217,35 +211,45 @@ void AdjutantAIModule::onNukeDetect(BWAPI::Position target)
 
 void AdjutantAIModule::onUnitDiscover(BWAPI::Unit* unit)
 {
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-	//	Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!displayOnEventMessages) {return;}
+
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+		Broodwar->sendText("A %s [%x] has been discovered at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitEvade(BWAPI::Unit* unit)
 {
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-	//	Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!displayOnEventMessages) {return;}
+
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+		Broodwar->sendText("A %s [%x] was last accessible at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitShow(BWAPI::Unit* unit)
 {
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-	//	Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!displayOnEventMessages) {return;}
+
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+		Broodwar->sendText("A %s [%x] has been spotted at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitHide(BWAPI::Unit* unit)
 {
-	//if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-	//	Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+	if (!displayOnEventMessages) {return;}
+
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+		Broodwar->sendText("A %s [%x] was last seen at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitCreate(BWAPI::Unit* unit)
 {
+	if (!displayOnEventMessages) {return;}
+
 	if (Broodwar->getFrameCount()>1)
 	{
 		if (!Broodwar->isReplay())
 		{
-			//Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+			Broodwar->sendText("A %s [%x] has been created at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 		}
 		else
 		{
@@ -264,12 +268,16 @@ void AdjutantAIModule::onUnitCreate(BWAPI::Unit* unit)
 
 void AdjutantAIModule::onUnitDestroy(BWAPI::Unit* unit)
 {
+	if (!displayOnEventMessages) {return;}
+
 	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
 		Broodwar->sendText("A %s [%x] has been destroyed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }
 
 void AdjutantAIModule::onUnitMorph(BWAPI::Unit* unit)
 {
+	if (!displayOnEventMessages) {return;}
+
 	if (!Broodwar->isReplay())
 		Broodwar->sendText("A %s [%x] has been morphed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 	else
@@ -288,14 +296,28 @@ void AdjutantAIModule::onUnitMorph(BWAPI::Unit* unit)
 
 void AdjutantAIModule::onUnitRenegade(BWAPI::Unit* unit)
 {
+	if (!displayOnEventMessages) {return;}
+
 	if (!Broodwar->isReplay())
 		Broodwar->sendText("A %s [%x] is now owned by %s",unit->getType().getName().c_str(),unit,unit->getPlayer()->getName().c_str());
 }
 
 void AdjutantAIModule::onSaveGame(std::string gameName)
 {
+	if (!displayOnEventMessages) {return;}
+
 	Broodwar->printf("The game was saved to \"%s\".", gameName.c_str());
 }
+
+
+void AdjutantAIModule::onUnitComplete(BWAPI::Unit *unit)
+{
+	if (!displayOnEventMessages) {return;}
+
+	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
+		Broodwar->sendText("A %s [%x] has been completed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+}
+
 
 DWORD WINAPI AnalyzeThread()
 {
@@ -452,10 +474,4 @@ void AdjutantAIModule::showForces()
 			Broodwar->printf("	- Player [%d]: %s",(*j)->getID(),(*j)->getName().c_str());
 		}
 	}
-}
-
-void AdjutantAIModule::onUnitComplete(BWAPI::Unit *unit)
-{
-	if (!Broodwar->isReplay() && Broodwar->getFrameCount()>1)
-		Broodwar->sendText("A %s [%x] has been completed at (%d,%d)",unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
 }

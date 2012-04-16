@@ -11,8 +11,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, std::priority_queue<Action
 
 	if (scoutingWeight > 0 && worldModel->isTerrainAnalyzed)
 	{
-		
-		if (BWAPI::Broodwar->getFrameCount() % 200 == 0)
+		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
 		{
 			BWAPI::Broodwar->printf("Scouts=%d|workers=%d|vs=%d",
 				worldModel->myScoutVector->size(),
@@ -20,9 +19,23 @@ void AwarenessModule::evalute(WorldModel* worldModel, std::priority_queue<Action
 				15 - (unsigned int)(10 * scoutingWeight));
 		}
 
-		//Pick initial scout
+		
+		//Picking locations of interest
+		BWAPI::Position positionToExplore = BWAPI::Position(0,0);
+
+		for each (BWTA::BaseLocation* base in BWTA::getStartLocations())
+		{
+			if (! BWAPI::Broodwar->isExplored(base->getTilePosition()))
+			{
+				positionToExplore = base->getPosition();
+				break;
+			}
+		}
+
+		//Picking scouts
 		if (worldModel->myScoutVector->empty() 
-			&& workers->size() > 15 - (unsigned int)(10 * scoutingWeight))
+			&& workers->size() > 15 - (unsigned int)(10 * scoutingWeight)
+			&& positionToExplore != BWAPI::Position(0,0))
 		{
 			BWAPI::Unit* firstScout;
 
@@ -42,23 +55,24 @@ void AwarenessModule::evalute(WorldModel* worldModel, std::priority_queue<Action
 			}
 		}
 
-		if (! worldModel->myScoutVector->empty())
+		//Issues explore or return commands
+		if (! worldModel->myScoutVector->empty() && positionToExplore != BWAPI::Position(0,0))
 		{
-			BWAPI::Position positionToExplore;
-
-			for each (BWTA::BaseLocation* base in BWTA::getStartLocations())
-			{
-				if (! BWAPI::Broodwar->isExplored(base->getTilePosition()))
-				{
-					positionToExplore = base->getPosition();
-					break;
-				}
-			}
-
 			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
 			{
 				actionQueue->push(new MoveAction(scout, positionToExplore));
 			}
+		}
+		else
+		{
+			//We've explored all bases, go back to mining
+			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
+			{
+				actionQueue->push(new MoveAction(scout, worldModel->myHomeRegion->getCenter()));
+				worldModel->myWorkerVector->push_back(scout);
+			}
+
+			worldModel->myScoutVector->clear();
 		}
 	}
 }

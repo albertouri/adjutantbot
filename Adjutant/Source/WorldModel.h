@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "Utils.h"
 #include <vector>
 
 class WorldModel
@@ -14,7 +15,7 @@ public:
 	//*****Our Units*****
 	
 	//Home base region
-	BWTA::Region* homeRegion;
+	BWTA::Region* myHomeRegion;
 
 	//Map of all of our available units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> myUnitMap;
@@ -29,10 +30,17 @@ public:
 	//TODO: one giant mob for now. Will need implement grouping... micro... etc...
 	std::vector<BWAPI::Unit*>* myArmyVector;
 
+	//*****Opponent Model*****
+	//Enemy
+	BWAPI::Player* enemy;
+
+	//Home base region
+	BWTA::Region* enemyHomeRegion;
+
+	//Map of all of our available units based on type
+	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> enemyUnitMap;
+
 	//*****Misc Data****
 	//Is BWTA finished?
 	bool isTerrainAnalyzed;
-
-	void handleOurUnitCreated(BWAPI::Unit* unit);
-
 };
