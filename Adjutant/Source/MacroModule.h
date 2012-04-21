@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
-#include "Action.h"
-#include "ActionComparator.h"
+#include "ActionQueue.h"
+
 #include <BWAPI.h>
 #include "TrainUnitAction.h"
 #include "BuildingManager.h"
@@ -13,5 +13,5 @@ class MacroModule
 public:
 	MacroModule(void);
 	~MacroModule(void);
-	void evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue);
+	void evalute(WorldModel* worldModel, ActionQueue* actionQueue);
 };

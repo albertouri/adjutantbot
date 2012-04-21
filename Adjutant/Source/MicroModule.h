@@ -1,7 +1,7 @@
 #pragma once
-#include "Action.h"
+#include "ActionQueue.h"
 #include "AttackAction.h"
-#include "ActionComparator.h"
+
 #include <BWAPI.h>
 #include <queue>
 #include "Utils.h"
@@ -12,5 +12,5 @@ class MicroModule
 public:
 	MicroModule(void);
 	~MicroModule(void);
-	void evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue);
+	void evalute(WorldModel* worldModel, ActionQueue* actionQueue);
 };

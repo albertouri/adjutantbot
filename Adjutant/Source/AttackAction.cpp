@@ -52,7 +52,7 @@ AttackAction::AttackAction(std::vector<BWAPI::Unit*>* unitVector,  BWAPI::Unit* 
 	this->target = target;
 }	
 
-bool AttackAction::isReady()
+bool AttackAction::isReady(int minerals, int gas, int supplyRemaining)
 {
 	return true;
 }
@@ -86,7 +86,6 @@ void AttackAction::execute()
 std::string AttackAction::toString()
 {
 	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
-	std::string isReadyText = (this->isReady() ? "T" : "F");
 	std::string priorityText, toX, toY;
 	std::string unitText = "";
 
@@ -111,12 +110,43 @@ std::string AttackAction::toString()
 	}
 
 	return "[P:" + priorityText+ "]"
-		+ "[R:" + isReadyText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " AttackAction"
 		+ " " + unitText + " to (" + toX + "," + toY + ")";
 }
 
+bool AttackAction::operator==(const Action &other) const
+{
+	if (typeid(other) != typeid(AttackAction)) {return false;}
+	AttackAction* otherAction = (AttackAction*)&other;
+	bool isSame = true;
+
+	if (this->position != otherAction->position)
+	{
+		isSame = false;
+	}
+	else if (this->target != otherAction->target)
+	{
+		isSame = false;
+	}
+	else if (this->unitVector->size() != otherAction->unitVector->size())
+	{
+		isSame = false;
+	}
+	else
+	{
+		for each (BWAPI::Unit* unit in (*this->unitVector))
+		{
+			if (! Utils::vectorContains(otherAction->unitVector, unit))
+			{
+				isSame = false;
+				break;
+			}
+		}
+	}
+
+	return isSame;
+}
 
 AttackAction::~AttackAction(void)
 {

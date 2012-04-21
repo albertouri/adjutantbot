@@ -13,10 +13,10 @@ ConstructBuildingAction::~ConstructBuildingAction(void)
 {
 }
 
-bool ConstructBuildingAction::isReady()
+bool ConstructBuildingAction::isReady(int minerals, int gas, int supplyRemaining)
 {
-	if (BWAPI::Broodwar->self()->minerals() < buildingType.mineralPrice()
-		&& BWAPI::Broodwar->self()->gas() < buildingType.gasPrice())
+	if (minerals < this->buildingType.mineralPrice()
+		&& gas < this->buildingType.gasPrice())
 	{
 		//If there is not enough resources
 		return false;
@@ -56,10 +56,34 @@ void ConstructBuildingAction::execute()
 	}
 }
 
+void ConstructBuildingAction::updateResourceCost(int* minerals, int* gas, int* supplyRemaining)
+{
+	*minerals = *minerals - this->buildingType.mineralPrice();
+	*gas = *gas - this->buildingType.gasPrice();
+	*supplyRemaining = *supplyRemaining - this->buildingType.supplyRequired();
+}
+
+bool ConstructBuildingAction::operator==(const Action &other) const
+{
+	if (typeid(other) != typeid(ConstructBuildingAction)) {return false;}
+	ConstructBuildingAction* otherAction = (ConstructBuildingAction*)&other;
+	bool isSame = true;
+
+	if (this->buildingType != otherAction->buildingType)
+	{
+		isSame = false;
+	}
+	else if (this->location != otherAction->location)
+	{
+		isSame = false;
+	}
+
+	return isSame;
+}
+
 std::string ConstructBuildingAction::toString()
 {
 	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
-	std::string isReadyText = (this->isReady() ? "T" : "F");
 	std::string priorityText;
 
 	std::stringstream stream;
@@ -67,7 +91,6 @@ std::string ConstructBuildingAction::toString()
 	priorityText = stream.str();
 
 	return "[P:" + priorityText + "]"
-		+ "[R:" + isReadyText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " ConstructBuildingAction"
 		+ " " + this->buildingType.c_str();

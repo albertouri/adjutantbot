@@ -1,10 +1,11 @@
 #include "MicroModule.h"
+#include "TrainUnitAction.h"
 
 MicroModule::MicroModule(void)
 {
 }
 
-void MicroModule::evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue)
+void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
 	std::vector<UnitGroup*>* myArmyGroups = worldModel->myArmyGroups;
 	UnitGroup* baseGroup = myArmyGroups->front();

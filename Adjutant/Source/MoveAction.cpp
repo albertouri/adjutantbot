@@ -32,7 +32,7 @@ MoveAction::MoveAction(std::vector<BWAPI::Unit*>* unitVector, int x, int y)
 	this->position = BWAPI::Position(x, y);
 }
 
-bool MoveAction::isReady()
+bool MoveAction::isReady(int minerals, int gas, int supplyRemaining)
 {
 	return true;
 }
@@ -53,10 +53,38 @@ void MoveAction::execute()
 	}
 }
 
+bool MoveAction::operator==(const Action &other) const
+{
+	if (typeid(other) != typeid(MoveAction)) {return false;}
+	MoveAction* otherAction = (MoveAction*)&other;
+	bool isSame = true;
+
+	if (this->position != otherAction->position)
+	{
+		isSame = false;
+	}
+	else if (this->unitVector->size() != otherAction->unitVector->size())
+	{
+		isSame = false;
+	}
+	else
+	{
+		for each (BWAPI::Unit* unit in (*this->unitVector))
+		{
+			if (! Utils::vectorContains(otherAction->unitVector, unit))
+			{
+				isSame = false;
+				break;
+			}
+		}
+	}
+
+	return isSame;
+}
+
 std::string MoveAction::toString()
 {
 	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
-	std::string isReadyText = (this->isReady() ? "T" : "F");
 	std::string priorityText, toX, toY;
 	std::string unitText = "";
 
@@ -70,6 +98,7 @@ std::string MoveAction::toString()
 
 	stream.clear();
 	stream << this->position.y();
+	toY = stream.str();
 	stream.str("");
 
 	
@@ -81,7 +110,6 @@ std::string MoveAction::toString()
 	}
 
 	return "[P:" + priorityText+ "]"
-		+ "[R:" + isReadyText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " MoveAction"
 		+ " " + unitText + " to (" + toX + "," + toY + ")";

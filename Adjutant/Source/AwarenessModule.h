@@ -1,6 +1,6 @@
 #pragma once
-#include "Action.h"
-#include "ActionComparator.h"
+#include "ActionQueue.h"
+
 #include <BWAPI.h>
 #include "MoveAction.h"
 #include <queue>
@@ -12,5 +12,5 @@ class AwarenessModule
 public:
 	AwarenessModule(void);
 	~AwarenessModule(void);
-	void evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue);
+	void evalute(WorldModel* worldModel, ActionQueue* actionQueue);
 };

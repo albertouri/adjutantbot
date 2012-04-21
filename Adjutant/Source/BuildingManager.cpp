@@ -5,7 +5,7 @@ BuildingManager::BuildingManager(void)
 {
 }
 
-void BuildingManager::evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue)
+void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
 	//BWAPI::Broodwar->sendText("Successfully Entered BuildingManager");
 	BWAPI::Unit* cc = NULL;

@@ -11,5 +11,5 @@ class BuildingManager
 public:
 	BuildingManager(void);
 	~BuildingManager(void);
-	static void evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue);
+	static void evalute(WorldModel* worldModel, ActionQueue* actionQueue);
 };

@@ -5,7 +5,7 @@ GatherResourceAction::GatherResourceAction(BWAPI::Unit* worker, BWAPI::Unit* res
 	//TODO: set internal variables
 }
 
-bool GatherResourceAction::isReady()
+bool GatherResourceAction::isReady(int minerals, int gas, int supplyRemaining)
 {
 	//TODO: add pre-condition if any
 	return true;
@@ -22,10 +22,20 @@ void GatherResourceAction::execute()
 	//TODO: actual BWAPI calls to execute the action
 }
 
+bool GatherResourceAction::operator==(const Action &other) const
+{
+if (typeid(other) != typeid(GatherResourceAction)) {return false;}
+	GatherResourceAction* otherAction = (GatherResourceAction*)&other;
+	bool isSame = true;
+
+	//TODO: compare internal variables to determine if two actions are exactly the same
+
+	return isSame;
+}
+
 std::string GatherResourceAction::toString()
 {
 	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
-	std::string isReadyText = (this->isReady() ? "T" : "F");
 	std::string priorityText;
 
 	std::stringstream stream;
@@ -33,7 +43,6 @@ std::string GatherResourceAction::toString()
 	priorityText = stream.str();
 
 	return "[P:" + priorityText + "]"
-		+ "[R:" + isReadyText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " GatherResourceAction"
 		+ " " ; //TODO: add extra useful info to action if any

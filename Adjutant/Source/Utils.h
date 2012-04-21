@@ -10,6 +10,19 @@ public:
 	~Utils(void);
 
 	template <typename T>
+	static bool vectorContains(std::vector<T*>* v, T* e)
+	{
+		if (std::find(v->begin(), v->end(), e) != v->end())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	template <typename T>
 	static bool vectorRemoveElement(std::vector<T*>* v, T* e)
 	{
 		if (std::find(v->begin(), v->end(), e) != v->end())

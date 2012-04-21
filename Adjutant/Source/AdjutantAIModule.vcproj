@@ -185,11 +185,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AdjutantAIModule.cpp"
+				RelativePath=".\ActionQueue.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\AttackAction.cpp"
+				RelativePath=".\AdjutantAIModule.cpp"
 				>
 			</File>
 			<File
@@ -201,15 +201,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ConstructBuildingAction.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Dll.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GatherResourceAction.cpp"
 				>
 			</File>
 			<File
@@ -218,14 +210,6 @@
 			</File>
 			<File
 				RelativePath=".\MicroModule.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveAction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TrainUnitAction.cpp"
 				>
 			</File>
 			<File
@@ -251,11 +235,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AdjutantAIModule.h"
+				RelativePath=".\ActionQueue.h"
 				>
 			</File>
 			<File
-				RelativePath=".\AttackAction.h"
+				RelativePath=".\AdjutantAIModule.h"
 				>
 			</File>
 			<File
@@ -267,27 +251,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ConstructBuildingAction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GatherResourceAction.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MacroModule.h"
 				>
 			</File>
 			<File
 				RelativePath=".\MicroModule.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveAction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TrainUnitAction.h"
 				>
 			</File>
 			<File
@@ -304,10 +272,48 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			Name="Actions"
 			>
+			<File
+				RelativePath=".\AttackAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AttackAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConstructBuildingAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ConstructBuildingAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GatherResourceAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GatherResourceAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MoveAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MoveAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

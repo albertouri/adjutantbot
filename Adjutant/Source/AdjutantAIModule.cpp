@@ -89,7 +89,7 @@ void AdjutantAIModule::onFrame()
 	if (analyzed && showTerrain) {drawTerrainData();}
 	if (Broodwar->isReplay()) {return;}
 
-	if (isBotEnabled && Broodwar->getFrameCount())
+	if (isBotEnabled)
 	{
 		bool isQueueCaptured = false;
 
@@ -109,23 +109,53 @@ void AdjutantAIModule::onFrame()
 			this->queueTextVector->clear();
 		}
 
-		//For right now, we throw away any actions that are not ready
-		while(! actionQueue.empty())
-		{
-			Action* action = actionQueue.top();
-			
+		//Create vector to save actions that don't get executed
+		std::vector<Action*> unexecutedActionList = std::vector<Action*>();
 
-			if (action->isReady())
-			{
-				action->execute();
-			}
-			
+		//Start off with our current resources. Needed for saving for more costly units
+		int remainingMinerals = BWAPI::Broodwar->self()->minerals();
+		int remainingGas = BWAPI::Broodwar->self()->gas();
+		int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+		std::priority_queue<Action*, std::vector<Action*>, ActionComparator> priorityQueue = this->actionQueue.getPrioritizedQueue();
+		this->actionQueue.clear();
+
+		while(! priorityQueue.empty())
+		{
+			Action* action = priorityQueue.top(); //Get top action
+			priorityQueue.pop(); //Remove top action from queue
+
 			if (isQueueCaptured)
 			{
 				this->queueTextVector->push_back(action->toString());
 			}
-			actionQueue.pop();
-			delete action;
+
+			if (! action->isStillValid())
+			{
+				//Action obsolete - just delete it
+				BWAPI::Broodwar->printf("Obsolete Action Deleted %s", action->toString().c_str());
+				delete action;
+			}
+			else if (action->isReady(remainingMinerals, remainingGas, remainingSupply))
+			{
+				action->execute();
+				action->updateResourceCost(&remainingMinerals, &remainingGas, &remainingSupply);
+
+				delete action;
+			}
+			else
+			{
+				//If an action requiring resources, this will decrease our remaining resources
+				//so that we will pool resources for higher priority actions
+				action->updateResourceCost(&remainingMinerals, &remainingGas, &remainingSupply);
+
+				unexecutedActionList.push_back(action);
+			}
+		}
+
+		//Add unexecuted actions back into the queue for the next frame
+		for each (Action* action in unexecutedActionList)
+		{
+			this->actionQueue.push(action);
 		}
 
 		if (showQueueStats) {drawQueueStats();}

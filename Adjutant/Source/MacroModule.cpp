@@ -4,7 +4,7 @@ MacroModule::MacroModule(void)
 {
 }
 
-void MacroModule::evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue)
+void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
 	BuildingManager::evalute(worldModel, actionQueue);
 	//examine world model

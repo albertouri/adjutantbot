@@ -1,7 +1,8 @@
 #pragma once
-#include "action.h"
+#include "ActionQueue.h"
 #include <BWAPI.h>
 #include <sstream>
+#include "Utils.h"
 
 class MoveAction : public Action
 {
@@ -11,9 +12,11 @@ public:
 	MoveAction::MoveAction(std::vector<BWAPI::Unit*>* unitVector,  BWAPI::Position position);
 	MoveAction::MoveAction(std::vector<BWAPI::Unit*>* unitVector, int x, int y);
 	~MoveAction(void);
-	bool isReady();
+	bool isReady(int minerals, int gas, int supplyRemaining);;
 	bool isStillValid();
 	void execute();
+
+	bool operator==(const Action &other) const;
 	std::string toString();
 
 	std::vector<BWAPI::Unit*>* unitVector;

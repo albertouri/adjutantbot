@@ -4,8 +4,8 @@
 #include <windows.h>
 #include <queue>
 #include <vector>
-#include "Action.h"
-#include "ActionComparator.h"
+#include "ActionQueue.h"
+
 #include "AwarenessModule.h"
 #include "MacroModule.h"
 #include "MicroModule.h"
@@ -64,6 +64,6 @@ public:
 	MacroModule* macroModule;
 	MicroModule* microModule;
 
-	std::priority_queue<Action*, std::vector<Action*>, ActionComparator> actionQueue;
+	ActionQueue actionQueue;
 	std::vector<std::string>* queueTextVector;
 };

@@ -4,7 +4,7 @@ AwarenessModule::AwarenessModule(void)
 {
 }
 
-void AwarenessModule::evalute(WorldModel* worldModel, std::priority_queue<Action*, std::vector<Action*>, ActionComparator>* actionQueue)
+void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
 	double scoutingWeight = 0.75;
 	std::vector<BWAPI::Unit*>* workers = worldModel->myWorkerVector;
