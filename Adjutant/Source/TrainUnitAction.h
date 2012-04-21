@@ -3,7 +3,6 @@
 #include <BWAPI.h>
 #include <sstream>
 
-
 class TrainUnitAction : public Action
 {
 public:

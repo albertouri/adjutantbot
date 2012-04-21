@@ -1,11 +1,18 @@
 #pragma once
 #include "action.h"
+#include <BWAPI.h>
+#include <sstream>
 
-class ConstructBuildingAction :
-	public Action
+class ConstructBuildingAction : public Action
 {
 public:
-	ConstructBuildingAction(void); //TODO: Update constructor for "building type" and "location" parameters
+	ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType); 
 	~ConstructBuildingAction(void);
-	//TODO: add core method from Action
+	bool isReady();
+	bool isStillValid();
+	void execute();
+	std::string toString();
+protected:
+	BWAPI::TilePosition location;
+	BWAPI::UnitType buildingType;
 };

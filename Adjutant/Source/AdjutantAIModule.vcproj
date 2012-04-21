@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BuildingManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ConstructBuildingAction.cpp"
 				>
 			</File>
@@ -256,6 +260,10 @@
 			</File>
 			<File
 				RelativePath=".\AwarenessModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildingManager.h"
 				>
 			</File>
 			<File

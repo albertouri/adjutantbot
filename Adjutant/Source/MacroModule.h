@@ -2,8 +2,10 @@
 #include <queue>
 #include "Action.h"
 #include "ActionComparator.h"
-#include "BWAPI.h"
+#include <BWAPI.h>
 #include "TrainUnitAction.h"
+#include "BuildingManager.h"
+#include "ConstructBuildingAction.h"
 #include "WorldModel.h"
 
 class MacroModule

@@ -70,7 +70,7 @@ goto end
 echo ************************
 echo Errors have occurred.
 echo ************************
-
+pause
 :end
 cd /D "%k_originalDir%"
 set PATH=%k_originalPath%
