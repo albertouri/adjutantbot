@@ -10,17 +10,11 @@ TrainUnitAction::TrainUnitAction(int priority, BWAPI::Unit* building, BWAPI::Uni
 bool TrainUnitAction::isReady(int minerals, int gas, int supplyRemaining)
 {
 
-	if (! this->building->isCompleted())
-	{
-		return false;
-	}
-	else if (supplyRemaining < unitType.supplyRequired())
-	{
-		//If there is not enough supply
-		return false;
-	}
-	else if (minerals < unitType.mineralPrice()
-		&& gas < unitType.gasPrice())
+	if (! this->building->isCompleted()
+		|| (supplyRemaining < this->unitType.supplyRequired())
+		|| (this->unitType.mineralPrice() != 0 && minerals < this->unitType.mineralPrice())
+		|| (this->unitType.gasPrice() != 0 && gas < this->unitType.gasPrice())
+		)
 	{
 		//If there is not enough resources
 		return false;

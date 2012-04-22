@@ -15,8 +15,9 @@ ConstructBuildingAction::~ConstructBuildingAction(void)
 
 bool ConstructBuildingAction::isReady(int minerals, int gas, int supplyRemaining)
 {
-	if (minerals < this->buildingType.mineralPrice()
-		&& gas < this->buildingType.gasPrice())
+	if (this->buildingType.mineralPrice() != 0 && minerals < this->buildingType.mineralPrice()
+		|| (this->buildingType.gasPrice() != 0 && gas < this->buildingType.gasPrice())
+		)
 	{
 		//If there is not enough resources
 		return false;
@@ -84,14 +85,23 @@ bool ConstructBuildingAction::operator==(const Action &other) const
 std::string ConstructBuildingAction::toString()
 {
 	std::string isStillValidText = (this->isStillValid() ? "T" : "F");
-	std::string priorityText;
+	std::string priorityText, toX, toY;
 
 	std::stringstream stream;
 	stream << this->priority;
 	priorityText = stream.str();
 
+	stream.str("");
+	stream << this->location.x();
+	toX = stream.str();
+
+	stream.str("");
+	stream << this->location.y();
+	toY = stream.str();
+
+
 	return "[P:" + priorityText + "]"
 		+ "[V:" + isStillValidText + "]"
 		+ " ConstructBuildingAction"
-		+ " " + this->buildingType.c_str();
+		+ " " + this->buildingType.c_str() + "(" + toX + "," + toY + ")";
 }
