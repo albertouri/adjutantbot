@@ -16,7 +16,6 @@ public:
 	bool operator==(const Action &other) const;
 	std::string toString();
 
-protected:
 	BWAPI::TilePosition location;
 	BWAPI::UnitType buildingType;
 };
