@@ -1,6 +1,8 @@
 #pragma once
 #include "Action.h"
 #include "ActionComparator.h"
+#include "ConstructBuildingAction.h"
+#include "BWAPI.h"
 #include <queue>
 
 class ActionQueue
@@ -8,6 +10,12 @@ class ActionQueue
 public:
 	ActionQueue(void);
 	~ActionQueue(void);
+
+	//Get all actions in queue
+	std::vector<Action*>* getActionVector();
+
+	//Checks queue for specified building type
+	int countBuildingActions(BWAPI::UnitType unitType);
 
 	//Add a new action to the queue (will not be added if it is a duplicate)
 	void push(Action* action);

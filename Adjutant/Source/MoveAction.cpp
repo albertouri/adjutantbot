@@ -96,10 +96,9 @@ std::string MoveAction::toString()
 	stream << this->position.x();
 	toX = stream.str();
 
-	stream.clear();
+	stream.str("");
 	stream << this->position.y();
 	toY = stream.str();
-	stream.str("");
 
 	
 	unitText = this->unitVector->front()->getType().getName();

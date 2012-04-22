@@ -11,6 +11,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 
 	if (scoutingWeight > 0 && worldModel->isTerrainAnalyzed)
 	{
+		/*
 		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
 		{
 			BWAPI::Broodwar->printf("Scouts=%d|workers=%d|vs=%d",
@@ -18,7 +19,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 				workers->size(),
 				15 - (unsigned int)(10 * scoutingWeight));
 		}
-
+		*/
 		
 		//Picking locations of interest
 		BWAPI::Position positionToExplore = BWAPI::Position(0,0);
@@ -62,6 +63,14 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				actionQueue->push(new MoveAction(scout, positionToExplore));
 			}
+
+			for each (BWAPI::Unit* enemyUnit in worldModel->enemy->getUnits())
+			{
+				if (enemyUnit->getType().isResourceDepot())
+				{
+					worldModel->enemyHomeRegion = BWAPI::Broodwar->getRegionAt(enemyUnit->getPosition());
+				}
+			}
 		}
 		else
 		{
@@ -74,6 +83,8 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 
 			worldModel->myScoutVector->clear();
 		}
+
+
 	}
 }
 

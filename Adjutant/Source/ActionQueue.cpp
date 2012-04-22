@@ -5,6 +5,31 @@ ActionQueue::ActionQueue(void)
 	actionVector = std::vector<Action*>();
 }
 
+std::vector<Action*>* ActionQueue::getActionVector()
+{
+	return &this->actionVector;
+}
+
+int ActionQueue::countBuildingActions(BWAPI::UnitType unitType)
+{
+	int count = 0;
+
+	for each (Action* a in this->actionVector)
+	{
+		if (typeid(*a) == typeid(ConstructBuildingAction))
+		{
+			ConstructBuildingAction* action = (ConstructBuildingAction*)a;
+			
+			if (action->buildingType.getID() == unitType.getID())
+			{
+				count++;
+			}
+		}
+	}
+
+	return count;
+}
+
 void ActionQueue::push(Action* action)
 {
 	this->push(action, false);

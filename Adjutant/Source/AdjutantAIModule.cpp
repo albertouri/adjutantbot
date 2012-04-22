@@ -101,6 +101,7 @@ void AdjutantAIModule::onFrame()
 		this->awarenessModule->evalute(worldModel, &actionQueue);
 		this->microModule->evalute(worldModel, &actionQueue);
 
+		//Debug info
 		//Only capture every 50 frames when there is something in the queue
 		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 
 			! actionQueue.empty())
@@ -108,6 +109,21 @@ void AdjutantAIModule::onFrame()
 			isQueueCaptured = true;
 			this->queueTextVector->clear();
 		}
+		
+		BWAPI::Position mousePosition = BWAPI::Broodwar->getMousePosition();
+		if (BWAPI::Broodwar->getScreenPosition() != NULL && mousePosition != NULL)
+		{
+			mousePosition += BWAPI::Broodwar->getScreenPosition();
+			BWAPI::TilePosition mouseTile = BWAPI::TilePosition(mousePosition);
+			
+			Broodwar->drawTextScreen(500,32,"MPos=(%d, %d)",
+				mousePosition.x(), mousePosition.y());
+
+			Broodwar->drawTextScreen(500,48,"MTile=(%d,%d)",
+				mouseTile.x(), mouseTile.y());
+		}
+
+
 
 		//Create vector to save actions that don't get executed
 		std::vector<Action*> unexecutedActionList = std::vector<Action*>();
@@ -157,7 +173,7 @@ void AdjutantAIModule::onFrame()
 		{
 			this->actionQueue.push(action);
 		}
-
+		
 		if (showQueueStats) {drawQueueStats();}
 		if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
 	}

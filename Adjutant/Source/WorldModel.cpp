@@ -34,7 +34,7 @@ void WorldModel::update(bool isTerrainAnalyzed)
 		
 		if (Utils::unitIsMine(unit))
 		{
-			if (this->myUnitMap.find(type) == this->myUnitMap.end())
+			if (this->myUnitMap[type] == NULL)
 			{
 				this->myUnitMap[type] = new std::vector<BWAPI::Unit*>();
 			}
@@ -52,7 +52,6 @@ void WorldModel::update(bool isTerrainAnalyzed)
 		}
 	}
 
-	
 	//Use event checking to handle other groups
 	for each(BWAPI::Event gameEvent in BWAPI::Broodwar->getEvents())
 	{
@@ -126,6 +125,7 @@ void WorldModel::update(bool isTerrainAnalyzed)
 		if (BWTA::getStartLocation(BWAPI::Broodwar->self()) != NULL)
 		{
 			this->myHomeRegion = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
+			this->myHomeBase = BWTA::getNearestBaseLocation(this->myHomeRegion->getCenter());
 		}
 		this->isTerrainAnalyzed = true;
 	}

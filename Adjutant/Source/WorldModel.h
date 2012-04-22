@@ -18,6 +18,9 @@ public:
 	//Home base region
 	BWTA::Region* myHomeRegion;
 
+	//Home base location
+	BWTA::BaseLocation* myHomeBase;
+
 	//Map of all of our available units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> myUnitMap;
 
@@ -38,9 +41,9 @@ public:
 	BWAPI::Player* enemy;
 
 	//Home base region
-	BWTA::Region* enemyHomeRegion;
+	BWAPI::Region* enemyHomeRegion;
 
-	//Map of all of our available units based on type
+	//Map of all available enemy units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> enemyUnitMap;
 
 	//*****Misc Data****
