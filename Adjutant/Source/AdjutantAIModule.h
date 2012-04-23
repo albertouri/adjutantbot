@@ -4,8 +4,8 @@
 #include <windows.h>
 #include <queue>
 #include <vector>
+#include <time.h>
 #include "ActionQueue.h"
-
 #include "AwarenessModule.h"
 #include "MacroModule.h"
 #include "MicroModule.h"
