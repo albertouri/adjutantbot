@@ -66,4 +66,7 @@ public:
 
 	ActionQueue actionQueue;
 	std::vector<std::string>* queueTextVector;
+
+	//Global
+	static const bool useOpponentModeling = true;
 };

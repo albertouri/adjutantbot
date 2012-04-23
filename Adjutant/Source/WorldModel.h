@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "HistoricalUnitInfo.h"
 #include "UnitGroup.h"
 #include "Utils.h"
 #include <vector>
@@ -43,10 +44,18 @@ public:
 	//Home base region
 	BWAPI::Region* enemyHomeRegion;
 
-	//Map of all available enemy units based on type
+	//Map of all available enemy units based on type -- only enemies currently on screen
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> enemyUnitMap;
+
+	//Map of all available enemy units we have ever seen and their last known location
+	std::map<int, HistoricalUnitInfo> enemyHistoricalUnitMap;
 
 	//*****Misc Data****
 	//Is BWTA finished?
 	bool isTerrainAnalyzed;
+
+	//Opponent Modeling functions
+	int getEnemyArmyValue();
+	int getMyArmyValue();
+	double getEnemyRangedWeight();
 };

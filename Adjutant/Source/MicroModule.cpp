@@ -1,4 +1,5 @@
 #include "MicroModule.h"
+#include "AdjutantAIModule.h"
 
 MicroModule::MicroModule(void)
 {
@@ -6,6 +7,7 @@ MicroModule::MicroModule(void)
 
 void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
+	bool useModeling = AdjutantAIModule::useOpponentModeling;
 	std::vector<UnitGroup*>* myArmyGroups = worldModel->myArmyGroups;
 	UnitGroup* baseGroup = myArmyGroups->front();
 
@@ -65,7 +67,9 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 				armyPosition = oldPosition;
 			}
 		}
-		else if(worldModel->myArmyVector->size() > 100 && worldModel->enemyHomeRegion != NULL)
+		else if((!useModeling && worldModel->enemyHomeRegion != NULL && worldModel->myArmyVector->size() > 100)
+			|| (useModeling && worldModel->enemyHomeRegion != NULL && (worldModel->getMyArmyValue() - worldModel->getEnemyArmyValue() > 1000))
+			)
 		{
 			static bool searchAndDestroy = false;
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
@@ -79,10 +83,18 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				if (BWAPI::Broodwar->getFrameCount() % 500 == 0)
 				{
-					int randTileX = rand() % BWAPI::Broodwar->mapWidth();
-					int randTileY = rand() % BWAPI::Broodwar->mapHeight();
+					if (worldModel->enemyHistoricalUnitMap.size() > 0)
+					{
+						std::pair<int, HistoricalUnitInfo> firstPair = (*worldModel->enemyHistoricalUnitMap.begin());
+						armyPosition = BWAPI::Position(firstPair.second.getPosition());
+					}
+					else
+					{
+						int randTileX = rand() % BWAPI::Broodwar->mapWidth();
+						int randTileY = rand() % BWAPI::Broodwar->mapHeight();
 
-					armyPosition = BWAPI::Position(BWAPI::TilePosition(randTileX, randTileY));
+						armyPosition = BWAPI::Position(BWAPI::TilePosition(randTileX, randTileY));
+					}
 					oldPosition = armyPosition;
 				}
 				else

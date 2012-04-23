@@ -35,6 +35,9 @@ void AdjutantAIModule::onStart()
 	this->awarenessModule = new AwarenessModule();
 	this->microModule = new MicroModule();
 
+	//Init random number generator
+	srand((unsigned int)time(NULL));
+
 	if (Broodwar->isReplay())
 	{
 		Broodwar->printf("The following players are in this replay:");
@@ -110,6 +113,7 @@ void AdjutantAIModule::onFrame()
 			this->queueTextVector->clear();
 		}
 		
+		//Mouse position
 		BWAPI::Position mousePosition = BWAPI::Broodwar->getMousePosition();
 		if (BWAPI::Broodwar->getScreenPosition() != NULL && mousePosition != NULL)
 		{
@@ -123,7 +127,13 @@ void AdjutantAIModule::onFrame()
 				mouseTile.x(), mouseTile.y());
 		}
 
+		//Opponent Modeling stats
+		Broodwar->drawTextScreen(500,80,"Army Value: %d vs %d)",
+			worldModel->getMyArmyValue(), 
+			worldModel->getEnemyArmyValue());
 
+		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
+			worldModel->getEnemyRangedWeight());	
 
 		//Create vector to save actions that don't get executed
 		std::vector<Action*> unexecutedActionList = std::vector<Action*>();

@@ -1,4 +1,5 @@
 #include "AwarenessModule.h"
+#include "AdjutantAIModule.h"
 
 AwarenessModule::AwarenessModule(void)
 {
@@ -33,21 +34,42 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			}
 		}
 
+		if (AdjutantAIModule::useOpponentModeling
+			&& BWAPI::Broodwar->getFrameCount() > 2000
+			&& BWAPI::Broodwar->getFrameCount() % (2000 + (int)((1.0 - scoutingWeight) * 4000.0)) < 50
+			&& worldModel->myScoutVector->empty())
+		{
+			//50% chance - Pick random base location to scout
+			//50% chance - Pick enemy home base to scout
+			std::set<BWTA::BaseLocation*> baseLocationSet = BWTA::getBaseLocations();
+			
+			unsigned int choice = rand() % (baseLocationSet.size() * 2);
+			int count = 0;
+
+			if (choice < baseLocationSet.size())
+			{
+				for each (BWTA::BaseLocation* base in baseLocationSet)
+				{
+					if (choice == count)
+					{
+						positionToExplore = base->getPosition();
+						break;
+					}
+					count++;
+				}
+			}
+			else if (worldModel->enemyHomeRegion != NULL)
+			{
+				positionToExplore = worldModel->enemyHomeRegion->getCenter();
+			}
+		}
+
 		//Picking scouts
 		if (worldModel->myScoutVector->empty() 
 			&& workers->size() > 15 - (unsigned int)(10 * scoutingWeight)
 			&& positionToExplore != BWAPI::Position(0,0))
 		{
-			BWAPI::Unit* firstScout;
-
-			for each (BWAPI::Unit* worker in (*workers))
-			{
-				if (! worker->isGatheringGas() && ! worker->isCarryingMinerals() && ! worker->isConstructing())
-				{
-					firstScout = worker;
-					break;
-				}
-			}
+			BWAPI::Unit* firstScout = Utils::getFreeWorker(worldModel->myWorkerVector);
 
 			if (firstScout != NULL)
 			{
@@ -63,7 +85,31 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				actionQueue->push(new MoveAction(scout, positionToExplore));
 			}
+		}
+		else
+		{
+			std::vector<BWAPI::Unit*> scoutsToRemove = std::vector<BWAPI::Unit*>();
 
+			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
+			{
+				//we know it's done
+				if (scout->isIdle() || scout->isGatheringMinerals())
+				{
+					scoutsToRemove.push_back(scout);
+				}				
+			}
+
+			for each (BWAPI::Unit* scout in scoutsToRemove)
+			{
+				actionQueue->push(new MoveAction(scout, worldModel->myHomeRegion->getCenter()));
+				Utils::vectorRemoveElement(worldModel->myScoutVector, scout);
+				worldModel->myWorkerVector->push_back(scout);
+			}
+		}
+
+		//Capture enemy home base if we find it
+		if (worldModel->enemyHomeRegion == NULL)
+		{
 			for each (BWAPI::Unit* enemyUnit in worldModel->enemy->getUnits())
 			{
 				if (enemyUnit->getType().isResourceDepot())
@@ -72,19 +118,29 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 				}
 			}
 		}
-		else
+
+		//Control comsat use
+		if (AdjutantAIModule::useOpponentModeling && worldModel->enemyHomeRegion != NULL)
 		{
-			//We've explored all bases, go back to mining
-			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
+			std::vector<BWAPI::Unit*>* comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
+			std::vector<BWAPI::Unit*>* sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
+
+			if (comsatVector != NULL && (sweepVector == NULL || sweepVector->size() == 0))
 			{
-				actionQueue->push(new MoveAction(scout, worldModel->myHomeRegion->getCenter()));
-				worldModel->myWorkerVector->push_back(scout);
+				if (BWAPI::Broodwar->getFrameCount() % 10000 == 0)
+				{
+					for each (BWAPI::Unit* comsat in (*comsatVector))
+					{
+						if (comsat->getEnergy() > (BWAPI::TechTypes::Scanner_Sweep.energyUsed() * 3))
+						{
+							//TODO: Create use ability action
+							comsat->useTech(BWAPI::TechTypes::Scanner_Sweep, worldModel->enemyHomeRegion->getCenter());
+							break;
+						}
+					}
+				}
 			}
-
-			worldModel->myScoutVector->clear();
 		}
-
-
 	}
 }
 

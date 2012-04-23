@@ -63,15 +63,12 @@ void WorldModel::update(bool isTerrainAnalyzed)
 			switch(gameEvent.getType())
 			{
 				case BWAPI::EventType::UnitComplete:
-					BWAPI::Broodwar->sendText("MyUnitComplete");
 					if (unit->getType() == BWAPI::UnitTypes::Terran_SCV)
 					{
-						BWAPI::Broodwar->sendText("New Worker");
 						this->myWorkerVector->push_back(unit);
 					}
 					else if (unit->getType().canMove())
 					{
-						BWAPI::Broodwar->sendText("New Army Unit");
 						this->myArmyVector->push_back(unit);
 
 						//We always add units to the "0th" group - micro manager might split army using other groups
@@ -91,15 +88,6 @@ void WorldModel::update(bool isTerrainAnalyzed)
 					{
 						if (group->removeUnit(unit)) {break;}
 					}
-
-					if (wasRemoved)
-					{
-						BWAPI::Broodwar->sendText("MyUnitDestroy[T]");
-					}
-					else
-					{
-						BWAPI::Broodwar->sendText("MyUnitDestroy[F]");
-					}
 					break;
 			}
 		}
@@ -108,13 +96,30 @@ void WorldModel::update(bool isTerrainAnalyzed)
 			switch(gameEvent.getType())
 			{
 				case BWAPI::EventType::UnitDiscover:
-					BWAPI::Broodwar->sendText("Enemy unit %s [%x] has been discovered at (%d,%d)",
-						unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+					//BWAPI::Broodwar->sendText("Enemy unit %s [%x] has been discovered at (%d,%d)",
+					//	unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+					if (this->enemyHistoricalUnitMap.find(unit->getID()) == this->enemyHistoricalUnitMap.end())
+					{
+						this->enemyHistoricalUnitMap[unit->getID()] = 
+							HistoricalUnitInfo(unit->getID(), unit->getType(), unit->getPosition());
+					}
+					break;
+				case BWAPI::EventType::UnitEvade:
+					//BWAPI::Broodwar->sendText("Enemy unit %s [%x] has evaded at (%d,%d)",
+					//	unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+					if (this->enemyHistoricalUnitMap.find(unit->getID()) != this->enemyHistoricalUnitMap.end())
+					{
+						this->enemyHistoricalUnitMap[unit->getID()].setPosition(unit->getPosition());
+					}
 					break;
 				
 				case BWAPI::EventType::UnitDestroy:
-					BWAPI::Broodwar->sendText("Enemy unit %s [%x] has been destroyed at (%d,%d)",
-						unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+					//BWAPI::Broodwar->sendText("Enemy unit %s [%x] has been destroyed at (%d,%d)",
+					//	unit->getType().getName().c_str(),unit,unit->getPosition().x(),unit->getPosition().y());
+					if (this->enemyHistoricalUnitMap.find(unit->getID()) != this->enemyHistoricalUnitMap.end())
+					{
+						this->enemyHistoricalUnitMap.erase(unit->getID());
+					}
 					break;
 			}
 		}
@@ -131,11 +136,71 @@ void WorldModel::update(bool isTerrainAnalyzed)
 	}
 }
 
+int WorldModel::getEnemyArmyValue()
+{
+	int armyValue = 0;
+
+	for each (std::pair<int, HistoricalUnitInfo> pair in this->enemyHistoricalUnitMap)
+	{
+		HistoricalUnitInfo hui = pair.second;
+
+		if ( (hui.getType().canAttack() || hui.getType().isSpellcaster())
+			&& ! hui.getType().isWorker())
+		{
+			armyValue += hui.getType().gasPrice() + hui.getType().mineralPrice();
+		}
+	}
+
+	return armyValue;
+}
+
+int WorldModel::getMyArmyValue()
+{
+	int armyValue = 0;
+
+	for each (BWAPI::Unit* unit in (*this->myArmyVector))
+	{
+		armyValue += unit->getType().gasPrice() + unit->getType().mineralPrice();
+	}
+
+	return armyValue;
+}
+
+double WorldModel::getEnemyRangedWeight()
+{
+	double actual = 0;
+	double possible = 1;
+
+	for each (std::pair<int, HistoricalUnitInfo> pair in this->enemyHistoricalUnitMap)
+	{
+		BWAPI::UnitType type = pair.second.getType();
+
+		if (! type.isWorker() && ! type.isBuilding())
+		{
+			if (type.isFlyer())
+			{
+				actual += 1;
+			}
+			else if (type.groundWeapon().maxRange() 
+						> BWAPI::UnitTypes::Zerg_Zergling.groundWeapon())
+			{
+				actual += 1;
+			}
+
+			possible += 1;
+		}
+
+		
+	}
+
+	return (actual / possible);
+}
 
 WorldModel::~WorldModel(void)
 {
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();
+	this->enemyHistoricalUnitMap.clear();
 	delete this->myWorkerVector;
 	delete this->myScoutVector;
 	delete this->myArmyVector;
