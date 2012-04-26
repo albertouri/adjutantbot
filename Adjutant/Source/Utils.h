@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include "BWAPI.h"
+#include "HistoricalUnitInfo.h"
 #include <vector>
 
 class Utils

@@ -3,10 +3,13 @@
 #include <BWAPI.h>
 #include <sstream>
 
+//Forward declare to avoid circular reference
+class WorldModel;
+
 class ConstructBuildingAction : public Action
 {
 public:
-	ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType); 
+	ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType, WorldModel* worldModel); 
 	~ConstructBuildingAction(void);
 	bool isReady(int minerals, int gas, int supplyRemaining);
 	bool isStillValid();
@@ -16,6 +19,7 @@ public:
 	bool operator==(const Action &other) const;
 	std::string toString();
 
-	BWAPI::TilePosition location;
 	BWAPI::UnitType buildingType;
+	BWAPI::TilePosition location;
+	WorldModel* worldModel;
 };

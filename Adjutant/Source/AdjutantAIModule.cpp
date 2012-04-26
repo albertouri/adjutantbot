@@ -139,8 +139,8 @@ void AdjutantAIModule::onFrame()
 		std::vector<Action*> unexecutedActionList = std::vector<Action*>();
 
 		//Start off with our current resources. Needed for saving for more costly units
-		int remainingMinerals = BWAPI::Broodwar->self()->minerals();
-		int remainingGas = BWAPI::Broodwar->self()->gas();
+		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - worldModel->reservedMinerals;
+		int remainingGas = BWAPI::Broodwar->self()->gas() - worldModel->reservedMinerals;
 		int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
 		std::priority_queue<Action*, std::vector<Action*>, ActionComparator> priorityQueue = this->actionQueue.getPrioritizedQueue();
 		this->actionQueue.clear();

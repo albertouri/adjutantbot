@@ -1,11 +1,13 @@
 #include "ConstructBuildingAction.h"
+#include "WorldModel.h"
 
 //TODO:Update constructor to take in  "building type" and "location"
-ConstructBuildingAction::ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType)
+ConstructBuildingAction::ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType, WorldModel* worldModel)
 {
 	this->priority = priority;
 	this->location = loc;
 	this->buildingType = unitType;
+	this->worldModel = worldModel;
 }
 
 
@@ -15,11 +17,23 @@ ConstructBuildingAction::~ConstructBuildingAction(void)
 
 bool ConstructBuildingAction::isReady(int minerals, int gas, int supplyRemaining)
 {
+
+	//Draw Building placement 
+	Utils::isValidBuildingLocation(this->location, this->buildingType);
+
 	if (this->buildingType.mineralPrice() != 0 && minerals < this->buildingType.mineralPrice()
 		|| (this->buildingType.gasPrice() != 0 && gas < this->buildingType.gasPrice())
 		)
 	{
 		//If there is not enough resources
+		return false;
+	}
+	else if (NULL == Utils::getFreeWorker(this->worldModel->myWorkerVector))
+	{
+		return false;
+	}
+	else if (! Utils::isValidBuildingLocation(this->location, this->buildingType))
+	{
 		return false;
 	}
 	else
@@ -31,7 +45,7 @@ bool ConstructBuildingAction::isReady(int minerals, int gas, int supplyRemaining
 bool ConstructBuildingAction::isStillValid()
 {
 	//Check to to see if the location still exists
-	if (! this->location.isValid())
+	if (! Utils::isValidBuildingLocation(this->location, this->buildingType))
 	{
 		return false;
 	}
@@ -44,16 +58,30 @@ bool ConstructBuildingAction::isStillValid()
 void ConstructBuildingAction::execute()
 {
 	// Get Unit to perform work
-	BWAPI::Unit* workerPerformingBuild=NULL;
+	BWAPI::Unit* workerPerformingBuild = Utils::getFreeWorker(this->worldModel->myWorkerVector);
 
-	for(std::set<BWAPI::Unit*>::const_iterator unit=BWAPI::Broodwar->self()->getUnits().begin();unit!=BWAPI::Broodwar->self()->getUnits().end();unit++)
+	if (workerPerformingBuild != NULL)
 	{
-		if ((*unit)->getType().isWorker() && !(*unit)->isConstructing())
-		{
-			workerPerformingBuild = (*unit);
-			workerPerformingBuild->build(location, this->buildingType);
-			break;
-		}
+		//Reserve resources for SCV's travel to building location
+		this->worldModel->reservedGas += this->buildingType.gasPrice();
+		this->worldModel->reservedMinerals += this->buildingType.mineralPrice();
+		this->worldModel->workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(this->priority, 
+			this->location, 
+			this->buildingType,
+			this->worldModel);
+
+		workerPerformingBuild->build(location, this->buildingType);
+
+		BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
+			workerPerformingBuild->getPosition().x(),
+			workerPerformingBuild->getPosition().y(),
+			this->buildingType.getName().c_str(),
+			this->location.x(),
+			this->location.y());
+	}
+	else
+	{
+		BWAPI::Broodwar->printf("Executed build but failed to find free worker");
 	}
 }
 

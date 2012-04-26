@@ -31,7 +31,11 @@ void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			if ( closestGeyser!=NULL && (!closestGeyser->getType().isRefinery() || !closestGeyser->isBeingConstructed()) )
 			{
 				// Create refinerey Action
-				actionQueue->push(new ConstructBuildingAction(55, closestGeyser->getTilePosition(), BWAPI::Broodwar->self()->getRace().getRefinery()));
+				if (BWAPI::Broodwar->getFrameCount() > 3000
+					&& worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Refinery] == NULL)
+				{
+					actionQueue->push(new ConstructBuildingAction(40, closestGeyser->getTilePosition(), BWAPI::Broodwar->self()->getRace().getRefinery(), worldModel));
+				}
 			}
 		}
 	}

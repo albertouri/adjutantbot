@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "ConstructBuildingAction.h"
 #include "HistoricalUnitInfo.h"
 #include "UnitGroup.h"
 #include "Utils.h"
@@ -36,6 +37,15 @@ public:
 
 	//Army - split into groups
 	std::vector<UnitGroup*>* myArmyGroups;
+
+	//Workers that are on their way to build a building
+	std::map<BWAPI::Unit*, ConstructBuildingAction*> workersBuildingMap;
+
+	//Reserved minerals
+	int reservedGas;
+
+	//Reserved gas
+	int reservedMinerals;
 
 	//*****Opponent Model*****
 	//Enemy

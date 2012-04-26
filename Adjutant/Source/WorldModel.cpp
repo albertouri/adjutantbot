@@ -19,6 +19,9 @@ WorldModel::WorldModel(void)
 			break;
 		}
 	}
+	
+	this->reservedMinerals = 0;
+	this->reservedGas = 0;
 }
 
 void WorldModel::update(bool isTerrainAnalyzed)
@@ -200,6 +203,8 @@ WorldModel::~WorldModel(void)
 {
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();
+	this->enemyHistoricalUnitMap.clear();
+	this->workersBuildingMap.clear();
 	this->enemyHistoricalUnitMap.clear();
 	delete this->myWorkerVector;
 	delete this->myScoutVector;
