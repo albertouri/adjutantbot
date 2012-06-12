@@ -30,6 +30,8 @@ set PATH=%PATH%;%CD%\BWAPI 3.7.2\WINDOWS
 cd /D "%k_chaosLauncherDir%"
 "%k_chaosLauncherDir%\Chaoslauncher - MultiInstance.exe"
 
+goto end
+
 :error
 echo ************************
 echo Errors have occurred.

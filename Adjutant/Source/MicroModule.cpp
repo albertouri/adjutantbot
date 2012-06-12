@@ -11,7 +11,7 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 	std::vector<UnitGroup*>* myArmyGroups = worldModel->myArmyGroups;
 	UnitGroup* baseGroup = myArmyGroups->front();
 
-	if (worldModel->isTerrainAnalyzed)
+	if (worldModel->isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
 	{
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Position(0,0))
@@ -74,7 +74,8 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			static bool searchAndDestroy = false;
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
 
-			if (myArmyGroups->at(1)->getCentroid().getDistance(worldModel->enemyHomeRegion->getCenter()) < 100)
+			if (myArmyGroups->at(1)->getCentroid().getDistance(worldModel->enemyHomeRegion->getCenter()) < 200
+				|| BWAPI::Broodwar->getFrameCount() > 50000)
 			{
 				searchAndDestroy = true;
 			}

@@ -209,5 +209,12 @@ WorldModel::~WorldModel(void)
 	delete this->myWorkerVector;
 	delete this->myScoutVector;
 	delete this->myArmyVector;
+
+	//Deallocate each army group
+	for each (UnitGroup* group in (*this->myArmyGroups))
+	{
+		delete group;
+	}
+
 	delete this->myArmyGroups;
 }

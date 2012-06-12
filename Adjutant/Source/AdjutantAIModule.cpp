@@ -7,7 +7,6 @@ bool displayOnEventMessages = false;
 
 void AdjutantAIModule::onStart()
 {
-	Broodwar->sendText("Hello world!");
 	Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
 	
 	// Enable some cheat flags
@@ -86,6 +85,8 @@ void AdjutantAIModule::onEnd(bool isWinner)
 
 void AdjutantAIModule::onFrame()
 {
+	CPrecisionTimer timer = CPrecisionTimer();
+	timer.Start();
 	if (showVisibilityData) {drawVisibilityData();}
 	if (showBullets) {drawBullets();}	
 	if (showStats) { drawStats();}
@@ -135,6 +136,9 @@ void AdjutantAIModule::onFrame()
 		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
 			worldModel->getEnemyRangedWeight());	
 
+
+
+
 		//Create vector to save actions that don't get executed
 		std::vector<Action*> unexecutedActionList = std::vector<Action*>();
 
@@ -145,8 +149,12 @@ void AdjutantAIModule::onFrame()
 		std::priority_queue<Action*, std::vector<Action*>, ActionComparator> priorityQueue = this->actionQueue.getPrioritizedQueue();
 		this->actionQueue.clear();
 
+		int actionsExecuted = 0;
+
 		while(! priorityQueue.empty())
 		{
+			if (actionsExecuted > 100) {break;}
+
 			Action* action = priorityQueue.top(); //Get top action
 			priorityQueue.pop(); //Remove top action from queue
 
@@ -176,6 +184,8 @@ void AdjutantAIModule::onFrame()
 
 				unexecutedActionList.push_back(action);
 			}
+
+			actionsExecuted++;
 		}
 
 		//Add unexecuted actions back into the queue for the next frame
@@ -193,6 +203,17 @@ void AdjutantAIModule::onFrame()
 		Broodwar->printf("Finished analyzing map.");
 		analysisJustFinished=false;
 	}
+
+	static double maxLat = 0;
+	if (timer.Stop() * 1000 > maxLat)
+	{
+		maxLat = timer.Stop() * 1000;
+	}
+
+	Broodwar->drawTextScreen(500,128,"Max Lat (ms): %f", maxLat);
+
+	//Debug latency
+	Broodwar->drawTextScreen(500,112,"Latency (ms): %f", timer.Stop() * 1000);
 }
 
 void AdjutantAIModule::onSendText(std::string text)

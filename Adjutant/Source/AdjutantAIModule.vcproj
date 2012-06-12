@@ -267,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Timer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UnitGroup.h"
 				>
 			</File>

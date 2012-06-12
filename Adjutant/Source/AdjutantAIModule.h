@@ -1,7 +1,6 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
-#include <windows.h>
 #include <queue>
 #include <vector>
 #include <time.h>
@@ -9,6 +8,7 @@
 #include "AwarenessModule.h"
 #include "MacroModule.h"
 #include "MicroModule.h"
+#include "Timer.h"
 #include "TrainUnitAction.h"
 #include "Utils.h"
 #include "WorldModel.h"

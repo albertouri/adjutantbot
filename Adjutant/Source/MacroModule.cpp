@@ -327,6 +327,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		
 		for each (BWAPI::Unit* key in keysToRemove)
 		{
+			delete worldModel->workersBuildingMap[key];
 			worldModel->workersBuildingMap.erase(key);
 		}
 	}
