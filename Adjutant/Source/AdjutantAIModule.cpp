@@ -75,11 +75,15 @@ void AdjutantAIModule::onEnd(bool isWinner)
 		//log win to file
 	}
 
+	this->actionQueue.destroy();
 	delete this->queueTextVector;
+
 	delete this->worldModel;
 	delete this->microModule;
 	delete this->macroModule;
 	delete this->awarenessModule;
+	
+
 
 }
 
@@ -98,8 +102,10 @@ void AdjutantAIModule::onFrame()
 		bool isQueueCaptured = false;
 
 		//Update world model
+		
 		this->worldModel->update(analyzed);
 
+		
 		//Generate actions
 		this->macroModule->evalute(worldModel, &actionQueue);
 		this->awarenessModule->evalute(worldModel, &actionQueue);
@@ -135,12 +141,6 @@ void AdjutantAIModule::onFrame()
 
 		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
 			worldModel->getEnemyRangedWeight());	
-
-
-
-
-		//Create vector to save actions that don't get executed
-		std::vector<Action*> unexecutedActionList = std::vector<Action*>();
 
 		//Start off with our current resources. Needed for saving for more costly units
 		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - worldModel->reservedMinerals;
@@ -182,16 +182,11 @@ void AdjutantAIModule::onFrame()
 				//so that we will pool resources for higher priority actions
 				action->updateResourceCost(&remainingMinerals, &remainingGas, &remainingSupply);
 
-				unexecutedActionList.push_back(action);
+				//Add unexecuted actions back for the next queue
+				this->actionQueue.push(action);
 			}
 
 			actionsExecuted++;
-		}
-
-		//Add unexecuted actions back into the queue for the next frame
-		for each (Action* action in unexecutedActionList)
-		{
-			this->actionQueue.push(action);
 		}
 		
 		if (showQueueStats) {drawQueueStats();}

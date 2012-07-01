@@ -26,6 +26,9 @@ public:
 	//Clear all elements from the queue
 	void clear();
 
+	//Unallocates all memory and clears internal list
+	void destroy();
+
 	//Check if queue is empty
 	bool empty();
 

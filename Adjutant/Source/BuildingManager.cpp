@@ -7,7 +7,6 @@ BuildingManager::BuildingManager(void)
 
 void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
-	//BWAPI::Broodwar->sendText("Successfully Entered BuildingManager");
 	BWAPI::Unit* cc = NULL;
 	
 	int gasWorkers = 0;
@@ -32,7 +31,7 @@ void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				// Create refinerey Action
 				if (BWAPI::Broodwar->getFrameCount() > 3000
-					&& worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Refinery] == NULL)
+					&& worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Refinery].empty())
 				{
 					actionQueue->push(new ConstructBuildingAction(40, closestGeyser->getTilePosition(), BWAPI::Broodwar->self()->getRace().getRefinery(), worldModel));
 				}

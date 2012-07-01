@@ -37,21 +37,11 @@ void WorldModel::update(bool isTerrainAnalyzed)
 		
 		if (Utils::unitIsMine(unit))
 		{
-			if (this->myUnitMap[type] == NULL)
-			{
-				this->myUnitMap[type] = new std::vector<BWAPI::Unit*>();
-			}
-
-			this->myUnitMap[type]->push_back(unit);
+			this->myUnitMap[type].push_back(unit);
 		}
 		else if (Utils::unitIsEnemy(unit))
 		{
-			if (this->enemyUnitMap.find(type) == this->enemyUnitMap.end())
-			{
-				this->enemyUnitMap[type] = new std::vector<BWAPI::Unit*>();
-			}
-
-			this->enemyUnitMap[type]->push_back(unit);
+			this->enemyUnitMap[type].push_back(unit);
 		}
 	}
 

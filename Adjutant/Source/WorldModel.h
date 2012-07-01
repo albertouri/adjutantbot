@@ -24,7 +24,7 @@ public:
 	BWTA::BaseLocation* myHomeBase;
 
 	//Map of all of our available units based on type
-	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> myUnitMap;
+	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>> myUnitMap;
 
 	//Workers - SCVs dedicated to mining minerals
 	std::vector<BWAPI::Unit*>* myWorkerVector;
@@ -55,7 +55,7 @@ public:
 	BWAPI::Region* enemyHomeRegion;
 
 	//Map of all available enemy units based on type -- only enemies currently on screen
-	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>*> enemyUnitMap;
+	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>> enemyUnitMap;
 
 	//Map of all available enemy units we have ever seen and their last known location
 	std::map<int, HistoricalUnitInfo> enemyHistoricalUnitMap;

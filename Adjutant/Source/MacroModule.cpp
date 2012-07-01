@@ -9,6 +9,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 {
 	
 	BuildingManager::evalute(worldModel, actionQueue);
+
 	//examine world model
 	//add actions to actionQueue based on current state
 
@@ -81,21 +82,10 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 					mineralWorkers++;
 				}
 			}
-			/*
-			// Worker is gathering something
-			else if ( !(*unit)->isIdle() && !(*unit)->isConstructing()) // Else back to the mines with the worker!
-			{		
-				if (mineralWorkers > 5 && gasWorkers < 3 && refinery!=NULL && !refinery->isBeingConstructed())
-				{	
-					(*unit)->rightClick(refinery);
-					gasWorkers++;
-				}
-			}
-			*/
 		}
 	}
 	
-
+	
 	//start temporary unit training/construction
 	if (worldModel->isTerrainAnalyzed)
 	{
@@ -115,20 +105,20 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			actionQueue->push(new TrainUnitAction(50, cc, BWAPI::Broodwar->self()->getRace().getWorker()));
 		}
 
-		if (worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks] != NULL)
+		if (! worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks].empty())
 		{
-			for each (BWAPI::Unit* rax in (*worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks]))
+			for each (BWAPI::Unit* rax in worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks])
 			{
 				if (! rax->isTraining())
 				{
 					bool useModeling = AdjutantAIModule::useOpponentModeling;
 					int choice = 0;
 
-					std::vector<BWAPI::Unit*>* academyVector = 
+					std::vector<BWAPI::Unit*> academyVector = 
 						worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Academy];
 
 					//If we have an academy, randomly choose; otherwise, default to marine
-					if (academyVector != NULL && ! academyVector->front()->isBeingConstructed())
+					if (! academyVector.empty() && ! academyVector.front()->isBeingConstructed())
 					{
 						choice = rand() % 90; //0 - 89
 					}
@@ -187,9 +177,9 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			int supplyInQueue = actionQueue->countBuildingActions(BWAPI::UnitTypes::Terran_Supply_Depot);			
 			int supplyBeingConstructed = 0;
 
-			if (worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot] != NULL)
+			if (! worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot].empty())
 			{
-				for each (BWAPI::Unit* supply in (*worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot]))
+				for each (BWAPI::Unit* supply in worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot])
 				{
 					if (supply->isBeingConstructed())
 					{
@@ -214,7 +204,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		}
 
 		//academy
-		if (BWAPI::Broodwar->getFrameCount() > 3000 && worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Academy] == NULL)
+		if (BWAPI::Broodwar->getFrameCount() > 3000 && worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Academy].empty())
 		{
 			int acadBuilding = actionQueue->countBuildingActions(BWAPI::UnitTypes::Terran_Academy);
 
@@ -227,11 +217,11 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		//comsat
 		if (BWAPI::Broodwar->getFrameCount() > 3000)
 		{
-			std::vector<BWAPI::Unit*>* comandCenters = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Command_Center];
+			std::vector<BWAPI::Unit*> comandCenters = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Command_Center];
 
-			if (comandCenters != NULL)
+			if (! comandCenters.empty())
 			{
-				for each (BWAPI::Unit* cc in (*comandCenters))
+				for each (BWAPI::Unit* cc in comandCenters)
 				{
 					if (cc->getAddon() == NULL)
 					{
@@ -299,12 +289,12 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		{
 			BWAPI::Unit* worker = mapPair.first;
 			ConstructBuildingAction* action = mapPair.second;
-			std::vector<BWAPI::Unit*>* buildings = worldModel->myUnitMap[action->buildingType];
+			std::vector<BWAPI::Unit*> buildings = worldModel->myUnitMap[action->buildingType];
 			bool isBuildingStarted = false;
 
-			if (buildings != NULL)
+			if (! buildings.empty())
 			{
-				for each (BWAPI::Unit* building in (*buildings))
+				for each (BWAPI::Unit* building in buildings)
 				{
 					if (building->getTilePosition() == action->location)
 					{

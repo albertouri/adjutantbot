@@ -178,16 +178,16 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		}
 
 		//Control comsat use
-		std::vector<BWAPI::Unit*>* comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
-		std::vector<BWAPI::Unit*>* sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
+		std::vector<BWAPI::Unit*> comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
+		std::vector<BWAPI::Unit*> sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
 
-		if (comsatVector != NULL && (sweepVector == NULL || sweepVector->size() == 0))
+		if (! comsatVector.empty() && (sweepVector.empty() || sweepVector.size() == 0))
 		{
 			for each (BWAPI::Unit* enemyUnit in worldModel->enemy->getUnits())
 			{
 				if (enemyUnit->isCloaked() || enemyUnit->isBurrowed() || enemyUnit->getType().hasPermanentCloak())
 				{
-					for each (BWAPI::Unit* comsat in (*comsatVector))
+					for each (BWAPI::Unit* comsat in comsatVector)
 					{
 						if (comsat->getEnergy() > BWAPI::TechTypes::Scanner_Sweep.energyUsed())
 						{

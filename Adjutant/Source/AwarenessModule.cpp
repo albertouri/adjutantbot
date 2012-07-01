@@ -122,14 +122,14 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		//Control comsat use
 		if (AdjutantAIModule::useOpponentModeling && worldModel->enemyHomeRegion != NULL)
 		{
-			std::vector<BWAPI::Unit*>* comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
-			std::vector<BWAPI::Unit*>* sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
+			std::vector<BWAPI::Unit*> comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
+			std::vector<BWAPI::Unit*> sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
 
-			if (comsatVector != NULL && (sweepVector == NULL || sweepVector->size() == 0))
+			if (! comsatVector.empty() && (sweepVector.empty() || sweepVector.size() == 0))
 			{
 				if (BWAPI::Broodwar->getFrameCount() % 10000 == 0)
 				{
-					for each (BWAPI::Unit* comsat in (*comsatVector))
+					for each (BWAPI::Unit* comsat in comsatVector)
 					{
 						if (comsat->getEnergy() > (BWAPI::TechTypes::Scanner_Sweep.energyUsed() * 3))
 						{

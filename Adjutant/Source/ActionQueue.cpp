@@ -64,6 +64,15 @@ void ActionQueue::clear()
 	this->actionVector.clear();
 }
 
+void ActionQueue::destroy()
+{
+	for each(Action* action in this->actionVector)
+	{
+		delete action;
+	}
+	this->actionVector.clear();
+}
+
 bool ActionQueue::empty()
 {
 	return (this->actionVector.size() == 0);
@@ -83,4 +92,6 @@ std::priority_queue<Action*, std::vector<Action*>, ActionComparator> ActionQueue
 
 ActionQueue::~ActionQueue(void)
 {
+	this->destroy();
+	this->clear();
 }
