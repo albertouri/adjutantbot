@@ -4,12 +4,12 @@
 #include <sstream>
 
 //Forward declare to avoid circular reference
-class WorldModel;
+class WorldManager;
 
 class ConstructBuildingAction : public Action
 {
 public:
-	ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType, WorldModel* worldModel); 
+	ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType); 
 	~ConstructBuildingAction(void);
 	bool isReady(int minerals, int gas, int supplyRemaining);
 	bool isStillValid();
@@ -21,5 +21,4 @@ public:
 
 	BWAPI::UnitType buildingType;
 	BWAPI::TilePosition location;
-	WorldModel* worldModel;
 };

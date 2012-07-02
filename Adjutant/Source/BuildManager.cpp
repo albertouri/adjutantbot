@@ -1,11 +1,11 @@
-#include "BuildingManager.h"
+#include "BuildManager.h"
 
 
-BuildingManager::BuildingManager(void)
+BuildManager::BuildManager(void)
 {
 }
 
-void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
+void BuildManager::evalute(ActionQueue* actionQueue)
 {
 	BWAPI::Unit* cc = NULL;
 	
@@ -31,15 +31,15 @@ void BuildingManager::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				// Create refinerey Action
 				if (BWAPI::Broodwar->getFrameCount() > 3000
-					&& worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Refinery].empty())
+					&& WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Refinery].empty())
 				{
-					actionQueue->push(new ConstructBuildingAction(40, closestGeyser->getTilePosition(), BWAPI::Broodwar->self()->getRace().getRefinery(), worldModel));
+					actionQueue->push(new ConstructBuildingAction(40, closestGeyser->getTilePosition(), BWAPI::Broodwar->self()->getRace().getRefinery()));
 				}
 			}
 		}
 	}
 }
 
-BuildingManager::~BuildingManager(void)
+BuildManager::~BuildManager(void)
 {
 }

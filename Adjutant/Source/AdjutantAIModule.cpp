@@ -29,10 +29,9 @@ void AdjutantAIModule::onStart()
 
 	//Initialize member variables
 	this->queueTextVector = new std::vector<std::string>();
-	this->worldModel = new WorldModel();
-	this->macroModule = new MacroModule();
-	this->awarenessModule = new AwarenessModule();
-	this->microModule = new MicroModule();
+	this->unitManager = new UnitManager();
+	this->scoutingManager = new ScoutingManager();
+	this->militaryManager = new MilitaryManager();
 
 	//Init random number generator
 	srand((unsigned int)time(NULL));
@@ -78,10 +77,9 @@ void AdjutantAIModule::onEnd(bool isWinner)
 	this->actionQueue.destroy();
 	delete this->queueTextVector;
 
-	delete this->worldModel;
-	delete this->microModule;
-	delete this->macroModule;
-	delete this->awarenessModule;
+	delete this->militaryManager;
+	delete this->unitManager;
+	delete this->scoutingManager;
 	
 
 
@@ -103,13 +101,13 @@ void AdjutantAIModule::onFrame()
 
 		//Update world model
 		
-		this->worldModel->update(analyzed);
+		WorldManager::Instance().update(analyzed);
 
 		
 		//Generate actions
-		this->macroModule->evalute(worldModel, &actionQueue);
-		this->awarenessModule->evalute(worldModel, &actionQueue);
-		this->microModule->evalute(worldModel, &actionQueue);
+		this->unitManager->evalute(&actionQueue);
+		this->scoutingManager->evalute(&actionQueue);
+		this->militaryManager->evalute(&actionQueue);
 
 		//Debug info
 		//Only capture every 50 frames when there is something in the queue
@@ -136,15 +134,15 @@ void AdjutantAIModule::onFrame()
 
 		//Opponent Modeling stats
 		Broodwar->drawTextScreen(500,80,"Army Value: %d vs %d)",
-			worldModel->getMyArmyValue(), 
-			worldModel->getEnemyArmyValue());
+			WorldManager::Instance().getMyArmyValue(), 
+			WorldManager::Instance().getEnemyArmyValue());
 
 		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
-			worldModel->getEnemyRangedWeight());	
+			WorldManager::Instance().getEnemyRangedWeight());	
 
 		//Start off with our current resources. Needed for saving for more costly units
-		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - worldModel->reservedMinerals;
-		int remainingGas = BWAPI::Broodwar->self()->gas() - worldModel->reservedMinerals;
+		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals;
+		int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedMinerals;
 		int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
 		std::priority_queue<Action*, std::vector<Action*>, ActionComparator> priorityQueue = this->actionQueue.getPrioritizedQueue();
 		this->actionQueue.clear();

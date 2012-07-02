@@ -1,13 +1,12 @@
 #include "ConstructBuildingAction.h"
-#include "WorldModel.h"
+#include "WorldManager.h"
 
 //TODO:Update constructor to take in  "building type" and "location"
-ConstructBuildingAction::ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType, WorldModel* worldModel)
+ConstructBuildingAction::ConstructBuildingAction(int priority, BWAPI::TilePosition loc, BWAPI::UnitType unitType)
 {
 	this->priority = priority;
 	this->location = loc;
 	this->buildingType = unitType;
-	this->worldModel = worldModel;
 }
 
 
@@ -28,7 +27,7 @@ bool ConstructBuildingAction::isReady(int minerals, int gas, int supplyRemaining
 		//If there is not enough resources
 		return false;
 	}
-	else if (NULL == Utils::getFreeWorker(this->worldModel->myWorkerVector))
+	else if (NULL == Utils::getFreeWorker(WorldManager::Instance().myWorkerVector))
 	{
 		return false;
 	}
@@ -58,17 +57,16 @@ bool ConstructBuildingAction::isStillValid()
 void ConstructBuildingAction::execute()
 {
 	// Get Unit to perform work
-	BWAPI::Unit* workerPerformingBuild = Utils::getFreeWorker(this->worldModel->myWorkerVector);
+	BWAPI::Unit* workerPerformingBuild = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
 
 	if (workerPerformingBuild != NULL)
 	{
 		//Reserve resources for SCV's travel to building location
-		this->worldModel->reservedGas += this->buildingType.gasPrice();
-		this->worldModel->reservedMinerals += this->buildingType.mineralPrice();
-		this->worldModel->workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(this->priority, 
+		WorldManager::Instance().reservedGas += this->buildingType.gasPrice();
+		WorldManager::Instance().reservedMinerals += this->buildingType.mineralPrice();
+		WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(this->priority, 
 			this->location, 
-			this->buildingType,
-			this->worldModel);
+			this->buildingType);
 
 		workerPerformingBuild->build(location, this->buildingType);
 

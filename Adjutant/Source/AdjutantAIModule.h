@@ -5,13 +5,13 @@
 #include <vector>
 #include <time.h>
 #include "ActionQueue.h"
-#include "AwarenessModule.h"
-#include "MacroModule.h"
-#include "MicroModule.h"
+#include "ScoutingManager.h"
+#include "UnitManager.h"
+#include "MilitaryManager.h"
 #include "Timer.h"
 #include "TrainUnitAction.h"
 #include "Utils.h"
-#include "WorldModel.h"
+#include "WorldManager.h"
 
 extern bool analyzed;
 extern bool analysisJustFinished;
@@ -59,10 +59,9 @@ public:
 	bool isBotEnabled;
 	bool showVisibilityData;
 	
-	WorldModel* worldModel;
-	AwarenessModule* awarenessModule;
-	MacroModule* macroModule;
-	MicroModule* microModule;
+	ScoutingManager* scoutingManager;
+	UnitManager* unitManager;
+	MilitaryManager* militaryManager;
 
 	ActionQueue actionQueue;
 	std::vector<std::string>* queueTextVector;

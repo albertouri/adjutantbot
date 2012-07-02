@@ -1,17 +1,17 @@
 #pragma once
 #include "ActionQueue.h"
 #include <BWAPI.h>
-#include "BuildingManager.h"
+#include "BuildManager.h"
 #include "ConstructBuildingAction.h"
 #include <queue>
 #include <time.h>
 #include "TrainUnitAction.h"
-#include "WorldModel.h"
+#include "WorldManager.h"
 
-class MacroModule
+class UnitManager
 {
 public:
-	MacroModule(void);
-	~MacroModule(void);
-	void evalute(WorldModel* worldModel, ActionQueue* actionQueue);
+	UnitManager(void);
+	~UnitManager(void);
+	void evalute(ActionQueue* actionQueue);
 };

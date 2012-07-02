@@ -253,43 +253,51 @@
 			Name="Managers"
 			>
 			<File
-				RelativePath=".\AwarenessModule.cpp"
+				RelativePath=".\BuildManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\AwarenessModule.h"
+				RelativePath=".\BuildManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BuildingManager.cpp"
+				RelativePath=".\InformationManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BuildingManager.h"
+				RelativePath=".\InformationManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\MacroModule.cpp"
+				RelativePath=".\MilitaryManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\MacroModule.h"
+				RelativePath=".\MilitaryManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\MicroModule.cpp"
+				RelativePath=".\ScoutingManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\MicroModule.h"
+				RelativePath=".\ScoutingManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\WorldModel.cpp"
+				RelativePath=".\UnitManager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\WorldModel.h"
+				RelativePath=".\UnitManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WorldManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WorldManager.h"
 				>
 			</File>
 		</Filter>

@@ -1,20 +1,20 @@
-#include "MacroModule.h"
+#include "UnitManager.h"
 #include "AdjutantAIModule.h"
 
-MacroModule::MacroModule(void)
+UnitManager::UnitManager(void)
 {
 }
 
-void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
+void UnitManager::evalute(ActionQueue* actionQueue)
 {
 	
-	BuildingManager::evalute(worldModel, actionQueue);
+	BuildManager::evalute(actionQueue);
 
 	//examine world model
 	//add actions to actionQueue based on current state
 
 	//manually assigning idle workers to mine
-	//TODO:Update to use worldModel and actions instead
+	//TODO:Update to use worldManager and actions instead
 	BWAPI::Unit* cc = NULL;
 	BWAPI::Unit* refinery = NULL;
 	BWAPI::Unit* closestGeyser=NULL;
@@ -87,27 +87,27 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 	
 	
 	//start temporary unit training/construction
-	if (worldModel->isTerrainAnalyzed)
+	if (WorldManager::Instance().isTerrainAnalyzed)
 	{
 		if (BWAPI::Broodwar->getFrameCount() % 500 == 0) {
-			BWAPI::Broodwar->printf("Reserved %d/%d", worldModel->reservedMinerals, worldModel->reservedGas);
+			BWAPI::Broodwar->printf("Reserved %d/%d", WorldManager::Instance().reservedMinerals, WorldManager::Instance().reservedGas);
 		}
 
 		//train workers
-		unsigned int numMineralPatches = worldModel->myHomeBase->getMinerals().size();
-		unsigned int numGasGeysers = worldModel->myHomeBase->getGeysers().size();
+		unsigned int numMineralPatches = WorldManager::Instance().myHomeBase->getMinerals().size();
+		unsigned int numGasGeysers = WorldManager::Instance().myHomeBase->getGeysers().size();
 
 		if (cc != NULL && ! cc->isTraining() && 
-			worldModel->myWorkerVector->size() < (numMineralPatches * 2) + (numGasGeysers * 3)
+			WorldManager::Instance().myWorkerVector->size() < (numMineralPatches * 2) + (numGasGeysers * 3)
 			+ 3 //3 extra workers for construction
 			)
 		{	
 			actionQueue->push(new TrainUnitAction(50, cc, BWAPI::Broodwar->self()->getRace().getWorker()));
 		}
 
-		if (! worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks].empty())
+		if (! WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Barracks].empty())
 		{
-			for each (BWAPI::Unit* rax in worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Barracks])
+			for each (BWAPI::Unit* rax in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Barracks])
 			{
 				if (! rax->isTraining())
 				{
@@ -115,7 +115,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 					int choice = 0;
 
 					std::vector<BWAPI::Unit*> academyVector = 
-						worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Academy];
+						WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Academy];
 
 					//If we have an academy, randomly choose; otherwise, default to marine
 					if (! academyVector.empty() && ! academyVector.front()->isBeingConstructed())
@@ -125,7 +125,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 
 					if (useModeling)
 					{
-						double rangeWeight = worldModel->getEnemyRangedWeight();
+						double rangeWeight = WorldManager::Instance().getEnemyRangedWeight();
 						int rangeOffset = (int)(40.0 * rangeWeight);
 
 						if (choice >= 80)
@@ -177,9 +177,9 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			int supplyInQueue = actionQueue->countBuildingActions(BWAPI::UnitTypes::Terran_Supply_Depot);			
 			int supplyBeingConstructed = 0;
 
-			if (! worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot].empty())
+			if (! WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot].empty())
 			{
-				for each (BWAPI::Unit* supply in worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot])
+				for each (BWAPI::Unit* supply in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Supply_Depot])
 				{
 					if (supply->isBeingConstructed())
 					{
@@ -204,7 +204,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		}
 
 		//academy
-		if (BWAPI::Broodwar->getFrameCount() > 3000 && worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Academy].empty())
+		if (BWAPI::Broodwar->getFrameCount() > 3000 && WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Academy].empty())
 		{
 			int acadBuilding = actionQueue->countBuildingActions(BWAPI::UnitTypes::Terran_Academy);
 
@@ -217,7 +217,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		//comsat
 		if (BWAPI::Broodwar->getFrameCount() > 3000)
 		{
-			std::vector<BWAPI::Unit*> comandCenters = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Command_Center];
+			std::vector<BWAPI::Unit*> comandCenters = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Command_Center];
 
 			if (! comandCenters.empty())
 			{
@@ -237,17 +237,17 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			bool isValidPosition = true;
 			int counter = 0;
 
-			BWAPI::Unit* freeWorker = Utils::getFreeWorker(worldModel->myWorkerVector);
+			BWAPI::Unit* freeWorker = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
 			
 			if (freeWorker != NULL)
 			{
-				BWAPI::TilePosition buildingTile = worldModel->myHomeBase->getTilePosition();
+				BWAPI::TilePosition buildingTile = WorldManager::Instance().myHomeBase->getTilePosition();
 
 				do
 				{
 					//Start at command center + some random offset from the CC
 					//gradually expand build radious
-					buildingTile = worldModel->myHomeBase->getTilePosition();
+					buildingTile = WorldManager::Instance().myHomeBase->getTilePosition();
 					int range = 20 + (int)(30.0*(counter/100));
 					buildingTile.x() += (rand() % (range*2)) - range; 
 					buildingTile.y() += (rand() % (range*2)) - range;
@@ -272,7 +272,7 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 					}
 					
 					actionQueue->push(
-						new ConstructBuildingAction(priority, buildingTile, buildingType, worldModel));
+						new ConstructBuildingAction(priority, buildingTile, buildingType));
 				}
 			}
 			else
@@ -285,11 +285,11 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		//If building has started (or worker was interrupted), unreserve resources
 		std::vector<BWAPI::Unit*> keysToRemove = std::vector<BWAPI::Unit*>();
 
-		for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> mapPair in worldModel->workersBuildingMap)
+		for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> mapPair in WorldManager::Instance().workersBuildingMap)
 		{
 			BWAPI::Unit* worker = mapPair.first;
 			ConstructBuildingAction* action = mapPair.second;
-			std::vector<BWAPI::Unit*> buildings = worldModel->myUnitMap[action->buildingType];
+			std::vector<BWAPI::Unit*> buildings = WorldManager::Instance().myUnitMap[action->buildingType];
 			bool isBuildingStarted = false;
 
 			if (! buildings.empty())
@@ -309,16 +309,16 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 				|| worker->isGatheringGas()
 				|| worker->isGatheringMinerals())
 			{
-				worldModel->reservedMinerals -= action->buildingType.mineralPrice();
-				worldModel->reservedGas -= action->buildingType.gasPrice();
+				WorldManager::Instance().reservedMinerals -= action->buildingType.mineralPrice();
+				WorldManager::Instance().reservedGas -= action->buildingType.gasPrice();
 				keysToRemove.push_back(worker);
 			}
 		}
 		
 		for each (BWAPI::Unit* key in keysToRemove)
 		{
-			delete worldModel->workersBuildingMap[key];
-			worldModel->workersBuildingMap.erase(key);
+			delete WorldManager::Instance().workersBuildingMap[key];
+			WorldManager::Instance().workersBuildingMap.erase(key);
 		}
 	}
 	else
@@ -328,6 +328,6 @@ void MacroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 	}
 }
 
-MacroModule::~MacroModule(void)
+UnitManager::~UnitManager(void)
 {
 }

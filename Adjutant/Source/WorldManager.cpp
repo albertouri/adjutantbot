@@ -1,6 +1,6 @@
-#include "WorldModel.h"
+#include "WorldManager.h"
 
-WorldModel::WorldModel(void)
+WorldManager::WorldManager(void)
 {
 	//Initialize command center vector
 	this->isTerrainAnalyzed = false;
@@ -24,7 +24,7 @@ WorldModel::WorldModel(void)
 	this->reservedGas = 0;
 }
 
-void WorldModel::update(bool isTerrainAnalyzed)
+void WorldManager::update(bool isTerrainAnalyzed)
 {
 	//Clear out previous structures so they can be refreshed
 	this->myUnitMap.clear();
@@ -129,7 +129,7 @@ void WorldModel::update(bool isTerrainAnalyzed)
 	}
 }
 
-int WorldModel::getEnemyArmyValue()
+int WorldManager::getEnemyArmyValue()
 {
 	int armyValue = 0;
 
@@ -147,7 +147,7 @@ int WorldModel::getEnemyArmyValue()
 	return armyValue;
 }
 
-int WorldModel::getMyArmyValue()
+int WorldManager::getMyArmyValue()
 {
 	int armyValue = 0;
 
@@ -159,7 +159,7 @@ int WorldModel::getMyArmyValue()
 	return armyValue;
 }
 
-double WorldModel::getEnemyRangedWeight()
+double WorldManager::getEnemyRangedWeight()
 {
 	double actual = 0;
 	double possible = 1;
@@ -189,7 +189,7 @@ double WorldModel::getEnemyRangedWeight()
 	return (actual / possible);
 }
 
-WorldModel::~WorldModel(void)
+WorldManager::~WorldManager(void)
 {
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();

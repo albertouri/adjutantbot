@@ -7,13 +7,19 @@
 #include "Utils.h"
 #include <vector>
 
-class WorldModel
+class WorldManager
 {
 public:
-	WorldModel(void);
-	~WorldModel(void);
+	static WorldManager& Instance()
+	{
+		static WorldManager instance;
+		return instance;
+	}
+
+	~WorldManager(void);
 
 	void update(bool isTerrainAnalyzed);
+
 
 	//*****Our Units*****
 	
@@ -68,4 +74,9 @@ public:
 	int getEnemyArmyValue();
 	int getMyArmyValue();
 	double getEnemyRangedWeight();
+
+private:
+	WorldManager(void);
+	WorldManager(const WorldManager&);
+	WorldManager& operator=(const WorldManager&);
 };

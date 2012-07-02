@@ -1,22 +1,22 @@
-#include "AwarenessModule.h"
+#include "ScoutingManager.h"
 #include "AdjutantAIModule.h"
 
-AwarenessModule::AwarenessModule(void)
+ScoutingManager::ScoutingManager(void)
 {
 }
 
-void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
+void ScoutingManager::evalute(ActionQueue* actionQueue)
 {
 	double scoutingWeight = 0.75;
-	std::vector<BWAPI::Unit*>* workers = worldModel->myWorkerVector;
+	std::vector<BWAPI::Unit*>* workers = WorldManager::Instance().myWorkerVector;
 
-	if (scoutingWeight > 0 && worldModel->isTerrainAnalyzed)
+	if (scoutingWeight > 0 && WorldManager::Instance().isTerrainAnalyzed)
 	{
 		/*
 		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
 		{
 			BWAPI::Broodwar->printf("Scouts=%d|workers=%d|vs=%d",
-				worldModel->myScoutVector->size(),
+				WorldManager::Instance().myScoutVector->size(),
 				workers->size(),
 				15 - (unsigned int)(10 * scoutingWeight));
 		}
@@ -37,7 +37,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		if (AdjutantAIModule::useOpponentModeling
 			&& BWAPI::Broodwar->getFrameCount() > 2000
 			&& BWAPI::Broodwar->getFrameCount() % (2000 + (int)((1.0 - scoutingWeight) * 4000.0)) < 50
-			&& worldModel->myScoutVector->empty())
+			&& WorldManager::Instance().myScoutVector->empty())
 		{
 			//50% chance - Pick random base location to scout
 			//50% chance - Pick enemy home base to scout
@@ -58,30 +58,30 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 					count++;
 				}
 			}
-			else if (worldModel->enemyHomeRegion != NULL)
+			else if (WorldManager::Instance().enemyHomeRegion != NULL)
 			{
-				positionToExplore = worldModel->enemyHomeRegion->getCenter();
+				positionToExplore = WorldManager::Instance().enemyHomeRegion->getCenter();
 			}
 		}
 
 		//Picking scouts
-		if (worldModel->myScoutVector->empty() 
+		if (WorldManager::Instance().myScoutVector->empty() 
 			&& workers->size() > 15 - (unsigned int)(10 * scoutingWeight)
 			&& positionToExplore != BWAPI::Position(0,0))
 		{
-			BWAPI::Unit* firstScout = Utils::getFreeWorker(worldModel->myWorkerVector);
+			BWAPI::Unit* firstScout = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
 
 			if (firstScout != NULL)
 			{
 				Utils::vectorRemoveElement(workers, firstScout);
-				worldModel->myScoutVector->push_back(firstScout);
+				WorldManager::Instance().myScoutVector->push_back(firstScout);
 			}
 		}
 
 		//Issues explore or return commands
-		if (! worldModel->myScoutVector->empty() && positionToExplore != BWAPI::Position(0,0))
+		if (! WorldManager::Instance().myScoutVector->empty() && positionToExplore != BWAPI::Position(0,0))
 		{
-			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
+			for each (BWAPI::Unit* scout in (*WorldManager::Instance().myScoutVector))
 			{
 				actionQueue->push(new MoveAction(scout, positionToExplore));
 			}
@@ -90,7 +90,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		{
 			std::vector<BWAPI::Unit*> scoutsToRemove = std::vector<BWAPI::Unit*>();
 
-			for each (BWAPI::Unit* scout in (*worldModel->myScoutVector))
+			for each (BWAPI::Unit* scout in (*WorldManager::Instance().myScoutVector))
 			{
 				//we know it's done
 				if (scout->isIdle() || scout->isGatheringMinerals())
@@ -101,29 +101,29 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 
 			for each (BWAPI::Unit* scout in scoutsToRemove)
 			{
-				actionQueue->push(new MoveAction(scout, worldModel->myHomeRegion->getCenter()));
-				Utils::vectorRemoveElement(worldModel->myScoutVector, scout);
-				worldModel->myWorkerVector->push_back(scout);
+				actionQueue->push(new MoveAction(scout, WorldManager::Instance().myHomeRegion->getCenter()));
+				Utils::vectorRemoveElement(WorldManager::Instance().myScoutVector, scout);
+				WorldManager::Instance().myWorkerVector->push_back(scout);
 			}
 		}
 
 		//Capture enemy home base if we find it
-		if (worldModel->enemyHomeRegion == NULL)
+		if (WorldManager::Instance().enemyHomeRegion == NULL)
 		{
-			for each (BWAPI::Unit* enemyUnit in worldModel->enemy->getUnits())
+			for each (BWAPI::Unit* enemyUnit in WorldManager::Instance().enemy->getUnits())
 			{
 				if (enemyUnit->getType().isResourceDepot())
 				{
-					worldModel->enemyHomeRegion = BWAPI::Broodwar->getRegionAt(enemyUnit->getPosition());
+					WorldManager::Instance().enemyHomeRegion = BWAPI::Broodwar->getRegionAt(enemyUnit->getPosition());
 				}
 			}
 		}
 
 		//Control comsat use
-		if (AdjutantAIModule::useOpponentModeling && worldModel->enemyHomeRegion != NULL)
+		if (AdjutantAIModule::useOpponentModeling && WorldManager::Instance().enemyHomeRegion != NULL)
 		{
-			std::vector<BWAPI::Unit*> comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
-			std::vector<BWAPI::Unit*> sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
+			std::vector<BWAPI::Unit*> comsatVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
+			std::vector<BWAPI::Unit*> sweepVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
 
 			if (! comsatVector.empty() && (sweepVector.empty() || sweepVector.size() == 0))
 			{
@@ -134,7 +134,7 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 						if (comsat->getEnergy() > (BWAPI::TechTypes::Scanner_Sweep.energyUsed() * 3))
 						{
 							//TODO: Create use ability action
-							comsat->useTech(BWAPI::TechTypes::Scanner_Sweep, worldModel->enemyHomeRegion->getCenter());
+							comsat->useTech(BWAPI::TechTypes::Scanner_Sweep, WorldManager::Instance().enemyHomeRegion->getCenter());
 							break;
 						}
 					}
@@ -144,6 +144,6 @@ void AwarenessModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 	}
 }
 
-AwarenessModule::~AwarenessModule(void)
+ScoutingManager::~ScoutingManager(void)
 {
 }

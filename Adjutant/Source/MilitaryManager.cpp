@@ -1,30 +1,30 @@
-#include "MicroModule.h"
+#include "MilitaryManager.h"
 #include "AdjutantAIModule.h"
 
-MicroModule::MicroModule(void)
+MilitaryManager::MilitaryManager(void)
 {
 }
 
-void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
+void MilitaryManager::evalute(ActionQueue* actionQueue)
 {
 	bool useModeling = AdjutantAIModule::useOpponentModeling;
-	std::vector<UnitGroup*>* myArmyGroups = worldModel->myArmyGroups;
+	std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
 	UnitGroup* baseGroup = myArmyGroups->front();
 
-	if (worldModel->isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
+	if (WorldManager::Instance().isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
 	{
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Position(0,0))
 		{
-			baseGroup->targetPosition = worldModel->myHomeRegion->getCenter();
+			baseGroup->targetPosition = WorldManager::Instance().myHomeRegion->getCenter();
 		}
 
 		/*
 		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
 		{
 			BWAPI::Broodwar->printf("MyArmy=%d () | EnemyArmy=%d ()",
-				worldModel->myArmyVector->size(),
-				worldModel->enemy->getUnits().size());
+				WorldManager::Instance().myArmyVector->size(),
+				WorldManager::Instance().enemy->getUnits().size());
 		}
 		*/
 
@@ -52,29 +52,29 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		BWAPI::Position armyPosition = BWAPI::Position(0,0);
 
 		//Threats
-		if (worldModel->enemy->getUnits().size() != 0)
+		if (WorldManager::Instance().enemy->getUnits().size() != 0)
 		{
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
 
 			//Mob Attack threat location
 			if (BWAPI::Broodwar->getFrameCount() % 50 == 0)
 			{
-				armyPosition = (*worldModel->enemy->getUnits().begin())->getPosition();
-				oldPosition = (*worldModel->enemy->getUnits().begin())->getPosition();
+				armyPosition = (*WorldManager::Instance().enemy->getUnits().begin())->getPosition();
+				oldPosition = (*WorldManager::Instance().enemy->getUnits().begin())->getPosition();
 			}
 			else
 			{
 				armyPosition = oldPosition;
 			}
 		}
-		else if((!useModeling && worldModel->enemyHomeRegion != NULL && worldModel->myArmyVector->size() > 100)
-			|| (useModeling && worldModel->enemyHomeRegion != NULL && (worldModel->getMyArmyValue() - worldModel->getEnemyArmyValue() > 1000))
+		else if((!useModeling && WorldManager::Instance().enemyHomeRegion != NULL && WorldManager::Instance().myArmyVector->size() > 100)
+			|| (useModeling && WorldManager::Instance().enemyHomeRegion != NULL && (WorldManager::Instance().getMyArmyValue() - WorldManager::Instance().getEnemyArmyValue() > 1000))
 			)
 		{
 			static bool searchAndDestroy = false;
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
 
-			if (myArmyGroups->at(1)->getCentroid().getDistance(worldModel->enemyHomeRegion->getCenter()) < 200
+			if (myArmyGroups->at(1)->getCentroid().getDistance(WorldManager::Instance().enemyHomeRegion->getCenter()) < 200
 				|| BWAPI::Broodwar->getFrameCount() > 50000)
 			{
 				searchAndDestroy = true;
@@ -84,9 +84,9 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			{
 				if (BWAPI::Broodwar->getFrameCount() % 500 == 0)
 				{
-					if (worldModel->enemyHistoricalUnitMap.size() > 0)
+					if (WorldManager::Instance().enemyHistoricalUnitMap.size() > 0)
 					{
-						std::pair<int, HistoricalUnitInfo> firstPair = (*worldModel->enemyHistoricalUnitMap.begin());
+						std::pair<int, HistoricalUnitInfo> firstPair = (*WorldManager::Instance().enemyHistoricalUnitMap.begin());
 						armyPosition = BWAPI::Position(firstPair.second.getPosition());
 					}
 					else
@@ -105,22 +105,22 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			}
 			else
 			{
-				armyPosition = worldModel->enemyHomeRegion->getCenter();
+				armyPosition = WorldManager::Instance().enemyHomeRegion->getCenter();
 			}
 		}
 		else
 		{
 			//TODO:account for multiple chokepoints
-			BWTA::Region* homeRegion = worldModel->myHomeRegion;
+			BWTA::Region* homeRegion = WorldManager::Instance().myHomeRegion;
 			
 			if (homeRegion->getChokepoints().size() > 0)
 			{
-				//armyPosition = (*worldModel->myHomeRegion->getChokepoints().begin())->getCenter();
+				//armyPosition = (*WorldManager::Instance().myHomeRegion->getChokepoints().begin())->getCenter();
 				armyPosition = homeRegion->getCenter();
 			}
 			else
 			{
-				armyPosition = worldModel->myHomeRegion->getCenter();
+				armyPosition = WorldManager::Instance().myHomeRegion->getCenter();
 			}
 		}
 
@@ -132,9 +132,9 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 			bool useLowLevelControl = false;
 			BWAPI::Unit* closestEnemy = NULL;
 
-			if (worldModel->enemy->getUnits().size() != 0)
+			if (WorldManager::Instance().enemy->getUnits().size() != 0)
 			{
-				closestEnemy = Utils::getClosestUnit(unit, &worldModel->enemy->getUnits());
+				closestEnemy = Utils::getClosestUnit(unit, &WorldManager::Instance().enemy->getUnits());
 				if (closestEnemy->getDistance(unit) < 500)
 				{
 					useLowLevelControl = true;
@@ -178,12 +178,12 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 		}
 
 		//Control comsat use
-		std::vector<BWAPI::Unit*> comsatVector = worldModel->myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
-		std::vector<BWAPI::Unit*> sweepVector = worldModel->myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
+		std::vector<BWAPI::Unit*> comsatVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
+		std::vector<BWAPI::Unit*> sweepVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
 
 		if (! comsatVector.empty() && (sweepVector.empty() || sweepVector.size() == 0))
 		{
-			for each (BWAPI::Unit* enemyUnit in worldModel->enemy->getUnits())
+			for each (BWAPI::Unit* enemyUnit in WorldManager::Instance().enemy->getUnits())
 			{
 				if (enemyUnit->isCloaked() || enemyUnit->isBurrowed() || enemyUnit->getType().hasPermanentCloak())
 				{
@@ -202,6 +202,6 @@ void MicroModule::evalute(WorldModel* worldModel, ActionQueue* actionQueue)
 	}
 }
 
-MicroModule::~MicroModule(void)
+MilitaryManager::~MilitaryManager(void)
 {
 }
