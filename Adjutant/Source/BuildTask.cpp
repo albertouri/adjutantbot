@@ -22,7 +22,7 @@ BuildTask::BuildTask(int p, BWAPI::UnitType unt, BWAPI::TilePosition tp)
 	this->position = tp;
 }
 
-BuildTask::BuildTask(int p, BWAPI::UnitType unitType, BWAPI::Unit* btu)
+BuildTask::BuildTask(int p, BWAPI::UnitType unt, BWAPI::Unit* btu)
 {
 	init(p, "TrainAtBuilding", NULL, NULL, unt);
 	this->buildingToUse = btu;
