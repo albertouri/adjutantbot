@@ -8,6 +8,7 @@ WorldManager::WorldManager(void)
 	this->myArmyVector = new std::vector<BWAPI::Unit*>();
 	this->myScoutVector = new std::vector<BWAPI::Unit*>();
 	this->myWorkerVector = new std::vector<BWAPI::Unit*>();	
+	this->buildTaskVector = std::vector<BuildTask*>();
 
 	this->myArmyGroups->push_back(new UnitGroup());
 

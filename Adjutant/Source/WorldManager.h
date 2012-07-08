@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "BuildTask.h"
 #include "ConstructBuildingAction.h"
 #include "HistoricalUnitInfo.h"
 #include "UnitGroup.h"
@@ -69,6 +70,9 @@ public:
 	//*****Misc Data****
 	//Is BWTA finished?
 	bool isTerrainAnalyzed;
+
+	//Structure used to pass data between UnitManager and BuildManager
+	std::vector<BuildTask*> buildTaskVector;
 
 	//Opponent Modeling functions
 	int getEnemyArmyValue();

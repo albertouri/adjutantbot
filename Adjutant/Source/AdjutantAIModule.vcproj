@@ -193,6 +193,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BuildQueue.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildTask.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildTaskComparator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Dll.cpp"
 				>
 			</File>
@@ -320,6 +332,18 @@
 			</File>
 			<File
 				RelativePath=".\AdjutantAIModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildQueue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildTask.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildTaskComparator.h"
 				>
 			</File>
 			<File

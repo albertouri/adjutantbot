@@ -30,6 +30,7 @@ void AdjutantAIModule::onStart()
 	//Initialize member variables
 	this->queueTextVector = new std::vector<std::string>();
 	this->unitManager = new UnitManager();
+	this->buildManager = new BuildManager();
 	this->scoutingManager = new ScoutingManager();
 	this->militaryManager = new MilitaryManager();
 
@@ -69,20 +70,12 @@ void AdjutantAIModule::onStart()
 
 void AdjutantAIModule::onEnd(bool isWinner)
 {
-	if (isWinner)
-	{
-		//log win to file
-	}
-
 	this->actionQueue.destroy();
 	delete this->queueTextVector;
-
 	delete this->militaryManager;
 	delete this->unitManager;
 	delete this->scoutingManager;
-	
-
-
+	delete this->buildManager;
 }
 
 void AdjutantAIModule::onFrame()
@@ -98,14 +91,11 @@ void AdjutantAIModule::onFrame()
 	if (isBotEnabled)
 	{
 		bool isQueueCaptured = false;
-
-		//Update world model
 		
+		//Main loop
 		WorldManager::Instance().update(analyzed);
-
-		
-		//Generate actions
-		this->unitManager->evalute(&actionQueue);
+		this->unitManager->evalute();
+		this->buildManager->evalute();
 		this->scoutingManager->evalute(&actionQueue);
 		this->militaryManager->evalute(&actionQueue);
 
@@ -151,7 +141,6 @@ void AdjutantAIModule::onFrame()
 
 		while(! priorityQueue.empty())
 		{
-			if (actionsExecuted > 100) {break;}
 
 			Action* action = priorityQueue.top(); //Get top action
 			priorityQueue.pop(); //Remove top action from queue
@@ -187,8 +176,8 @@ void AdjutantAIModule::onFrame()
 			actionsExecuted++;
 		}
 		
-		if (showQueueStats) {drawQueueStats();}
-		if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
+		//if (showQueueStats) {drawQueueStats();}
+		//if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
 	}
 
 	if (analysisJustFinished)

@@ -2,6 +2,7 @@
 #include "ActionQueue.h"
 #include <BWAPI.h>
 #include "BuildManager.h"
+#include "BuildQueue.h"
 #include "ConstructBuildingAction.h"
 #include <queue>
 #include <time.h>
@@ -13,5 +14,6 @@ class UnitManager
 public:
 	UnitManager(void);
 	~UnitManager(void);
-	void evalute(ActionQueue* actionQueue);
+	void evalute();
+	BuildQueue* buildQueue;
 };

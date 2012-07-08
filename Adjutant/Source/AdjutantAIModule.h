@@ -5,6 +5,7 @@
 #include <vector>
 #include <time.h>
 #include "ActionQueue.h"
+#include "BuildManager.h"
 #include "ScoutingManager.h"
 #include "UnitManager.h"
 #include "MilitaryManager.h"
@@ -59,10 +60,11 @@ public:
 	bool isBotEnabled;
 	bool showVisibilityData;
 	
-	ScoutingManager* scoutingManager;
 	UnitManager* unitManager;
+	BuildManager* buildManager;
+	ScoutingManager* scoutingManager;
 	MilitaryManager* militaryManager;
-
+	
 	ActionQueue actionQueue;
 	std::vector<std::string>* queueTextVector;
 

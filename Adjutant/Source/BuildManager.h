@@ -11,5 +11,5 @@ class BuildManager
 public:
 	BuildManager(void);
 	~BuildManager(void);
-	static void evalute(ActionQueue* actionQueue);
+	void evalute();
 };
