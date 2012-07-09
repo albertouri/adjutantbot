@@ -15,5 +15,7 @@ public:
 	UnitManager(void);
 	~UnitManager(void);
 	void evalute();
+	void manageResourceGathering();
+	void manageSupply();
 	BuildQueue* buildQueue;
 };

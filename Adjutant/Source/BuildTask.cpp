@@ -1,40 +1,40 @@
 #include "BuildTask.h"
 #include "WorldManager.h"
 
-BuildTask::BuildTask(int p, BWAPI::UpgradeType ut)
+BuildTask::BuildTask(int p, BWAPI::UpgradeType upgradeType)
 {
-	init(p, "Upgrade", ut, NULL, NULL);
+	init(p, "Upgrade", upgradeType, BWAPI::TechTypes::None, BWAPI::UnitTypes::None);
 }
 
-BuildTask::BuildTask(int p, BWAPI::TechType tt)
+BuildTask::BuildTask(int p, BWAPI::TechType techType)
 {
-	init(p, "Tech", NULL, tt, NULL);
+	init(p, "Tech", BWAPI::UpgradeTypes::None, techType, BWAPI::UnitTypes::None);
 }
 
-BuildTask::BuildTask(int p, BWAPI::UnitType unt)
+BuildTask::BuildTask(int p, BWAPI::UnitType unitType)
 {
-	init(p, "UnitRandom", NULL, NULL, unt);
+	init(p, "UnitRandom", BWAPI::UpgradeTypes::None, BWAPI::TechTypes::None, unitType);
 }
 
-BuildTask::BuildTask(int p, BWAPI::UnitType unt, BWAPI::TilePosition tp)
+BuildTask::BuildTask(int p, BWAPI::UnitType unitType, BWAPI::TilePosition position)
 {
-	init(p, "ConstructAtLocation", NULL, NULL, unt);
-	this->position = tp;
+	init(p, "ConstructAtLocation", BWAPI::UpgradeTypes::None, BWAPI::TechTypes::None, unitType);
+	this->position = position;
 }
 
-BuildTask::BuildTask(int p, BWAPI::UnitType unt, BWAPI::Unit* btu)
+BuildTask::BuildTask(int p, BWAPI::UnitType unitType, BWAPI::Unit* buildingToUse)
 {
-	init(p, "TrainAtBuilding", NULL, NULL, unt);
-	this->buildingToUse = btu;
+	init(p, "TrainAtBuilding", BWAPI::UpgradeTypes::None, BWAPI::TechTypes::None, unitType);
+	this->buildingToUse = buildingToUse;
 }
 
-void BuildTask::init(int p, std::string text, BWAPI::UpgradeType upt, BWAPI::TechType tt, BWAPI::UnitType unt)
+void BuildTask::init(int p, std::string text, BWAPI::UpgradeType upgradeType, BWAPI::TechType techType, BWAPI::UnitType unitType)
 {
 	this->priority = p;
 	this->taskTypeText = text;
-	this->upgradeType = upt;
-	this->techType = tt;
-	this->unitType = unt;
+	this->upgradeType = upgradeType;
+	this->techType = techType;
+	this->unitType = unitType;
 	this->position = BWAPI::TilePositions::Invalid;
 	this->buildingToUse = NULL;
 	
@@ -57,30 +57,31 @@ bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 		mineralCost = this->upgradeType.mineralPrice();
 		gasCost = this->upgradeType.gasPrice();
 	}
-	else if (this->isConstructBuilding() || this->isTrainUnit())
+	else if (this->isConstructBuilding() )
+	{
+		mineralCost = this->unitType.mineralPrice();
+		gasCost = this->unitType.gasPrice();
+
+		//Check to make sure we have a free worker if we are trying to build something
+		if (NULL == Utils::getFreeWorker(WorldManager::Instance().myWorkerVector))
+		{
+			ret = false;
+		}
+	}
+	else if (this->isTrainUnit())
 	{
 		mineralCost = this->unitType.mineralPrice();
 		gasCost = this->unitType.gasPrice();
 		supplyCost = this->unitType.supplyRequired();
 
-		//Check to make sure we have a free worker if we are trying to build something
-		if (this->isConstructBuilding())
+		if ((this->buildingToUse != NULL && ! this->buildingToUse->isCompleted()))
 		{
-			if (NULL == Utils::getFreeWorker(WorldManager::Instance().myWorkerVector))
-			{
-				ret = false;
-			}
+			ret = false;
 		}
 	}
 
 	//Global conditions
 	if (minerals < mineralCost || gas < gasCost || supplyRemaining < supplyCost)
-	{
-		ret = false;
-	}
-
-
-	if ((this->buildingToUse != NULL && ! this->buildingToUse->isCompleted()))
 	{
 		ret = false;
 	}
@@ -92,27 +93,27 @@ bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 
 bool BuildTask::isUpgrade()
 {
-	return (this->upgradeType != NULL);
+	return (this->upgradeType != BWAPI::UpgradeTypes::None);
 }
 
 bool BuildTask::isTech()
 {
-	return (this->techType != NULL);
+	return (this->techType != BWAPI::TechTypes::None);
 }
 
 bool BuildTask::isTrainUnit()
 {
-	return (this->unitType != NULL && !this->unitType.isBuilding());
+	return (this->unitType != BWAPI::UnitTypes::None && !this->unitType.isBuilding());
 }
 
 bool BuildTask::isConstructBuilding()
 {
-	return (this->unitType != NULL && this->unitType.isBuilding());
+	return (this->unitType != BWAPI::UnitTypes::None && this->unitType.isBuilding());
 }
 
 void BuildTask::updateResourceCost(int* minerals, int* gas, int* supplyRemaining)
 {
-	if (this->unitType != NULL)
+	if (this->unitType != BWAPI::UnitTypes::None)
 	{
 		*minerals = *minerals - this->unitType.mineralPrice();
 		*gas = *gas - this->unitType.gasPrice();
@@ -131,17 +132,17 @@ std::string BuildTask::toString()
 	ret = "[P:" + priorityText + "]"
 		+ " " + this->taskTypeText;
 
-	if (this->unitType != NULL)
+	if (this->unitType != BWAPI::UnitTypes::None)
 	{
 		ret += " ";
 		ret += this->unitType.c_str();
 	}
-	else if (this->techType != NULL)
+	else if (this->techType != BWAPI::TechTypes::None)
 	{
 		ret += " ";
 		ret += this->techType.c_str();
 	}
-	else if (this->upgradeType != NULL)
+	else if (this->upgradeType != BWAPI::UpgradeTypes::None)
 	{
 		ret += " ";
 		ret += this->upgradeType.c_str();
