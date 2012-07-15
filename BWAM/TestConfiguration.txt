@@ -1,0 +1,15 @@
+//Each row requires 5 values that must be separated with at least one tab:
+//	Host_DLL - the file name of the AI Module DLL to be run on the client
+//	Host_Race - the race (Protoess, Terran, Zerg) of the host
+//	Client_DLL - the file name of the AI Module DLL to be run on the host
+//	Client_Race - the race (Protoess, Terran, Zerg) of the client
+//	Number_Of_Games - the number of matches to be completed between the two AIs
+//
+//*************************************************************************************************
+//Host_DLL				Host_Race		Client_DLL			Client_Race		Number_Of_Games
+//*************************************************************************************************
+AdjutantAIModule.dll	Terran			Skynet.dll			Protoss			2
+AdjutantAIModule.dll	Terran			Quorum.dll			Zerg			4
+AdjutantAIModule.dll	Terran			Aiur.dll			Protoss			5
+
+
