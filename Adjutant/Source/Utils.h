@@ -156,4 +156,51 @@ public:
 
 		return closestUnit;
 	}
+
+	
+	static bool canMakeGivenUnits(BWAPI::UnitType type)
+	{
+		for each (std::pair<BWAPI::UnitType, int> pair in type.requiredUnits())
+		{
+			bool pass = false;
+
+			if (BWAPI::Broodwar->self()->completedUnitCount(pair.first) >= pair.second)
+			{
+				pass = true;
+			}
+
+			if (pair.first == BWAPI::UnitTypes::Zerg_Hatchery)
+			{
+				if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Lair) >= pair.second)
+				{
+					pass = true;
+				}
+				else if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= pair.second)
+				{
+					pass = true;
+				}
+			}
+
+			if (pair.first == BWAPI::UnitTypes::Zerg_Lair && 
+				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= pair.second)
+			{
+					pass = true;
+			}
+
+			if (pass == false)
+			{
+				return false;
+			}
+		}
+
+		if (type.requiredTech() != BWAPI::TechTypes::None)
+		{
+			if (!BWAPI::Broodwar->self()->hasResearched(type.requiredTech()))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 };

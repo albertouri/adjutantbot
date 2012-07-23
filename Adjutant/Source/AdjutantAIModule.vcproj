@@ -363,6 +363,34 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="BuilOrder"
+			>
+			<File
+				RelativePath=".\BuildOrder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildOrder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildOrderUnits.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildOrderUnits.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LoadBuildOrder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LoadBuildOrder.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

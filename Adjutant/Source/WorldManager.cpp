@@ -30,6 +30,7 @@ void WorldManager::update(bool isTerrainAnalyzed)
 	//Clear out previous structures so they can be refreshed
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();
+	this->imminentBuildingMap.clear();
 
 	//Update unit maps based all visibile units
 	for each (BWAPI::Unit* unit in BWAPI::Broodwar->getAllUnits())
@@ -119,6 +120,12 @@ void WorldManager::update(bool isTerrainAnalyzed)
 		}
 	}
 
+	//Build map of buildings that workers are on their way to build
+	for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> pair in this->workersBuildingMap)
+	{
+		imminentBuildingMap[pair.second->buildingType]++;
+	}
+	
 	if (isTerrainAnalyzed)
 	{
 		if (BWTA::getStartLocation(BWAPI::Broodwar->self()) != NULL)
@@ -194,6 +201,7 @@ WorldManager::~WorldManager(void)
 {
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();
+	this->imminentBuildingMap.clear();
 	this->enemyHistoricalUnitMap.clear();
 	this->workersBuildingMap.clear();
 	this->enemyHistoricalUnitMap.clear();

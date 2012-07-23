@@ -78,6 +78,33 @@ bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 		{
 			ret = false;
 		}
+		else if (this->buildingToUse == NULL)
+		{
+			BWAPI::UnitType whatBuildsType = unitType.whatBuilds().first;
+
+			if (WorldManager::Instance().myUnitMap[whatBuildsType].empty())
+			{
+				ret = false;
+			}
+			else
+			{
+				bool isOneAvailable = false;
+
+				for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[whatBuildsType])
+				{
+					if (building->isCompleted() && ! building->isTraining() && ! building->isConstructing())
+					{
+						isOneAvailable = true;
+						break;
+					}
+				}
+
+				if (! isOneAvailable)
+				{
+					ret = false;
+				}
+			}
+		}
 	}
 
 	//Global conditions

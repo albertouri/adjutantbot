@@ -130,6 +130,8 @@ void AdjutantAIModule::onFrame()
 		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
 			WorldManager::Instance().getEnemyRangedWeight());	
 
+		BWAPI::Broodwar->drawTextScreen(500,144,"Reserved %d/%d", WorldManager::Instance().reservedMinerals, WorldManager::Instance().reservedGas);
+
 		//Start off with our current resources. Needed for saving for more costly units
 		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals;
 		int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedMinerals;

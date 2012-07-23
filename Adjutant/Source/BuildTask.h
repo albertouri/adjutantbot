@@ -28,7 +28,8 @@ public:
 	BWAPI::TechType techType;
 	BWAPI::UnitType unitType;
 
-	//required
+	//required - priority of this task. "Normal" is 500. Lower is higher priority.
+	//-1 is used to fix supply block, so make sure all tasks are >= 0. 
 	int priority;
 
 	//optional

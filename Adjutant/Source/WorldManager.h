@@ -23,7 +23,7 @@ public:
 
 
 	//*****Our Units*****
-	
+
 	//Home base region
 	BWTA::Region* myHomeRegion;
 
@@ -47,6 +47,9 @@ public:
 
 	//Workers that are on their way to build a building
 	std::map<BWAPI::Unit*, ConstructBuildingAction*> workersBuildingMap;
+
+	//Map of unit types that workers are on their way to build
+	std::map<BWAPI::UnitType, int> imminentBuildingMap;
 
 	//Reserved minerals
 	int reservedGas;
