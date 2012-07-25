@@ -1,7 +1,10 @@
 #pragma once
 #include <algorithm>
 #include "BWAPI.h"
+#include <fstream>
 #include "HistoricalUnitInfo.h"
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 class Utils
@@ -9,6 +12,8 @@ class Utils
 public:
 	Utils(void);
 	~Utils(void);
+
+	static const bool isDebug = false;
 
 	template <typename T>
 	static bool vectorContains(std::vector<T*>* v, T* e)
@@ -202,5 +207,47 @@ public:
 		}
 
 		return true;
+	}
+
+	static void log(std::string text)
+	{
+		static int writeCount = 0;
+		static int fileCount = 0;
+
+		if (Utils::isDebug)
+		{
+			std::stringstream fileName = std::stringstream();
+			fileName << "AdjutantLog_" << fileCount << ".txt";
+			std::ofstream myfile;
+			myfile.open (fileName.str().c_str(), std::ios::app);
+			myfile << BWAPI::Broodwar->getFrameCount() << ":" << text << std::endl;
+			myfile.close();
+			
+			//Check file size to make sure it doesn't get too big
+			if (writeCount > 5000)
+			{
+				FILE* pFile;
+				long size;//in bytes
+
+				fopen_s(&pFile, fileName.str().c_str(),"rb");
+				
+				if (pFile != NULL)
+				{
+					fseek (pFile, 0, SEEK_END);
+					size=ftell (pFile);
+					fclose (pFile);
+				}
+
+				//Limit each log file to ~300MB
+				if (size > 1024 * 1024 * 300)
+				{
+					fileCount++;
+				}
+
+				writeCount = 0;
+			}
+
+			writeCount++;
+		}
 	}
 };

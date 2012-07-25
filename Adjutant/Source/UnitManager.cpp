@@ -10,6 +10,8 @@ UnitManager::UnitManager(void)
 
 void UnitManager::evalute()
 {
+	Utils::log("Entering UnitManager");
+
 	if (! WorldManager::Instance().isTerrainAnalyzed)
 	{
 		this->manageStartOfGame();
@@ -77,6 +79,8 @@ void UnitManager::evalute()
 	{
 		BWAPI::Broodwar->drawTextScreen(200, 16*i, textVector.at(i).c_str());
 	}
+
+	Utils::log("Leaving UnitManager");
 }
 
 void UnitManager::manageStartOfGame()
@@ -269,6 +273,7 @@ void UnitManager::manageBuildOrder()
 	std::map<BWAPI::UnitType, int> expectedPersonMap = std::map<BWAPI::UnitType, int>();
 	int totalUnitCount = 0;
 
+
 	//Get all of our current units
 	for each (std::pair<BWAPI::UnitType, float> pair in unitRatioMap)
 	{
@@ -394,10 +399,14 @@ BWAPI::UnitType UnitManager::getNextRequiredUnit(BWAPI::UnitType unitType)
 	//Then add the next level
 	for each (std::pair<BWAPI::UnitType, int> typePair in unitType.requiredUnits())
 	{
-		BWAPI::UnitType ut = getNextRequiredUnit(typePair.first);
-		if (ut != BWAPI::UnitTypes::None)
+		//Ignore workers to avoid "worker -> resource depot -> worker ..." infinite recursion
+		if (! typePair.first.isWorker())
 		{
-			return ut;
+			BWAPI::UnitType ut = getNextRequiredUnit(typePair.first);
+			if (ut != BWAPI::UnitTypes::None)
+			{
+				return ut;
+			}
 		}
 	}
 
