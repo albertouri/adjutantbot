@@ -1,4 +1,5 @@
 #pragma once
+#include "Base.h"
 #include <BWAPI.h>
 #include "BWTA.h"
 #include "BuildTask.h"
@@ -24,11 +25,9 @@ public:
 
 	//*****Our Units*****
 
-	//Home base region
-	BWTA::Region* myHomeRegion;
-
-	//Home base location
-	BWTA::BaseLocation* myHomeBase;
+	//Base locations (set in UnitManager)
+	Base* myHomeBase;
+	std::vector<Base*> myBaseVector;
 
 	//Map of all of our available units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>> myUnitMap;
@@ -76,6 +75,10 @@ public:
 
 	//Structure used to pass data between UnitManager and BuildManager
 	std::vector<BuildTask*> buildTaskVector;
+
+	//Updating current bases
+	void checkForBases();
+	void addBase(BWAPI::Unit* commandCenter);
 
 	//Opponent Modeling functions
 	int getEnemyArmyValue();

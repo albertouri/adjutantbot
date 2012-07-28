@@ -4,13 +4,11 @@
 #include <queue>
 #include <vector>
 #include <time.h>
-#include "ActionQueue.h"
 #include "BuildManager.h"
 #include "ScoutingManager.h"
 #include "UnitManager.h"
 #include "MilitaryManager.h"
 #include "Timer.h"
-#include "TrainUnitAction.h"
 #include "Utils.h"
 #include "WorldManager.h"
 
@@ -50,12 +48,8 @@ public:
 	void showPlayers();
 	void showForces();
 
-	//Mark the last time we captured the queue to display it to the screen
-	int lastQueueCapture;
-
 	bool showBullets;
 	bool showStats;
-	bool showQueueStats;
 	bool showTerrain;
 	bool isBotEnabled;
 	bool showVisibilityData;
@@ -64,10 +58,4 @@ public:
 	BuildManager* buildManager;
 	ScoutingManager* scoutingManager;
 	MilitaryManager* militaryManager;
-	
-	ActionQueue actionQueue;
-	std::vector<std::string>* queueTextVector;
-
-	//Global
-	static const bool useOpponentModeling = true;
 };

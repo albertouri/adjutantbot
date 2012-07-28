@@ -177,19 +177,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Action.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ActionComparator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ActionQueue.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\AdjutantAIModule.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Base.cpp"
 				>
 			</File>
 			<File
@@ -216,16 +208,20 @@
 				RelativePath=".\UnitGroup.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Utils.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Actions"
 			>
 			<File
-				RelativePath=".\AttackAction.cpp"
+				RelativePath=".\Action.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\AttackAction.h"
+				RelativePath=".\Action.h"
 				>
 			</File>
 			<File
@@ -234,30 +230,6 @@
 			</File>
 			<File
 				RelativePath=".\ConstructBuildingAction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GatherResourceAction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GatherResourceAction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveAction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MoveAction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TrainUnitAction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TrainUnitAction.h"
 				>
 			</File>
 		</Filter>
@@ -319,7 +291,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Action.h"
+				RelativePath=".\AdjutantAIModule.h"
 				>
 			</File>
 			<File
@@ -327,11 +299,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ActionQueue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\AdjutantAIModule.h"
+				RelativePath=".\Base.h"
 				>
 			</File>
 			<File

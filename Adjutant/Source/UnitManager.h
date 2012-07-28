@@ -1,14 +1,12 @@
 #pragma once
-#include "ActionQueue.h"
+#include "Base.h"
 #include <BWAPI.h>
 #include "BuildManager.h"
 #include "BuildQueue.h"
 #include <cmath>
-#include "ConstructBuildingAction.h"
 #include "LoadBuildOrder.h"
 #include <queue>
 #include <time.h>
-#include "TrainUnitAction.h"
 #include "WorldManager.h"
 
 class UnitManager

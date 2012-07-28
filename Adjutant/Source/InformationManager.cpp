@@ -4,7 +4,7 @@ InformationManager::InformationManager(void)
 {
 }
 
-void InformationManager::evalute(ActionQueue* actionQueue)
+void InformationManager::evalute()
 {
 }
 

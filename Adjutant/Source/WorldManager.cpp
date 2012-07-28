@@ -21,12 +21,14 @@ WorldManager::WorldManager(void)
 		}
 	}
 	
+	this->myHomeBase = NULL;
 	this->reservedMinerals = 0;
 	this->reservedGas = 0;
 }
 
 void WorldManager::update(bool isTerrainAnalyzed)
 {
+	Utils::log("Entering WorldManager", 1);
 	//Clear out previous structures so they can be refreshed
 	this->myUnitMap.clear();
 	this->enemyUnitMap.clear();
@@ -128,12 +130,157 @@ void WorldManager::update(bool isTerrainAnalyzed)
 	
 	if (isTerrainAnalyzed)
 	{
-		if (BWTA::getStartLocation(BWAPI::Broodwar->self()) != NULL)
+		//Special check for initial base
+		if (this->myHomeBase == NULL)
 		{
-			this->myHomeRegion = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion();
-			this->myHomeBase = BWTA::getNearestBaseLocation(this->myHomeRegion->getCenter());
+			if (! this->myUnitMap[BWAPI::UnitTypes::Terran_Command_Center].empty())
+			{
+				this->addBase(this->myUnitMap[BWAPI::UnitTypes::Terran_Command_Center].front());
+			}
 		}
+
+		//Check for new/destroyed bases and SCVs
+		this->checkForBases();
+
 		this->isTerrainAnalyzed = true;
+	}
+	Utils::log("Leaving WorldManager", 1);
+}
+
+void WorldManager::checkForBases()
+{
+	for each(BWAPI::Event e in BWAPI::Broodwar->getEvents())
+	{
+		BWAPI::Unit* unit = e.getUnit();
+		
+		if (unit != NULL && Utils::unitIsMine(unit))
+		{
+			switch(e.getType())
+			{
+				case BWAPI::EventType::UnitComplete:
+				case BWAPI::EventType::UnitMorph:
+					//Add new bases as they are created
+					if (unit->getType().isResourceDepot())
+					{
+						this->addBase(unit);
+					}
+					else if (unit->getType() == BWAPI::UnitTypes::Terran_Refinery)
+					{
+						//Add new refineries as they are morphed
+						for each (Base* base in this->myBaseVector)
+						{
+							if (base->addRefinery(unit))
+							{
+								break;
+							}
+						}
+					}
+					break;
+				
+				case BWAPI::EventType::UnitDestroy:
+					//Remove bases as they are destroyed
+					if (unit->getType().isResourceDepot())
+					{
+						Base* baseToRemove = NULL;
+
+						for each (Base* base in this->myBaseVector)
+						{
+							if (base->resourceDepot == unit)
+							{
+								baseToRemove = base;
+								break;
+							}
+						}
+
+						if (baseToRemove != NULL)
+						{
+							//do not remove home base
+							if (baseToRemove != this->myHomeBase)
+							{
+								Utils::vectorRemoveElement(&this->myBaseVector, baseToRemove);
+								delete baseToRemove;
+							}
+						}
+					}
+					else if (unit->getType() == BWAPI::UnitTypes::Terran_Refinery)
+					{
+						//Remove refineries from bases as they are destroyed
+						for each (Base* base in this->myBaseVector)
+						{
+							if (base->removeRefinery(unit))
+							{
+								break;
+							}
+						}
+					}
+					else if (unit->getType().isWorker())
+					{
+						//Remove workers from bases as they are destroyed
+						for each (Base* base in this->myBaseVector)
+						{
+							if (base->removeWorker(unit))
+							{
+								break;
+							}
+						}
+					}
+					break;
+			}
+		}
+	}
+}
+
+void WorldManager::addBase(BWAPI::Unit* commandCenter)
+{
+	//See if base already exists
+	Base* base = NULL;
+
+	for each (Base* b in this->myBaseVector)
+	{
+		if (b->baseLocation == BWTA::getNearestBaseLocation(commandCenter->getPosition()))
+		{
+			base = b;
+		}
+	}
+
+	//Otherwise, Create new base
+	if (base == NULL)
+	{
+		base = new Base(commandCenter);
+	}
+
+	BWTA::BaseLocation* location = base->baseLocation;
+
+	//Check for any refineries that may already exist at the location
+	for each (BWAPI::Unit* refinery in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Refinery])
+	{
+		for each (BWAPI::Unit* geyser in location->getGeysers())
+		{
+			if (refinery->getPosition() == geyser->getPosition())
+			{
+				base->refineryVector.insert(refinery);
+			}
+		}
+	}
+
+	//Check for any SCVs that may already exist at the location
+	for each (BWAPI::Unit* worker in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_SCV])
+	{
+		if ((worker->isGatheringMinerals() && Utils::setContains(&location->getMinerals(), worker->getTarget()))
+			|| (worker->isGatheringGas() && Utils::setContains(&base->refineryVector, worker->getTarget())))
+		{
+			base->addWorker(worker);
+		}
+	}
+
+	if (! Utils::vectorContains(&WorldManager::Instance().myBaseVector, base))
+	{
+		WorldManager::Instance().myBaseVector.push_back(base);
+	}
+
+	if (WorldManager::Instance().myHomeBase == NULL)
+	{
+		WorldManager::Instance().myHomeBase = base;
 	}
 }
 

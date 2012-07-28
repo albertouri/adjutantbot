@@ -5,23 +5,13 @@ ScoutingManager::ScoutingManager(void)
 {
 }
 
-void ScoutingManager::evalute(ActionQueue* actionQueue)
+void ScoutingManager::evalute()
 {
+	Utils::log("Entering ScoutingManager", 1);
 	double scoutingWeight = 0.75;
-	std::vector<BWAPI::Unit*>* workers = WorldManager::Instance().myWorkerVector;
 
 	if (scoutingWeight > 0 && WorldManager::Instance().isTerrainAnalyzed)
 	{
-		/*
-		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
-		{
-			BWAPI::Broodwar->printf("Scouts=%d|workers=%d|vs=%d",
-				WorldManager::Instance().myScoutVector->size(),
-				workers->size(),
-				15 - (unsigned int)(10 * scoutingWeight));
-		}
-		*/
-		
 		//Picking locations of interest
 		BWAPI::Position positionToExplore = BWAPI::Position(0,0);
 
@@ -34,8 +24,7 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 			}
 		}
 
-		if (AdjutantAIModule::useOpponentModeling
-			&& BWAPI::Broodwar->getFrameCount() > 2000
+		if (BWAPI::Broodwar->getFrameCount() > 2000
 			&& BWAPI::Broodwar->getFrameCount() % (2000 + (int)((1.0 - scoutingWeight) * 4000.0)) < 50
 			&& WorldManager::Instance().myScoutVector->empty())
 		{
@@ -66,14 +55,14 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 
 		//Picking scouts
 		if (WorldManager::Instance().myScoutVector->empty() 
-			&& workers->size() > 15 - (unsigned int)(10 * scoutingWeight)
+			&& WorldManager::Instance().myHomeBase->getTotalWorkerCount() > 15 - (int)(10 * scoutingWeight)
 			&& positionToExplore != BWAPI::Position(0,0))
 		{
-			BWAPI::Unit* firstScout = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
+			BWAPI::Unit* firstScout = Utils::getFreeWorker(&WorldManager::Instance().myHomeBase->getMineralWorkers());
 
 			if (firstScout != NULL)
 			{
-				Utils::vectorRemoveElement(workers, firstScout);
+				WorldManager::Instance().myHomeBase->removeWorker(firstScout);
 				WorldManager::Instance().myScoutVector->push_back(firstScout);
 			}
 		}
@@ -83,7 +72,7 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 		{
 			for each (BWAPI::Unit* scout in (*WorldManager::Instance().myScoutVector))
 			{
-				actionQueue->push(new MoveAction(scout, positionToExplore));
+				scout->move(positionToExplore);
 			}
 		}
 		else
@@ -101,9 +90,8 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 
 			for each (BWAPI::Unit* scout in scoutsToRemove)
 			{
-				actionQueue->push(new MoveAction(scout, WorldManager::Instance().myHomeRegion->getCenter()));
+				scout->move(WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter());
 				Utils::vectorRemoveElement(WorldManager::Instance().myScoutVector, scout);
-				WorldManager::Instance().myWorkerVector->push_back(scout);
 			}
 		}
 
@@ -120,7 +108,7 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 		}
 
 		//Control comsat use
-		if (AdjutantAIModule::useOpponentModeling && WorldManager::Instance().enemyHomeRegion != NULL)
+		if (WorldManager::Instance().enemyHomeRegion != NULL)
 		{
 			std::vector<BWAPI::Unit*> comsatVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
 			std::vector<BWAPI::Unit*> sweepVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Spell_Scanner_Sweep];
@@ -133,7 +121,6 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 					{
 						if (comsat->getEnergy() > (BWAPI::TechTypes::Scanner_Sweep.energyUsed() * 3))
 						{
-							//TODO: Create use ability action
 							comsat->useTech(BWAPI::TechTypes::Scanner_Sweep, WorldManager::Instance().enemyHomeRegion->getCenter());
 							break;
 						}
@@ -142,6 +129,8 @@ void ScoutingManager::evalute(ActionQueue* actionQueue)
 			}
 		}
 	}
+
+	Utils::log("Leaving ScoutingManager", 1);
 }
 
 ScoutingManager::~ScoutingManager(void)

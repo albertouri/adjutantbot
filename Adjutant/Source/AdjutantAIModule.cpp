@@ -19,16 +19,13 @@ void AdjutantAIModule::onStart()
 	analyzed=false;
 	analysisJustFinished=false;
 
-	lastQueueCapture = -51;
 	showTerrain=true;
 	showBullets=false;
 	showVisibilityData=false;
 	isBotEnabled=true;
 	showStats=true;
-	showQueueStats=true;
 
 	//Initialize member variables
-	this->queueTextVector = new std::vector<std::string>();
 	this->unitManager = new UnitManager();
 	this->buildManager = new BuildManager();
 	this->scoutingManager = new ScoutingManager();
@@ -70,12 +67,11 @@ void AdjutantAIModule::onStart()
 
 void AdjutantAIModule::onEnd(bool isWinner)
 {
-	this->actionQueue.destroy();
-	delete this->queueTextVector;
 	delete this->militaryManager;
 	delete this->unitManager;
 	delete this->scoutingManager;
 	delete this->buildManager;
+	Utils::onEnd();
 }
 
 void AdjutantAIModule::onFrame()
@@ -90,23 +86,12 @@ void AdjutantAIModule::onFrame()
 
 	if (isBotEnabled)
 	{
-		bool isQueueCaptured = false;
-		
 		//Main loop
 		WorldManager::Instance().update(analyzed);
 		this->unitManager->evalute();
 		this->buildManager->evalute();
-		this->scoutingManager->evalute(&actionQueue);
-		this->militaryManager->evalute(&actionQueue);
-
-		//Debug info
-		//Only capture every 50 frames when there is something in the queue
-		if (Broodwar->getFrameCount() - lastQueueCapture > 50 && 
-			! actionQueue.empty())
-		{
-			isQueueCaptured = true;
-			this->queueTextVector->clear();
-		}
+		this->scoutingManager->evalute();
+		this->militaryManager->evalute();
 		
 		//Mouse position
 		BWAPI::Position mousePosition = BWAPI::Broodwar->getMousePosition();
@@ -130,56 +115,14 @@ void AdjutantAIModule::onFrame()
 		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
 			WorldManager::Instance().getEnemyRangedWeight());	
 
-		BWAPI::Broodwar->drawTextScreen(500,144,"Reserved %d/%d", WorldManager::Instance().reservedMinerals, WorldManager::Instance().reservedGas);
+		BWAPI::Broodwar->drawTextScreen(500,160,"Reserved %d/%d", WorldManager::Instance().reservedMinerals, WorldManager::Instance().reservedGas);
 
-		//Start off with our current resources. Needed for saving for more costly units
-		int remainingMinerals = BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals;
-		int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedMinerals;
-		int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
-		std::priority_queue<Action*, std::vector<Action*>, ActionComparator> priorityQueue = this->actionQueue.getPrioritizedQueue();
-		this->actionQueue.clear();
-
-		int actionsExecuted = 0;
-
-		while(! priorityQueue.empty())
+		if (WorldManager::Instance().myHomeBase != NULL)
 		{
-
-			Action* action = priorityQueue.top(); //Get top action
-			priorityQueue.pop(); //Remove top action from queue
-
-			if (isQueueCaptured)
-			{
-				this->queueTextVector->push_back(action->toString());
-			}
-
-			if (! action->isStillValid())
-			{
-				//Action obsolete - just delete it
-				BWAPI::Broodwar->printf("Obsolete Action Deleted %s", action->toString().c_str());
-				delete action;
-			}
-			else if (action->isReady(remainingMinerals, remainingGas, remainingSupply))
-			{
-				action->execute();
-				action->updateResourceCost(&remainingMinerals, &remainingGas, &remainingSupply);
-
-				delete action;
-			}
-			else
-			{
-				//If an action requiring resources, this will decrease our remaining resources
-				//so that we will pool resources for higher priority actions
-				action->updateResourceCost(&remainingMinerals, &remainingGas, &remainingSupply);
-
-				//Add unexecuted actions back for the next queue
-				this->actionQueue.push(action);
-			}
-
-			actionsExecuted++;
+			BWAPI::Broodwar->drawTextScreen(500,176,"Miners %d/%d", 
+				WorldManager::Instance().myHomeBase->getMineralWorkers().size(),
+				WorldManager::Instance().myHomeBase->getGasWorkers().size());
 		}
-		
-		//if (showQueueStats) {drawQueueStats();}
-		//if (isQueueCaptured) {lastQueueCapture = Broodwar->getFrameCount();}
 	}
 
 	if (analysisJustFinished)
@@ -188,16 +131,21 @@ void AdjutantAIModule::onFrame()
 		analysisJustFinished=false;
 	}
 
+	//Latency
 	static double maxLat = 0;
-	if (timer.Stop() * 1000 > maxLat)
+	static double totalLat = 0;
+	double lat = timer.Stop() * 1000;
+	totalLat += lat;
+
+	if (lat > maxLat)
 	{
-		maxLat = timer.Stop() * 1000;
+		maxLat = lat;
 	}
 
-	Broodwar->drawTextScreen(500,128,"Max Lat (ms): %f", maxLat);
+	Broodwar->drawTextScreen(500,112,"Latency (ms): %f", lat);
+	Broodwar->drawTextScreen(500,128,"Avg Lat (ms): %f", totalLat / BWAPI::Broodwar->getFrameCount());
+	Broodwar->drawTextScreen(500,144,"Max Lat (ms): %f", maxLat);
 
-	//Debug latency
-	Broodwar->drawTextScreen(500,112,"Latency (ms): %f", timer.Stop() * 1000);
 }
 
 void AdjutantAIModule::onSendText(std::string text)
@@ -216,7 +164,7 @@ void AdjutantAIModule::onSendText(std::string text)
 	}
 	else if (text=="/show queue")
 	{
-		showQueueStats = !showQueueStats;
+		
 	}
 	else if (text=="/show terrain")
 	{
@@ -409,17 +357,6 @@ void AdjutantAIModule::drawStats()
 	{
 		Broodwar->drawTextScreen(5,16*line,"- %d %ss",(*i).second, (*i).first.getName().c_str());
 		line++;
-	}
-}
-
-void AdjutantAIModule::drawQueueStats()
-{
-	Broodwar->drawTextScreen(200,0,"Priority Queue(%d) at frame %d Now=%d:",
-		this->queueTextVector->size(), this->lastQueueCapture, Broodwar->getFrameCount());
-	
-	for(int i=0; i<(int)queueTextVector->size(); i++)
-	{
-		Broodwar->drawTextScreen(200,16*(i+1),this->queueTextVector->at(i).c_str());
 	}
 }
 

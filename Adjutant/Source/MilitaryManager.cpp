@@ -5,9 +5,10 @@ MilitaryManager::MilitaryManager(void)
 {
 }
 
-void MilitaryManager::evalute(ActionQueue* actionQueue)
+void MilitaryManager::evalute()
 {
-	bool useModeling = AdjutantAIModule::useOpponentModeling;
+	Utils::log("Entering MilitaryManager", 1);
+
 	std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
 	UnitGroup* baseGroup = myArmyGroups->front();
 
@@ -16,17 +17,9 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Position(0,0))
 		{
-			baseGroup->targetPosition = WorldManager::Instance().myHomeRegion->getCenter();
+			baseGroup->targetPosition = WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter();
 		}
 
-		/*
-		if (BWAPI::Broodwar->getFrameCount() % 100 == 0)
-		{
-			BWAPI::Broodwar->printf("MyArmy=%d () | EnemyArmy=%d ()",
-				WorldManager::Instance().myArmyVector->size(),
-				WorldManager::Instance().enemy->getUnits().size());
-		}
-		*/
 
 		//For now, just have the whole army in group(1)
 		if (myArmyGroups->size() < 2)
@@ -39,10 +32,7 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 			for each (BWAPI::Unit* unit in (*baseGroup->unitVector))
 			{
 				myArmyGroups->at(1)->addUnit(unit);
-				actionQueue->push(new AttackAction(
-					unit, 
-					myArmyGroups->at(1)->targetPosition
-					));
+				unit->attack(myArmyGroups->at(1)->targetPosition);
 			}
 
 			baseGroup->removeAllUnits();
@@ -67,9 +57,8 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 				armyPosition = oldPosition;
 			}
 		}
-		else if((!useModeling && WorldManager::Instance().enemyHomeRegion != NULL && WorldManager::Instance().myArmyVector->size() > 100)
-			|| (useModeling && WorldManager::Instance().enemyHomeRegion != NULL && (WorldManager::Instance().getMyArmyValue() - WorldManager::Instance().getEnemyArmyValue() > 1000))
-			)
+		else if (WorldManager::Instance().enemyHomeRegion != NULL 
+			&& (WorldManager::Instance().getMyArmyValue() - WorldManager::Instance().getEnemyArmyValue() > 1000))
 		{
 			static bool searchAndDestroy = false;
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
@@ -111,7 +100,7 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 		else
 		{
 			//TODO:account for multiple chokepoints
-			BWTA::Region* homeRegion = WorldManager::Instance().myHomeRegion;
+			BWTA::Region* homeRegion = WorldManager::Instance().myHomeBase->baseLocation->getRegion();
 			
 			if (homeRegion->getChokepoints().size() > 0)
 			{
@@ -120,7 +109,7 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 			}
 			else
 			{
-				armyPosition = WorldManager::Instance().myHomeRegion->getCenter();
+				armyPosition = homeRegion->getCenter();
 			}
 		}
 
@@ -147,33 +136,21 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 				{
 					if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
 					{
-					actionQueue->push(new AttackAction(
-						unit, 
-						closestEnemy
-						));
+						unit->attack(closestEnemy);
 					}
 					else
 					{
-						actionQueue->push(new AttackAction(
-							unit, 
-							closestEnemy->getPosition()
-							));
+						unit->attack(closestEnemy->getPosition());					
 					}
 				}
 			}
 			else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
 			{
-				actionQueue->push(new AttackAction(
-					unit, 
-					myArmyGroups->at(1)->getCentroid()
-					));
+				unit->attack(myArmyGroups->at(1)->getCentroid());
 			}
 			else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
 			{
-				actionQueue->push(new AttackAction(
-					unit, 
-					myArmyGroups->at(1)->targetPosition
-					));
+				unit->attack(myArmyGroups->at(1)->targetPosition);
 			}
 		}
 
@@ -191,7 +168,6 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 					{
 						if (comsat->getEnergy() > BWAPI::TechTypes::Scanner_Sweep.energyUsed())
 						{
-							//TODO: Create use ability action
 							comsat->useTech(BWAPI::TechTypes::Scanner_Sweep, enemyUnit->getPosition());
 							break;
 						}
@@ -200,6 +176,8 @@ void MilitaryManager::evalute(ActionQueue* actionQueue)
 			}
 		}
 	}
+
+	Utils::log("Leaving MilitaryManager", 1);
 }
 
 MilitaryManager::~MilitaryManager(void)

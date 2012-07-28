@@ -61,12 +61,6 @@ bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 	{
 		mineralCost = this->unitType.mineralPrice();
 		gasCost = this->unitType.gasPrice();
-
-		//Check to make sure we have a free worker if we are trying to build something
-		if (NULL == Utils::getFreeWorker(WorldManager::Instance().myWorkerVector))
-		{
-			ret = false;
-		}
 	}
 	else if (this->isTrainUnit())
 	{

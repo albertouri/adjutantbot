@@ -10,25 +10,31 @@ UnitManager::UnitManager(void)
 
 void UnitManager::evalute()
 {
-	Utils::log("Entering UnitManager");
+	Utils::log("Entering UnitManager", 1);
 
 	if (! WorldManager::Instance().isTerrainAnalyzed)
 	{
+		Utils::log("Before manageStartOfGame", 2);
 		this->manageStartOfGame();
 	}
 	else
 	{
 		//Construct supply depots and make sure we don't get supply blocked
+		Utils::log("Before manageSupply", 2);
 		this->manageSupply();
 
 		//Assign workers to minerals and train more if needed. Also, build refineries.
+		Utils::log("Before manageResourceGathering", 2);
 		this->manageResourceGathering();
 
+		//Construct units and buildings according to build order
+		Utils::log("Before manageBuildOrder", 2);
 		this->manageBuildOrder();
 	}
 
 	//For tasks that are ready, transfer them to the global vector so that
 	//the build manager will build them
+	Utils::log("Before transfer of tasks", 2);
 	int remainingMinerals = BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals;
 	int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedMinerals;
 	int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
@@ -80,7 +86,7 @@ void UnitManager::evalute()
 		BWAPI::Broodwar->drawTextScreen(200, 16*i, textVector.at(i).c_str());
 	}
 
-	Utils::log("Leaving UnitManager");
+	Utils::log("Leaving UnitManager", 1);
 }
 
 void UnitManager::manageStartOfGame()
@@ -101,7 +107,7 @@ void UnitManager::manageStartOfGame()
 		availableMinerals.push_back(mineral);
 	}
 	
-	for each (BWAPI::Unit* worker in (*WorldManager::Instance().myWorkerVector))
+	for each (BWAPI::Unit* worker in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_SCV])
 	{
 		if (worker->isIdle())
 		{
@@ -127,92 +133,167 @@ void UnitManager::manageStartOfGame()
 
 void UnitManager::manageResourceGathering()
 {
-	BWAPI::Unit* cc = NULL;
-	BWAPI::Unit* refinery = NULL;
-	int gasWorkers = 0;
-	int mineralWorkers = 0;
-
-	if (! WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Refinery].empty())
-	{
-		refinery = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Refinery].front();
-	}
-	
-	if (! WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Command_Center].empty())
-	{
-		cc = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Command_Center].front();
-	}
-
-	for each(BWAPI::Unit* worker in (*WorldManager::Instance().myWorkerVector))
-	{
-		if (worker->isGatheringMinerals()) { mineralWorkers++; }
-		if (worker->isGatheringGas()) { gasWorkers++; }
-	}
-
 	//Assign idle workers
+	Utils::log("manageResourceGathering::Before assign idles workers",3);
 	for each(BWAPI::Unit* unit in WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_SCV])
 	{
 		if (unit->isIdle())
 		{
-			// 6 Mineral workers, 3 Gas Workers
-			if (mineralWorkers >= 6 && gasWorkers < 3 
-				&& refinery != NULL && refinery->isCompleted())
-			{	
-				// Send to refinery for gas gathering
-				unit->gather(refinery);
-				gasWorkers++;
-			}
-			else
+			//First, make sure it doesn't already belong to a base
+			bool alreadyPlaced = false;
+			Base* unsaturatedBase = NULL;
+			Base* closestBase = NULL;
+
+			for each (Base* base in WorldManager::Instance().myBaseVector)
 			{
-				BWAPI::Unit* closestMineral = NULL;
-				if (WorldManager::Instance().myHomeBase->minerals() > 0)
+				if (base->isMinedOut()) {continue;}
+
+				double distanceToBase = base->baseLocation->getPosition().getDistance(unit->getPosition());
+
+				if (base->removeWorker(unit))
 				{
-					closestMineral = Utils::getClosestUnit(unit, &WorldManager::Instance().myHomeBase->getMinerals());
+					alreadyPlaced = true;
+					base->addWorker(unit);
+					break;
 				}
-				else
+				
+				if (! base->isSaturated())
 				{
-					closestMineral = Utils::getClosestUnit(unit, &BWAPI::Broodwar->getMinerals());
+					unsaturatedBase = base;
 				}
 
-				unit->rightClick(closestMineral);
-				mineralWorkers++;
+				if (closestBase == NULL || 
+					distanceToBase < closestBase->baseLocation->getPosition().getDistance(unit->getPosition()))
+				{
+					closestBase = base;
+				}
+			}
+			
+			//Otherise, add unsaturated, then closest base
+			if (! alreadyPlaced)
+			{
+				if (unsaturatedBase != NULL)
+				{
+					unsaturatedBase->addWorker(unit);
+				}
+				else if (closestBase != NULL)
+				{
+					closestBase->addWorker(unit);
+				}
 			}
 		}
 	}
 	
 	//Transfer existing workers to gas if needed
-	for each(BWAPI::Unit* worker in (*WorldManager::Instance().myWorkerVector))
+	Utils::log("manageResourceGathering::Before transfer workers",3);
+	for each(Base* base in WorldManager::Instance().myBaseVector)
 	{
-		if (mineralWorkers >= 10 && gasWorkers < 3 
-			&& refinery != NULL && refinery->isCompleted())
+		if (base->getMineralWorkers().size() >= 10 
+			&& base->getGasWorkers().size() < (unsigned int)(3 * base->getCompletedRefineryCount()))
 		{	
 			// Transfer worker to gas to refinery for gas gathering
-			worker->gather(refinery);
-			mineralWorkers--;
-			gasWorkers++;
+			BWAPI::Unit* unitToTransfer = (*base->getMineralWorkers().begin());
+			base->removeWorker(unitToTransfer);
+			base->addWorker(unitToTransfer);
+
 			break;
 		}
 	}
 
-	// Create refinery Action
-	if (BWAPI::Broodwar->getFrameCount() > 3000
-		&& WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Refinery].empty()
-		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Refinery) == 0)
+	// Create refinery task
+	Utils::log("manageResourceGathering::Before create refinery",3);
+	for each (Base* base in WorldManager::Instance().myBaseVector)
 	{
-		BWAPI::Unit* geyser = (*WorldManager::Instance().myHomeBase->getGeysers().begin());
-		this->buildQueue->push(new BuildTask(300, BWAPI::Broodwar->self()->getRace().getRefinery(), geyser->getTilePosition()));
+		if (BWAPI::Broodwar->getFrameCount() > 3000
+			&& base->refineryVector.size() < base->baseLocation->getGeysers().size()
+			&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Refinery) == 0)
+		{
+			BWAPI::Unit* geyserToBuildOn = NULL;
+
+			for each (BWAPI::Unit* geyser in base->baseLocation->getGeysers())
+			{
+				bool geyserIsFree = true;
+
+				for each (BWAPI::Unit* refinery in base->refineryVector)
+				{
+					if (refinery->getPosition() == geyser->getPosition())
+					{
+						geyserIsFree = false;
+					}
+				}
+
+				if (geyserIsFree)
+				{
+					geyserToBuildOn = geyser;
+					break;
+				}
+			}
+
+			if (geyserToBuildOn != NULL)
+			{
+				this->buildQueue->push(
+					new BuildTask(300, BWAPI::Broodwar->self()->getRace().getRefinery(), geyserToBuildOn->getTilePosition()));
+			}
+		}
 	}
 
-	//train workers
-	unsigned int numMineralPatches = WorldManager::Instance().myHomeBase->getMinerals().size();
-	unsigned int numGasGeysers = WorldManager::Instance().myHomeBase->getGeysers().size();
-	
-	if (cc != NULL && ! cc->isTraining()
-		&& this->buildQueue->getScheduledCount(BWAPI::UnitTypes::Terran_SCV) == 0
-		&& WorldManager::Instance().myWorkerVector->size() < (numMineralPatches * 2) + (numGasGeysers * 3)
-		+ 3 //3 extra workers for construction
-		)
+	//Train workers
+	Utils::log("manageResourceGathering::Before train workers",3);
+	for each (Base* base in WorldManager::Instance().myBaseVector)
 	{
-		this->buildQueue->push(new BuildTask(350, BWAPI::UnitTypes::Terran_SCV, cc));
+		int numMinerals = base->baseLocation->getMinerals().size();
+		int numGeysers =  base->baseLocation->getGeysers().size();
+
+		if (base->resourceDepot != NULL && ! base->resourceDepot->isTraining()
+			&& ! base->isMinedOut()
+			&& base->getTotalWorkerCount() < (numMinerals * 2) + (numGeysers * 3) + 3 //3 extra workers
+			&& this->inPipelineCount(BWAPI::UnitTypes::Terran_SCV, false) == 0
+			)
+		{
+			this->buildQueue->push(new BuildTask(350, BWAPI::UnitTypes::Terran_SCV, base->resourceDepot));
+		}
+	}
+
+	//Expansion
+	Utils::log("manageResourceGathering::Before Expansion",3);
+	if (BWAPI::Broodwar->getFrameCount() > 10000
+		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Command_Center) == 0
+		&& BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals > 400)
+	{
+		BWTA::BaseLocation* expansionLocation = NULL;
+		BWTA::BaseLocation* home = WorldManager::Instance().myHomeBase->baseLocation;
+
+		for each (BWTA::BaseLocation* location in BWTA::getBaseLocations())
+		{
+			if (! BWTA::isConnected(home->getTilePosition(), location->getTilePosition())) {continue;}
+			if (! Utils::isValidBuildingLocation(location->getTilePosition(), BWAPI::UnitTypes::Terran_Command_Center)) {continue;}
+
+			double newDistance = BWTA::getGroundDistance(location->getTilePosition(), home->getTilePosition());
+
+			if (expansionLocation == NULL 
+				|| newDistance < BWTA::getGroundDistance(expansionLocation->getTilePosition(), home->getTilePosition()))
+			{
+				expansionLocation = location;
+			}
+		}
+
+		if (expansionLocation != NULL)
+		{
+			this->buildQueue->push(new BuildTask(500,
+				BWAPI::UnitTypes::Terran_Command_Center, 
+				expansionLocation->getTilePosition()));
+		}
+	}
+
+	//Rebuild home CC if needed
+	Utils::log("manageResourceGathering::Before rebuild CC",3);
+	if (WorldManager::Instance().myHomeBase != NULL 
+		&& ! WorldManager::Instance().myHomeBase->resourceDepot->exists()
+		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Command_Center) == 0)
+	{
+		this->buildQueue->push(new BuildTask(100, 
+			BWAPI::UnitTypes::Terran_Command_Center, 
+			WorldManager::Instance().myHomeBase->resourceDepot->getTilePosition()));
 	}
 }
 
@@ -437,6 +518,7 @@ int UnitManager::inPipelineCount(BWAPI::UnitType unitType, bool includeIncomplet
 	//Worker on way to build it
 	count += WorldManager::Instance().imminentBuildingMap[unitType];
 
+	//Under construction or unit currently being trained
 	if (includeIncomplete)
 	{
 		count += BWAPI::Broodwar->self()->incompleteUnitCount(unitType);
