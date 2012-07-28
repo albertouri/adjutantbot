@@ -4,10 +4,12 @@
 #include <queue>
 #include <vector>
 #include <time.h>
+#include "InformationManager.h"
+#include "UnitManager.h"
 #include "BuildManager.h"
 #include "ScoutingManager.h"
-#include "UnitManager.h"
 #include "MilitaryManager.h"
+#include "Threat.h"
 #include "Timer.h"
 #include "Utils.h"
 #include "WorldManager.h"
@@ -45,15 +47,19 @@ public:
 	void drawBullets();
 	void drawVisibilityData();
 	void drawTerrainData();
+	void drawArmies();
 	void showPlayers();
 	void showForces();
+	
 
 	bool showBullets;
 	bool showStats;
 	bool showTerrain;
 	bool isBotEnabled;
+	bool showArmies;
 	bool showVisibilityData;
 	
+	InformationManager* informationManager;
 	UnitManager* unitManager;
 	BuildManager* buildManager;
 	ScoutingManager* scoutingManager;

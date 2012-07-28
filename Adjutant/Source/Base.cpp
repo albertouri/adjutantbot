@@ -102,6 +102,29 @@ bool Base::removeWorker(BWAPI::Unit* unit)
 	}
 }
 
+BWAPI::Unit* Base::removeWorkerNear(BWAPI::Position position)
+{
+	BWAPI::Unit* removedWorker = NULL;
+
+	if (this->mineralWorkers.size() > 0)
+	{
+		removedWorker = Utils::getFreeWorker(&this->mineralWorkers, position);
+		this->removeWorker(removedWorker);
+	}
+	else if (this->gasWorkers.size() > 0)
+	{
+		removedWorker = Utils::getFreeWorker(&this->gasWorkers, position);
+		this->removeWorker(removedWorker);
+	}
+
+	return removedWorker;
+}
+
+BWAPI::Unit* Base::removeWorker()
+{
+	return this->removeWorkerNear(BWAPI::Positions::None);
+}
+
 int Base::getTotalWorkerCount()
 {
 	return this->mineralWorkers.size() + this->gasWorkers.size();

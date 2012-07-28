@@ -3,11 +3,13 @@
 UnitGroup::UnitGroup(void)
 {
 	this->unitVector = new std::vector<BWAPI::Unit*>();
-	this->targetPosition = BWAPI::Position(0,0);
+	this->targetPosition = BWAPI::Positions::None;
 }
 
 BWAPI::Position UnitGroup::getCentroid()
 {
+	if (this->unitVector->size() == 0) {return BWAPI::Positions::None;}
+
 	double centerX = 0.0;
 	double centerY = 0.0;
 
@@ -31,6 +33,28 @@ void UnitGroup::addUnit(BWAPI::Unit* unit)
 bool UnitGroup::removeUnit(BWAPI::Unit* unit)
 {
 	return Utils::vectorRemoveElement(this->unitVector, unit);
+}
+
+int UnitGroup::removeType(BWAPI::UnitType type)
+{
+	int count = 0;
+	std::set<BWAPI::Unit*> unitsToRemove;
+
+	for each (BWAPI::Unit* unit in (*this->unitVector))
+	{
+		if (unit->getType() == type)
+		{
+			unitsToRemove.insert(unit);
+		}
+	}
+
+	for each (BWAPI::Unit* unit in unitsToRemove)
+	{
+		Utils::vectorRemoveElement(this->unitVector, unit);
+		count++;
+	}
+
+	return count;
 }
 
 void UnitGroup::removeAllUnits()

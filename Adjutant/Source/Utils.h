@@ -23,19 +23,26 @@ public:
 	//Unit is an enemy unit (non-neutral)
 	static bool unitIsEnemy(BWAPI::Unit* unit);
 
-	//Get a worker unit that isn't occupied
-	static BWAPI::Unit* getFreeWorker(std::vector<BWAPI::Unit*>* workerVector);
-	static BWAPI::Unit* getFreeWorker(std::set<BWAPI::Unit*>* workerSet);
-
 	static bool isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType);
-
 	static BWAPI::Unit* getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
-	
 	static bool canMakeGivenUnits(BWAPI::UnitType type);
-
 	static void log(std::string text, int level);
 
+	//Get a worker unit that isn't occupied
+	static BWAPI::Unit* getFreeWorker(std::vector<BWAPI::Unit*>* workerVector, BWAPI::Position position);
+	static BWAPI::Unit* getFreeWorker(std::set<BWAPI::Unit*>* workerSet, BWAPI::Position position);
+
 	//Functions using templates must be defined in here
+	static BWAPI::Unit* getFreeWorker(std::vector<BWAPI::Unit*>* workerVector)
+	{
+		return Utils::getFreeWorker(workerVector, BWAPI::Positions::None);
+	}
+
+	static BWAPI::Unit* getFreeWorker(std::set<BWAPI::Unit*>* workerSet)
+	{
+		return Utils::getFreeWorker(workerSet, BWAPI::Positions::None);
+	}
+
 	template <typename T>
 	static bool vectorContains(std::vector<T*>* v, T* e)
 	{

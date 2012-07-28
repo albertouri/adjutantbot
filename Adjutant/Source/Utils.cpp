@@ -17,41 +17,6 @@ bool Utils::unitIsEnemy(BWAPI::Unit* unit)
 	return unit->getPlayer()->isEnemy(BWAPI::Broodwar->self());
 }
 
-//Get a worker unit that isn't occupied
-BWAPI::Unit* Utils::getFreeWorker(std::vector<BWAPI::Unit*>* workerVector)
-{
-	BWAPI::Unit* freeWorker = NULL;
-
-	for each (BWAPI::Unit* worker in (*workerVector))
-	{
-		if (! worker->isGatheringGas() && ! worker->isCarryingMinerals() && ! worker->isConstructing())
-		{
-			freeWorker = worker;
-			break;
-		}
-	}
-
-	if (freeWorker == NULL)
-	{
-		for each (BWAPI::Unit* worker in (*workerVector))
-		{
-			if (! worker->isConstructing())
-			{
-				freeWorker = worker;
-				break;
-			}
-		}
-	}
-
-	return freeWorker;
-}
-
-BWAPI::Unit* Utils::getFreeWorker(std::set<BWAPI::Unit*>* workerSet)
-{
-	std::vector<BWAPI::Unit*> workerVector(workerSet->begin(), workerSet->end());
-	return Utils::getFreeWorker(&workerVector);
-}
-
 bool Utils::isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType)
 {
 	bool isValidLocation = true;
@@ -208,6 +173,60 @@ void Utils::log(std::string text, int level)
 
 		Utils::writeCount++;
 	}
+}
+
+//Get a worker unit that isn't occupied
+BWAPI::Unit* Utils::getFreeWorker(std::vector<BWAPI::Unit*>* workerVector, BWAPI::Position position)
+{
+	BWAPI::Unit* freeWorker = NULL;
+
+	//We prefer workers that are mining minerals and not carrying anything
+	for each (BWAPI::Unit* worker in (*workerVector))
+	{
+		if (! worker->isGatheringGas() && ! worker->isCarryingMinerals() 
+			&& ! worker->isConstructing() && worker->isCompleted())
+		{
+			if (position == BWAPI::Positions::None)
+			{
+				freeWorker = worker;
+				break;
+			}
+			else if (freeWorker == NULL
+				|| worker->getDistance(position) < freeWorker->getDistance(position))
+			{
+				freeWorker = worker;
+			}
+		}
+	}
+
+	//But will take any worker we can if needed
+	if (freeWorker == NULL)
+	{
+		for each (BWAPI::Unit* worker in (*workerVector))
+		{
+			if (! worker->isConstructing() && worker->isCompleted())
+			{
+				if (position == BWAPI::Positions::None)
+				{
+					freeWorker = worker;
+					break;
+				}
+				else if (freeWorker == NULL
+					|| worker->getDistance(position) < freeWorker->getDistance(position))
+				{
+					freeWorker = worker;
+				}
+			}
+		}
+	}
+
+	return freeWorker;
+}
+
+BWAPI::Unit* Utils::getFreeWorker(std::set<BWAPI::Unit*>* workerSet, BWAPI::Position position)
+{
+	std::vector<BWAPI::Unit*> workerVector(workerSet->begin(), workerSet->end());
+	return Utils::getFreeWorker(&workerVector, position);
 }
 
 void Utils::onEnd()

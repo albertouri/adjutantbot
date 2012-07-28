@@ -205,6 +205,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Threat.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\UnitGroup.cpp"
 				>
 			</File>
@@ -291,11 +295,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\AdjutantAIModule.h"
+				RelativePath=".\ActionComparator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ActionComparator.h"
+				RelativePath=".\AdjutantAIModule.h"
 				>
 			</File>
 			<File
@@ -316,6 +320,10 @@
 			</File>
 			<File
 				RelativePath=".\HistoricalUnitInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Threat.h"
 				>
 			</File>
 			<File

@@ -9,5 +9,6 @@ class InformationManager
 public:
 	InformationManager(void);
 	~InformationManager(void);
-	static void evalute();
+	void evaluate();
+	void manageThreatDetection();
 };

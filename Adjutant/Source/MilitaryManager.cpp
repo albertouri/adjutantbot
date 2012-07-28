@@ -9,22 +9,25 @@ void MilitaryManager::evalute()
 {
 	Utils::log("Entering MilitaryManager", 1);
 
-	std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
-	UnitGroup* baseGroup = myArmyGroups->front();
-
 	if (WorldManager::Instance().isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
 	{
-		//Init baseGroup location
-		if (baseGroup->targetPosition == BWAPI::Position(0,0))
-		{
-			baseGroup->targetPosition = WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter();
-		}
-
+		std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
 
 		//For now, just have the whole army in group(1)
 		if (myArmyGroups->size() < 2)
 		{
 			myArmyGroups->push_back(new UnitGroup());
+		}
+
+		UnitGroup* baseGroup = myArmyGroups->front();
+
+		//Recruit worker if needed
+		manageFightingWorkers();
+
+		//Init baseGroup location
+		if (baseGroup->targetPosition == BWAPI::Positions::None)
+		{
+			baseGroup->targetPosition = WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter();
 		}
 
 		if (baseGroup->size() > 0)
@@ -39,7 +42,7 @@ void MilitaryManager::evalute()
 		}
 		
 		//Determine army behavior
-		BWAPI::Position armyPosition = BWAPI::Position(0,0);
+		BWAPI::Position armyPosition = BWAPI::Positions::None;
 
 		//Threats
 		if (WorldManager::Instance().enemy->getUnits().size() != 0)
@@ -132,7 +135,7 @@ void MilitaryManager::evalute()
 
 			if (useLowLevelControl)
 			{
-				if (unit->isIdle())
+				if (! unit->isAttacking())
 				{
 					if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
 					{
@@ -178,6 +181,50 @@ void MilitaryManager::evalute()
 	}
 
 	Utils::log("Leaving MilitaryManager", 1);
+}
+
+void MilitaryManager::manageFightingWorkers()
+{
+	int totalProtectedThreat = 0;
+	Threat* protectionThreat = NULL;
+
+	for each (Threat* threat in WorldManager::Instance().threatVector)
+	{
+		if (threat->isInProtectedRegion())
+		{
+			protectionThreat = threat;
+			totalProtectedThreat += threat->getAttackValue();
+		}
+	}
+
+	while (totalProtectedThreat > WorldManager::getMyArmyValue() 
+		&& WorldManager::Instance().myHomeBase->getTotalWorkerCount() > 0)
+	{
+		BWAPI::Unit* armyWorker = WorldManager::Instance().myHomeBase->
+			removeWorkerNear(protectionThreat->getCentroid());
+		
+		if (armyWorker != NULL)
+		{
+			WorldManager::Instance().myArmyGroups->front()->addUnit(armyWorker);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (totalProtectedThreat == 0)
+	{
+		for each (UnitGroup* group in  (*WorldManager::Instance().myArmyGroups))
+		{
+			group->removeType(BWAPI::UnitTypes::Terran_SCV);
+		}
+	}
+}
+
+void MilitaryManager::manageDefense()
+{
+
 }
 
 MilitaryManager::~MilitaryManager(void)

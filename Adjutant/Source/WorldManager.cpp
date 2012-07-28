@@ -78,12 +78,14 @@ void WorldManager::update(bool isTerrainAnalyzed)
 					bool wasRemoved = false;
 
 					wasRemoved = Utils::vectorRemoveElement(this->myWorkerVector, unit);
-					if (!wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myScoutVector, unit);}
-					if (!wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myArmyVector, unit);}
+					if (! wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myScoutVector, unit);}
 					
-					for each (UnitGroup* group in (*this->myArmyGroups))
+					if (! wasRemoved)
 					{
-						if (group->removeUnit(unit)) {break;}
+						for each (UnitGroup* group in (*this->myArmyGroups))
+						{
+							if (group->removeUnit(unit)) {break;}
+						}
 					}
 					break;
 			}
@@ -144,6 +146,7 @@ void WorldManager::update(bool isTerrainAnalyzed)
 
 		this->isTerrainAnalyzed = true;
 	}
+
 	Utils::log("Leaving WorldManager", 1);
 }
 
@@ -276,6 +279,10 @@ void WorldManager::addBase(BWAPI::Unit* commandCenter)
 	if (! Utils::vectorContains(&WorldManager::Instance().myBaseVector, base))
 	{
 		WorldManager::Instance().myBaseVector.push_back(base);
+		if (! Utils::vectorContains(&this->protectedRegionVector, base->baseLocation->getRegion()))
+		{
+			this->protectedRegionVector.push_back(base->baseLocation->getRegion());
+		}
 	}
 
 	if (WorldManager::Instance().myHomeBase == NULL)
@@ -306,12 +313,37 @@ int WorldManager::getMyArmyValue()
 {
 	int armyValue = 0;
 
-	for each (BWAPI::Unit* unit in (*this->myArmyVector))
+	for each (UnitGroup* group in (*WorldManager::Instance().myArmyGroups))
 	{
-		armyValue += unit->getType().gasPrice() + unit->getType().mineralPrice();
+		for each (BWAPI::Unit* unit in (*group->unitVector))
+		{
+			armyValue += unit->getType().gasPrice() + unit->getType().mineralPrice();
+		}
 	}
 
 	return armyValue;
+}
+
+int WorldManager::getMyAttackValue()
+{
+	int attackValue = 0;
+
+	for each (UnitGroup* group in (*WorldManager::Instance().myArmyGroups))
+	{
+		for each (BWAPI::Unit* unit in (*group->unitVector))
+		{
+			if (unit->getType().isWorker())
+			{
+				attackValue += 13;
+			}
+			else
+			{
+				attackValue += unit->getType().gasPrice() + unit->getType().mineralPrice();
+			}
+		}
+	}
+
+	return attackValue;
 }
 
 double WorldManager::getEnemyRangedWeight()

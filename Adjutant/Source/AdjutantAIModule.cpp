@@ -23,9 +23,11 @@ void AdjutantAIModule::onStart()
 	showBullets=false;
 	showVisibilityData=false;
 	isBotEnabled=true;
-	showStats=true;
+	showStats=false;
+	showArmies=true;
 
 	//Initialize member variables
+	this->informationManager = new InformationManager();
 	this->unitManager = new UnitManager();
 	this->buildManager = new BuildManager();
 	this->scoutingManager = new ScoutingManager();
@@ -88,11 +90,14 @@ void AdjutantAIModule::onFrame()
 	{
 		//Main loop
 		WorldManager::Instance().update(analyzed);
+		this->informationManager->evaluate();
 		this->unitManager->evalute();
 		this->buildManager->evalute();
 		this->scoutingManager->evalute();
 		this->militaryManager->evalute();
 		
+		if (showArmies) {drawArmies();}
+
 		//Mouse position
 		BWAPI::Position mousePosition = BWAPI::Broodwar->getMousePosition();
 		if (BWAPI::Broodwar->getScreenPosition() != NULL && mousePosition != NULL)
@@ -162,9 +167,9 @@ void AdjutantAIModule::onSendText(std::string text)
 	{
 		showStats = !showStats;
 	}
-	else if (text=="/show queue")
+	else if (text=="/show armies")
 	{
-		
+		showArmies = !showArmies;
 	}
 	else if (text=="/show terrain")
 	{
@@ -190,6 +195,10 @@ void AdjutantAIModule::onSendText(std::string text)
 			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 		}
 	} 
+	else if (text=="/show")
+	{
+
+	}
 	else
 	{
 		Broodwar->printf("You typed '%s'!",text.c_str());
@@ -450,6 +459,45 @@ void AdjutantAIModule::drawTerrainData()
 			Position point1=(*c)->getSides().first;
 			Position point2=(*c)->getSides().second;
 			Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Red);
+		}
+	}
+}
+
+void AdjutantAIModule::drawArmies()
+{
+	//Draw my armies
+	for each (UnitGroup* group in (*WorldManager::Instance().myArmyGroups))
+	{
+		BWAPI::Position center = group->getCentroid();
+
+		for each (BWAPI::Unit* unit in (*group->unitVector))
+		{
+			Broodwar->drawLineMap(
+				unit->getPosition().x(), unit->getPosition().y(),
+				center.x(), center.y(), Colors::Teal);
+			
+			Broodwar->drawCircleMap(unit->getPosition().x(), unit->getPosition().y(), 10, Colors::Teal);
+		}
+
+		if (group->unitVector->size() > 0)
+		{
+			Broodwar->drawLineMap(center.x(), center.y(), 
+				group->targetPosition.x(), group->targetPosition.y(), Colors::Yellow);
+		}
+	}
+
+	//Draw enemy threats
+	for each (Threat* threat in WorldManager::Instance().threatVector)
+	{
+		BWAPI::Position center = threat->getCentroid();
+
+		for each (BWAPI::Unit* unit in threat->getUnits())
+		{
+			Broodwar->drawLineMap(
+				unit->getPosition().x(), unit->getPosition().y(),
+				center.x(), center.y(), Colors::Red);
+			
+			Broodwar->drawCircleMap(unit->getPosition().x(), unit->getPosition().y(), 10, Colors::Red);
 		}
 	}
 }

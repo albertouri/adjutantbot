@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <queue>
+#include "Threat.h"
 #include "Utils.h"
 #include "WorldManager.h"
 
@@ -10,5 +11,6 @@ public:
 	MilitaryManager(void);
 	~MilitaryManager(void);
 	void evalute();
+	void manageFightingWorkers();
 	void manageDefense();
 };

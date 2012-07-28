@@ -18,6 +18,8 @@ public:
 
 	bool addWorker(BWAPI::Unit* unit);
 	bool removeWorker(BWAPI::Unit* unit);
+	BWAPI::Unit* removeWorkerNear(BWAPI::Position position);
+	BWAPI::Unit* removeWorker();
 	int getTotalWorkerCount();	
 
 	bool addRefinery(BWAPI::Unit* unit);

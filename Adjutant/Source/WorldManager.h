@@ -5,6 +5,7 @@
 #include "BuildTask.h"
 #include "ConstructBuildingAction.h"
 #include "HistoricalUnitInfo.h"
+#include "Threat.h"
 #include "UnitGroup.h"
 #include "Utils.h"
 #include <vector>
@@ -28,6 +29,9 @@ public:
 	//Base locations (set in UnitManager)
 	Base* myHomeBase;
 	std::vector<Base*> myBaseVector;
+
+	//List of regions of the map we want to keep clear of enemy units
+	std::vector<BWTA::Region*> protectedRegionVector;
 
 	//Map of all of our available units based on type
 	std::map<BWAPI::UnitType, std::vector<BWAPI::Unit*>> myUnitMap;
@@ -69,6 +73,9 @@ public:
 	//Map of all available enemy units we have ever seen and their last known location
 	std::map<int, HistoricalUnitInfo> enemyHistoricalUnitMap;
 
+	//List of known threats (groups of enemy combatants)
+	std::vector<Threat*> threatVector;
+
 	//*****Misc Data****
 	//Is BWTA finished?
 	bool isTerrainAnalyzed;
@@ -82,7 +89,8 @@ public:
 
 	//Opponent Modeling functions
 	int getEnemyArmyValue();
-	int getMyArmyValue();
+	static int getMyArmyValue();
+	static int getMyAttackValue();
 	double getEnemyRangedWeight();
 
 private:
