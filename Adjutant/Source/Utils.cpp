@@ -31,7 +31,7 @@ BWAPI::Unit* Utils::getFreeWorker(std::vector<BWAPI::Unit*>* workerVector)
 		}
 	}
 
-	if (freeWorker = NULL)
+	if (freeWorker == NULL)
 	{
 		for each (BWAPI::Unit* worker in (*workerVector))
 		{
