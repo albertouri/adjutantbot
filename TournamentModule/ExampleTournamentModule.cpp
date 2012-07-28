@@ -203,13 +203,14 @@ void ExampleTournamentAI::recordEndGameStats(int status)
 	}
 
 	//Record stats to a file
-	//GameID, HostName, AwayName, VictorName, TotalFrames, isTimeout Map, TimeStamp, HomeScore, AwayScore, MaxFrameTime, Timestamp
+	std::string titleLine = "HostName, HomeRace, AwayName, AwayRace, VictorName, TotalFrames, isTimeout Map, TimeStamp, HomeScore, AwayScore, MaxFrameTime, Timestamp";
 
 	time_t timestamp = time(NULL);
 	std::stringstream outputLine;
-	
 	outputLine << home->getName() << ",";
+	outputLine << home->getRace().c_str() << ",";
 	outputLine << away->getName() << ",";
+	outputLine << away->getRace().c_str() << ",";
 	outputLine << victor->getName() << ",";
 	outputLine << Broodwar->getFrameCount() << ",";
 	outputLine << (isTimeout ? "true" : "false") << ",";
@@ -219,8 +220,26 @@ void ExampleTournamentAI::recordEndGameStats(int status)
 	outputLine << maxEventTime << ",";
 	outputLine << asctime(gmtime(&timestamp));
 	
-	std::ofstream myfile;
-	myfile.open (outputFile.c_str(), std::ios::out | std::ios::app);
-	myfile << outputLine.str();
-	myfile.close();
+	//Check for first time writing file
+	bool isFirst = false;
+	std::ifstream testFile(outputFile.c_str());
+	if (testFile.is_open())
+	{
+		testFile.close();
+	}
+	else
+	{
+		isFirst = true;
+	}
+
+	std::ofstream resultsFile;
+	resultsFile.open (outputFile.c_str(), std::ios::out | std::ios::app);
+
+	if (isFirst)
+	{
+		resultsFile << titleLine << std::endl;
+	}
+
+	resultsFile << outputLine.str();
+	resultsFile.close();
 }
