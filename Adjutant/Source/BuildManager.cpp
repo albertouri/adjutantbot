@@ -32,135 +32,154 @@ void BuildManager::evalute()
 
 	for each (BuildTask* buildTask in WorldManager::Instance().buildTaskVector)
 	{
-		// Building 
+		// Construct Building 
 		if (buildTask->isConstructBuilding())
 		{
-			BWAPI::TilePosition buildLocationTile = WorldManager::Instance().myHomeBase->baseLocation->getTilePosition();
-			BuildingPlacer* placer = defaultBuildingPlacer;
-
+			bool isSuccess = false;
 			BWAPI::UnitType buildingType = buildTask->unitType;
-			BWAPI::Unit* workerPerformingBuild = 
-					Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
 
-			if (workerPerformingBuild != NULL)
+			if (buildingType.isAddon())
 			{
-				// Pre-Defined Building Site Location to use
-				if (buildTask->position != BWAPI::TilePositions::Invalid)
+				//Add-on
+				BWAPI::Unit* buildingToUse = buildTask->buildingToUse;
+
+				if (buildingToUse == NULL)
 				{
-					//Reserve resources for SCV's travel to building location
-					WorldManager::Instance().reservedGas += buildingType.gasPrice();
-					WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-					WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
-						buildingType,
-						buildTask->position);
-					WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
+					std::vector<BWAPI::Unit*> builtByVector = 
+						WorldManager::Instance().myUnitMap[buildingType.whatBuilds().first];
 
-					workerPerformingBuild->build(buildTask->position, buildingType);
-
-					BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
-						workerPerformingBuild->getPosition().x(),
-						workerPerformingBuild->getPosition().y(),
-						buildingType.getName().c_str(),
-						buildTask->position.x(),
-						buildTask->position.y());
-
-					tasksToRemove.push_back(buildTask);
-
-				}
-				// No Pre-Defined Building Site Location to use
-				else
-				{
-					BWAPI::TilePosition buildLocation = placer->findBuildLocation(this->reservedMap->getInstance(), buildingType, 
-						buildLocationTile, workerPerformingBuild);
-			
-					if ( buildLocation != BWAPI::TilePositions::None )
+					for each (BWAPI::Unit* building in builtByVector)
 					{
-						//t->setBuildLocation( buildLocation );
-						this->reservedMap->getInstance()->reserveTiles(buildLocation, buildingType);
-
-						//Reserve resources for SCV's travel to building location
-						WorldManager::Instance().reservedGas += buildingType.gasPrice();
-						WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-						WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
-							buildingType, 
-							buildLocation);
-						WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
-
-						workerPerformingBuild->build(buildLocation, buildingType);
-
-						BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
-							workerPerformingBuild->getPosition().x(),
-							workerPerformingBuild->getPosition().y(),
-							buildingType.getName().c_str(),
-							buildLocation.x(),
-							buildLocation.y());
-
-						tasksToRemove.push_back(buildTask);
+						if (building->getAddon() == NULL && Utils::isBuildingReady(building))
+						{
+							buildingToUse = building;
+							break;
+						}
 					}
-					else
+				}
+
+				if (buildingToUse != NULL)
+				{
+					if (buildTask->frameStarted == -1) 
+					{ 
+						buildTask->frameStarted = BWAPI::Broodwar->getFrameCount();
+					}
+
+					if (buildingToUse->buildAddon(buildingType))
 					{
-						BWAPI::Broodwar->sendText("Unable to find building Location");
+						isSuccess = true;
+						tasksToRemove.push_back(buildTask);
+						break;
 					}
 				}
 			}
 			else
 			{
-				BWAPI::Broodwar->sendText("No free workers");
+				//Normal building
+				BWAPI::Unit* workerPerformingBuild = 
+					Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
+
+				if (workerPerformingBuild != NULL)
+				{
+					BWAPI::TilePosition buildLocation = buildTask->position;
+
+					if (buildLocation == BWAPI::TilePositions::Invalid)
+					{
+						BWAPI::TilePosition seedTile = WorldManager::Instance().myHomeBase->baseLocation->getTilePosition();
+
+						buildLocation = this->defaultBuildingPlacer->findBuildLocation(
+							this->reservedMap->getInstance(), buildingType, 
+							seedTile, workerPerformingBuild);
+					}
+
+					if (buildLocation != BWAPI::TilePositions::Invalid)
+					{
+						if (buildTask->frameStarted == -1) 
+						{ 
+							buildTask->frameStarted = BWAPI::Broodwar->getFrameCount();
+						}
+
+						if (workerPerformingBuild->build(buildLocation, buildingType))
+						{
+							//Reserve resources for SCV's travel to building location
+							WorldManager::Instance().reservedGas += buildingType.gasPrice();
+							WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
+							WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
+								buildingType,
+								buildLocation);
+							WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameStarted = BWAPI::Broodwar->getFrameCount();
+
+							BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
+								workerPerformingBuild->getPosition().x(),
+								workerPerformingBuild->getPosition().y(),
+								buildingType.getName().c_str(),
+								buildLocation.x(),
+								buildLocation.y());
+
+							isSuccess = true;
+							tasksToRemove.push_back(buildTask);
+						}
+					}
+				}
+			}
+
+			//If it's been 10 seconds, give up
+			if (BWAPI::Broodwar->getFrameCount() - buildTask->frameStarted > (Utils::FPS * 10)
+				&& ! isSuccess)
+			{
+				tasksToRemove.push_back(buildTask);
 			}
 		}
 		// Train Unit
 		else if (buildTask->isTrainUnit())
 		{
-			BWAPI::UnitType trainingType = buildTask->unitType;
-	
+			BWAPI::UnitType unitToBuild = buildTask->unitType;
+			BWAPI::Unit* buildingToUse = buildTask->buildingToUse;
+
 			// Pre-Defined Training site to use
-			if( buildTask->buildingToUse != NULL )
+			if(buildingToUse == NULL )
 			{
-				buildTask->buildingToUse->train(trainingType);
-				BWAPI::Broodwar->printf("Training Unit %s at %s",
-					trainingType.getName().c_str(), 
-					buildTask->buildingToUse->getType().getName().c_str());
+				BWAPI::UnitType builtBy = unitToBuild.whatBuilds().first;
 
-				tasksToRemove.push_back(buildTask);
-			}
-			// No Pre-Defined Training site to use
-			else
-			{
-				BWAPI::UnitType trainingSiteType = trainingType.whatBuilds().first;
-
-				std::vector<BWAPI::Unit*> trainingSites = WorldManager::Instance().myUnitMap[trainingSiteType];
-				if (!trainingSites.empty() && trainingSites.size() > 0)
+				for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[builtBy])
 				{
-					// TODO look into what happens if trainSite is fully queued
-					// might need to ensure training has a site to train at
-					trainingSites.front()->train(trainingType);
-					BWAPI::Broodwar->printf("Training Unit %s at %s",
-						trainingType.getName().c_str(), 
-						trainingSiteType.getName().c_str());
-
-					tasksToRemove.push_back(buildTask);
+					if (Utils::isBuildingReady(building))
+					{
+						buildingToUse = building;
+						break;
+					}
 				}
+			}
+
+			if (buildingToUse != NULL && buildingToUse->train(unitToBuild))
+			{
+				BWAPI::Broodwar->printf("Training Unit %s at %s",
+						unitToBuild.getName().c_str(), 
+						buildingToUse->getType().getName().c_str());
+				tasksToRemove.push_back(buildTask);
 			}
 		}
 		// Upgrade
 		else if (buildTask->isUpgrade())	
 		{
 			BWAPI::UpgradeType upgradeType = buildTask->upgradeType;
-			BWAPI::UnitType requiredUnitType = upgradeType.whatsRequired();
+			int currentLevel = BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType);
+			BWAPI::UnitType upgradedBy = buildTask->upgradeType.whatUpgrades();
+			BWAPI::UnitType requiredUnit = buildTask->upgradeType.whatsRequired(currentLevel + 1);
+			int requiredCount = BWAPI::Broodwar->self()->completedUnitCount(requiredUnit);
 
-			std::vector<BWAPI::Unit*> requiredUnits = WorldManager::Instance().myUnitMap[requiredUnitType];
-			if (!requiredUnits.empty() && requiredUnits.size() > 0)
+			if (requiredUnit == BWAPI::UnitTypes::None || requiredCount > 0)
 			{
-				BWAPI::UnitType upgradeUnitType = upgradeType.whatUpgrades();
-
-				std::vector<BWAPI::Unit*> upgradeUnits = WorldManager::Instance().myUnitMap[upgradeUnitType];
-				if (!upgradeUnits.empty() && upgradeUnits.size() > 0)
+				for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[upgradedBy])
 				{
-					upgradeUnits.front()->upgrade(upgradeType);
-					BWAPI::Broodwar->printf("Creating Upgrade %s",
-						upgradeType.c_str());
-
-					tasksToRemove.push_back(buildTask);
+					if (Utils::isBuildingReady(building))
+					{
+						building->upgrade(upgradeType);
+						BWAPI::Broodwar->printf("Upgrading %s",
+							upgradeType.c_str());
+						tasksToRemove.push_back(buildTask);
+						break;
+					}
 				}
 			}
 		}
@@ -173,74 +192,15 @@ void BuildManager::evalute()
 			std::vector<BWAPI::Unit*> units = WorldManager::Instance().myUnitMap[unitType];
 			if (!units.empty() && units.size() > 0)
 			{
-				units.front()->research(techType);
-				BWAPI::Broodwar->printf("Researching Tech %s",
-						techType.c_str());
-
-				tasksToRemove.push_back(buildTask);
-			}
-		}
-		// Add-on
-		else if(buildTask->unitType.isAddon())
-		{
-			BWAPI::UnitType addonType = buildTask->unitType;
-			BWAPI::Unit* workerPerformingBuild = 
-					Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
-
-			if (workerPerformingBuild != NULL)
-			{
-				// Pre-Defined Building site to use for the Addon
-				if( buildTask->buildingToUse != NULL )
+				for each (BWAPI::Unit* building in units)
 				{
-					BWAPI::TilePosition buildUnitLocation = buildTask->buildingToUse->getTilePosition();
-
-					//Reserve resources for SCV's travel to building location
-					WorldManager::Instance().reservedGas += addonType.gasPrice();
-					WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
-					WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
-						addonType, 
-						buildUnitLocation);
-					WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
-
-					BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
-						workerPerformingBuild->getPosition().x(),
-						workerPerformingBuild->getPosition().y(),
-						addonType.getName().c_str(),
-						buildUnitLocation.x(),
-						buildUnitLocation.y());
-
-					workerPerformingBuild->buildAddon(addonType);
-
-					tasksToRemove.push_back(buildTask);
-				}
-				// No Pre-Defined Building site to use for the Addon
-				else
-				{
-					BWAPI::UnitType buildingToUse = addonType.whatBuilds().first;
-
-					std::vector<BWAPI::Unit*> availableBuildingToUse = WorldManager::Instance().myUnitMap[buildingToUse];
-					if (!availableBuildingToUse.empty() && availableBuildingToUse.size() > 0)
+					if (Utils::isBuildingReady(building))
 					{
-						BWAPI::TilePosition buildUnitLocation = availableBuildingToUse.front()->getTilePosition();
-
-						//Reserve resources for SCV's travel to building location
-						WorldManager::Instance().reservedGas += addonType.gasPrice();
-						WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
-						WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
-							addonType, 
-							buildUnitLocation);
-						WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
-
-						BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
-							workerPerformingBuild->getPosition().x(),
-							workerPerformingBuild->getPosition().y(),
-							addonType.getName().c_str(),
-							buildUnitLocation.x(),
-							buildUnitLocation.y());
-
-						workerPerformingBuild->buildAddon(addonType);
-
+						building->research(techType);
+						BWAPI::Broodwar->printf("Researching Tech %s",
+								techType.c_str());
 						tasksToRemove.push_back(buildTask);
+						break;
 					}
 				}
 			}
@@ -277,7 +237,7 @@ void BuildManager::evalute()
 
 		if (! worker->exists()
 			|| isBuildingStarted
-			|| (BWAPI::Broodwar->getFrameCount() - task->frameExecuted > (23*5) &&
+			|| (BWAPI::Broodwar->getFrameCount() - task->frameStarted > (Utils::FPS * 5) &&
 				(! worker->isConstructing()
 				|| worker->isGatheringGas()
 				|| worker->isGatheringMinerals()

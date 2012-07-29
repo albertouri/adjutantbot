@@ -38,7 +38,7 @@ public:
 	long minFrame;
 
 	//Only when it is being constructed
-	long frameExecuted;
+	long frameStarted;
 
 private:
 	void init(int priority, std::string text, BWAPI::UpgradeType upgradeType, 

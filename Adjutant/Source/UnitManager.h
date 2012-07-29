@@ -24,6 +24,8 @@ private:
 	BWAPI::UnitType getNextRequiredUnit(BWAPI::UnitType unitType);
 	int inPipelineCount(BWAPI::UnitType unitType);
 	int inPipelineCount(BWAPI::UnitType unitType, bool includeIncomplete);
+	int inPipelineCount(BWAPI::TechType techType);
+	int inPipelineCount(BWAPI::UpgradeType upgradeType);
 
 	//Keeps track of which building we are waiting to finish building
 	BWAPI::UnitType buildOrderBuilding;

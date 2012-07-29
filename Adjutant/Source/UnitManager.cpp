@@ -383,7 +383,8 @@ void UnitManager::manageBuildOrder()
 			{
 				BWAPI::UnitType potentialBuildingType = this->getNextRequiredUnit(unitType);
 
-				if (potentialBuildingType != BWAPI::UnitTypes::None)
+				if (potentialBuildingType != BWAPI::UnitTypes::None
+					&& this->inPipelineCount(potentialBuildingType) == 0)
 				{
 					this->buildQueue->push(new BuildTask(500, potentialBuildingType));
 					this->buildOrderBuilding = potentialBuildingType;
@@ -457,6 +458,69 @@ void UnitManager::manageBuildOrder()
 			this->buildOrderBuilding = buildingToBuild;
 		}
 	}
+
+	//Figure out what tech to research
+	for each(BWAPI::TechType tech in this->buildOrder->getCurrentUnits()->techTypeVector)
+	{
+		if (! BWAPI::Broodwar->self()->hasResearched(tech) 
+			&& this->inPipelineCount(tech) == 0)
+		{
+			BWAPI::UnitType researchedBy = tech.whatResearches();
+			
+			if (WorldManager::Instance().myUnitMap[researchedBy].size() > 0)
+			{
+				this->buildQueue->push(new BuildTask(500, tech));
+			}
+			else if (buildingFree)
+			{
+				if (this->inPipelineCount(researchedBy) == 0)
+				{
+					this->buildQueue->push(new BuildTask(500, researchedBy));
+					this->buildOrderBuilding = researchedBy;
+					buildingFree = false;
+				}
+			}
+		}
+	}
+
+	//Figure out which upgrades to research
+	for each(BWAPI::UpgradeType upgrade in this->buildOrder->getCurrentUnits()->upgradeTypeVector)
+	{
+		int currentLevel = BWAPI::Broodwar->self()->getUpgradeLevel(upgrade);
+
+		if (currentLevel < upgrade.maxRepeats()
+			&& this->inPipelineCount(upgrade) == 0)
+		{
+			BWAPI::UnitType upgradedBy = upgrade.whatUpgrades();
+			BWAPI::UnitType requiredUnit = upgrade.whatsRequired(currentLevel + 1);
+			int upgradeCount = BWAPI::Broodwar->self()->completedUnitCount(upgradedBy);
+			int requiredCount = BWAPI::Broodwar->self()->completedUnitCount(requiredUnit);
+
+			if (upgradeCount > 0
+				&& (requiredUnit == BWAPI::UnitTypes::None || requiredCount > 0))
+			{
+				this->buildQueue->push(new BuildTask(500, upgrade));
+			}
+			else if (buildingFree)
+			{
+				if (upgradeCount == 0 
+					&& this->inPipelineCount(upgradedBy) == 0)
+				{
+					this->buildQueue->push(new BuildTask(333, upgradedBy));
+					this->buildOrderBuilding = upgradedBy;
+					buildingFree = false;
+				}
+				else if (requiredUnit != BWAPI::UnitTypes::None 
+					&& requiredCount == 0 
+					&& this->inPipelineCount(requiredUnit) == 0)
+				{
+					this->buildQueue->push(new BuildTask(222, requiredUnit));
+					this->buildOrderBuilding = requiredUnit;
+					buildingFree = false;
+				}
+			}
+		}
+	}
 }
 
 BWAPI::UnitType UnitManager::getNextRequiredUnit(BWAPI::UnitType unitType)
@@ -526,6 +590,57 @@ int UnitManager::inPipelineCount(BWAPI::UnitType unitType, bool includeIncomplet
 
 	return count;
 }
+
+int UnitManager::inPipelineCount(BWAPI::TechType techType)
+{
+	int count = 0;
+
+	//In queue to be built
+	count += this->buildQueue->getScheduledCount(techType);
+
+	//In between plan and scheduling
+	for each (BuildTask* buildTask in WorldManager::Instance().buildTaskVector)
+	{
+		if (buildTask->techType == techType)
+		{
+			count++;
+		}
+	}
+
+	//Currently being done
+	if (BWAPI::Broodwar->self()->isResearching(techType))
+	{
+		count++;
+	}
+
+	return count;
+}
+
+int UnitManager::inPipelineCount(BWAPI::UpgradeType upgradeType)
+{
+	int count = 0;
+
+	//In queue to be built
+	count += this->buildQueue->getScheduledCount(upgradeType);
+
+	//In between plan and scheduling
+	for each (BuildTask* buildTask in WorldManager::Instance().buildTaskVector)
+	{
+		if (buildTask->upgradeType == upgradeType)
+		{
+			count++;
+		}
+	}
+
+	//Currently being done
+	if (BWAPI::Broodwar->self()->isUpgrading(upgradeType))
+	{
+		count++;
+	}
+
+	return count;
+}
+
 
 UnitManager::~UnitManager(void)
 {

@@ -15,7 +15,11 @@ public:
 
 	static void onEnd();
 
+	//Level determines which log statements are written to the log file
 	static const int debugLevel = 0;
+
+	//frames per second the game runs at on fastest (actual is 23.81)
+	static const int FPS = 24;
 
 	//Unit belongs to me
 	static bool unitIsMine(BWAPI::Unit* unit);
@@ -23,6 +27,7 @@ public:
 	//Unit is an enemy unit (non-neutral)
 	static bool unitIsEnemy(BWAPI::Unit* unit);
 
+	static bool isBuildingReady(BWAPI::Unit* building);
 	static bool isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType);
 	static BWAPI::Unit* getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
 	static bool canMakeGivenUnits(BWAPI::UnitType type);

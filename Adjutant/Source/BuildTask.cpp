@@ -37,77 +37,84 @@ void BuildTask::init(int p, std::string text, BWAPI::UpgradeType upgradeType, BW
 	this->unitType = unitType;
 	this->position = BWAPI::TilePositions::Invalid;
 	this->buildingToUse = NULL;
-	this->frameExecuted = -1;
+	this->frameStarted = -1;
 }
 
 bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 {
-	bool ret = true;
+	BWAPI::UnitType typeNeeded = BWAPI::UnitTypes::None;
 	int mineralCost = 0;
 	int gasCost = 0;
 	int supplyCost = 0;
+	bool ret = true;
+	
 
 	if (this->isTech())
 	{
 		mineralCost = this->techType.mineralPrice();
 		gasCost = this->techType.gasPrice();
+		typeNeeded = this->techType.whatResearches();
 	}
 	else if (this->isUpgrade())
 	{
 		mineralCost = this->upgradeType.mineralPrice();
 		gasCost = this->upgradeType.gasPrice();
+		typeNeeded = this->upgradeType.whatUpgrades();
 	}
-	else if (this->isConstructBuilding() )
+	else if (this->isConstructBuilding())
 	{
 		mineralCost = this->unitType.mineralPrice();
 		gasCost = this->unitType.gasPrice();
+		
+		if (! Utils::canMakeGivenUnits(this->unitType))
+		{
+			ret = false;
+		}
 	}
 	else if (this->isTrainUnit())
 	{
 		mineralCost = this->unitType.mineralPrice();
 		gasCost = this->unitType.gasPrice();
 		supplyCost = this->unitType.supplyRequired();
+		typeNeeded = this->unitType.whatBuilds().first;
+	}
 
-		if ((this->buildingToUse != NULL && ! this->buildingToUse->isCompleted()))
+	//Check if required building is ready for training/upgrading/teching
+	if (this->buildingToUse != NULL && ! Utils::isBuildingReady(this->buildingToUse))
+	{
+		ret = false;
+	}
+	else if (typeNeeded != BWAPI::UnitTypes::None)
+	{
+		if (WorldManager::Instance().myUnitMap[typeNeeded].empty())
 		{
 			ret = false;
 		}
-		else if (this->buildingToUse == NULL)
+		else
 		{
-			BWAPI::UnitType whatBuildsType = unitType.whatBuilds().first;
+			bool isOneAvailable = false;
 
-			if (WorldManager::Instance().myUnitMap[whatBuildsType].empty())
+			for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[typeNeeded])
+			{
+				if (Utils::isBuildingReady(building))
+				{
+					isOneAvailable = true;
+					break;
+				}
+			}
+
+			if (! isOneAvailable)
 			{
 				ret = false;
-			}
-			else
-			{
-				bool isOneAvailable = false;
-
-				for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[whatBuildsType])
-				{
-					if (building->isCompleted() && ! building->isTraining() && ! building->isConstructing())
-					{
-						isOneAvailable = true;
-						break;
-					}
-				}
-
-				if (! isOneAvailable)
-				{
-					ret = false;
-				}
 			}
 		}
 	}
 
-	//Global conditions
+	//Resource constraints
 	if (minerals < mineralCost || gas < gasCost || supplyRemaining < supplyCost)
 	{
 		ret = false;
 	}
-
-	//TODO: Finish checking that all dependencies are built (i.e. factory needs rax)
 
 	return ret;
 }

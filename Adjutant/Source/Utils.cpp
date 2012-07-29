@@ -17,6 +17,24 @@ bool Utils::unitIsEnemy(BWAPI::Unit* unit)
 	return unit->getPlayer()->isEnemy(BWAPI::Broodwar->self());
 }
 
+bool Utils::isBuildingReady(BWAPI::Unit* building)
+{
+	if (! building->getType().isBuilding())
+	{
+		return false;
+	}
+
+	return building->isCompleted() 
+		&& building->isIdle()
+		&& ! building->isTraining()
+		&& ! building->isConstructing() 
+		&& ! building->isResearching()
+		&& ! building->isUpgrading()
+		&& ! building->isLifted()
+		&& ! building->isMorphing()
+		&& ! building->isUnpowered();
+}
+
 bool Utils::isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType)
 {
 	bool isValidLocation = true;
