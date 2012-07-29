@@ -37,7 +37,7 @@ void BuildTask::init(int p, std::string text, BWAPI::UpgradeType upgradeType, BW
 	this->unitType = unitType;
 	this->position = BWAPI::TilePositions::Invalid;
 	this->buildingToUse = NULL;
-	
+	this->frameExecuted = -1;
 }
 
 bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)

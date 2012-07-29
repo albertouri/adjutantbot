@@ -50,9 +50,10 @@ void BuildManager::evalute()
 					//Reserve resources for SCV's travel to building location
 					WorldManager::Instance().reservedGas += buildingType.gasPrice();
 					WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-					//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-					//	buildTask->position, 
-					//	buildingType);
+					WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
+						buildingType,
+						buildTask->position);
+					WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
 
 					workerPerformingBuild->build(buildTask->position, buildingType);
 
@@ -80,9 +81,10 @@ void BuildManager::evalute()
 						//Reserve resources for SCV's travel to building location
 						WorldManager::Instance().reservedGas += buildingType.gasPrice();
 						WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-						//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-						//	buildLocation, 
-						//	buildingType);
+						WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
+							buildingType, 
+							buildLocation);
+						WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
 
 						workerPerformingBuild->build(buildLocation, buildingType);
 
@@ -195,9 +197,10 @@ void BuildManager::evalute()
 					//Reserve resources for SCV's travel to building location
 					WorldManager::Instance().reservedGas += addonType.gasPrice();
 					WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
-					//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-					//	buildUnitLocation, 
-					//	addonType);
+					WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
+						addonType, 
+						buildUnitLocation);
+					WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
 
 					BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
 						workerPerformingBuild->getPosition().x(),
@@ -223,9 +226,10 @@ void BuildManager::evalute()
 						//Reserve resources for SCV's travel to building location
 						WorldManager::Instance().reservedGas += addonType.gasPrice();
 						WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
-						//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-						//	buildLocation, 
-						//	addonType);
+						WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new BuildTask(buildTask->priority, 
+							addonType, 
+							buildUnitLocation);
+						WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameExecuted = BWAPI::Broodwar->getFrameCount();
 
 						BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
 							workerPerformingBuild->getPosition().x(),
@@ -249,39 +253,42 @@ void BuildManager::evalute()
 		delete task;
 	}
 
-	//Monitor workers assigned to build something
+		//Monitor workers assigned to build something
 	//If building has started (or worker was interrupted), unreserve resources
 	std::vector<BWAPI::Unit*> keysToRemove = std::vector<BWAPI::Unit*>();
 
-	/*for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> mapPair in WorldManager::Instance().workersBuildingMap)
+	for each (std::pair<BWAPI::Unit*, BuildTask*> mapPair in WorldManager::Instance().workersBuildingMap)
 	{
 		BWAPI::Unit* worker = mapPair.first;
-		ConstructBuildingAction* action = mapPair.second;
-		std::vector<BWAPI::Unit*> buildings = WorldManager::Instance().myUnitMap[action->buildingType];
+		BuildTask* task = mapPair.second;
+		std::vector<BWAPI::Unit*> buildings = WorldManager::Instance().myUnitMap[task->unitType];
 		bool isBuildingStarted = false;
 
 		if (! buildings.empty())
 		{
 			for each (BWAPI::Unit* building in buildings)
 			{
-				if (building->getTilePosition() == action->location)
+				if (building->getTilePosition() == task->position)
 				{
 					isBuildingStarted = true;
 				}
 			}
 		}
 
-		if (worker == NULL
-			|| ! worker->isConstructing()
+		if (! worker->exists()
 			|| isBuildingStarted
-			|| worker->isGatheringGas()
-			|| worker->isGatheringMinerals())
+			|| (BWAPI::Broodwar->getFrameCount() - task->frameExecuted > (23*5) &&
+				(! worker->isConstructing()
+				|| worker->isGatheringGas()
+				|| worker->isGatheringMinerals()
+				))
+			)
 		{
-			WorldManager::Instance().reservedMinerals -= action->buildingType.mineralPrice();
-			WorldManager::Instance().reservedGas -= action->buildingType.gasPrice();
+			WorldManager::Instance().reservedMinerals -= task->unitType.mineralPrice();
+			WorldManager::Instance().reservedGas -= task->unitType.gasPrice();
 			keysToRemove.push_back(worker);
 		}
-	}*/
+	}
 	
 	for each (BWAPI::Unit* key in keysToRemove)
 	{

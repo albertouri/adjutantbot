@@ -122,9 +122,9 @@ void WorldManager::update(bool isTerrainAnalyzed)
 	}
 
 	//Build map of buildings that workers are on their way to build
-	for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> pair in this->workersBuildingMap)
+	for each (std::pair<BWAPI::Unit*, BuildTask*> pair in this->workersBuildingMap)
 	{
-		imminentBuildingMap[pair.second->buildingType]++;
+		imminentBuildingMap[pair.second->unitType]++;
 	}
 	
 	if (isTerrainAnalyzed)
@@ -380,7 +380,6 @@ WorldManager::~WorldManager(void)
 	this->imminentBuildingMap.clear();
 	this->enemyHistoricalUnitMap.clear();
 	this->workersBuildingMap.clear();
-	this->enemyHistoricalUnitMap.clear();
 	delete this->myWorkerVector;
 	delete this->myScoutVector;
 	delete this->myArmyVector;

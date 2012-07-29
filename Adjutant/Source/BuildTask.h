@@ -37,6 +37,9 @@ public:
 	BWAPI::Unit* buildingToUse;
 	long minFrame;
 
+	//Only when it is being constructed
+	long frameExecuted;
+
 private:
 	void init(int priority, std::string text, BWAPI::UpgradeType upgradeType, 
 		BWAPI::TechType techType, BWAPI::UnitType unitType);

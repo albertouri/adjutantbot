@@ -226,26 +226,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Actions"
-			>
-			<File
-				RelativePath=".\Action.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Action.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ConstructBuildingAction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ConstructBuildingAction.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="Managers"
 			>
 			<File

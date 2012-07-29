@@ -3,7 +3,6 @@
 #include <BWAPI.h>
 #include "BWTA.h"
 #include "BuildTask.h"
-#include "ConstructBuildingAction.h"
 #include "HistoricalUnitInfo.h"
 #include "Threat.h"
 #include "UnitGroup.h"
@@ -49,7 +48,7 @@ public:
 	std::vector<UnitGroup*>* myArmyGroups;
 
 	//Workers that are on their way to build a building
-	std::map<BWAPI::Unit*, ConstructBuildingAction*> workersBuildingMap;
+	std::map<BWAPI::Unit*, BuildTask*> workersBuildingMap;
 
 	//Map of unit types that workers are on their way to build
 	std::map<BWAPI::UnitType, int> imminentBuildingMap;

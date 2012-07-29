@@ -130,16 +130,16 @@ bool Utils::canMakeGivenUnits(BWAPI::UnitType type)
 
 void Utils::log(std::string text, int level)
 {
-	std::stringstream fileName = std::stringstream();
-	fileName << "AdjutantLog_" << Utils::fileCount << ".txt";
-
-	if (! Utils::logFile.is_open())
-	{
-		Utils::logFile.open (fileName.str().c_str(), std::ios::app);
-	}
-
 	if (level <= Utils::debugLevel)
 	{
+			std::stringstream fileName = std::stringstream();
+		fileName << "AdjutantLog_" << Utils::fileCount << ".txt";
+
+		if (! Utils::logFile.is_open())
+		{
+			Utils::logFile.open (fileName.str().c_str(), std::ios::app);
+		}
+
 		Utils::logFile << BWAPI::Broodwar->getFrameCount() << ":" << text << std::endl;
 		
 		//Check file size to make sure it doesn't get too big

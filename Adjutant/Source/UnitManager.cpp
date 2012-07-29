@@ -36,7 +36,7 @@ void UnitManager::evalute()
 	//the build manager will build them
 	Utils::log("Before transfer of tasks", 2);
 	int remainingMinerals = BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals;
-	int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedMinerals;
+	int remainingGas = BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedGas;
 	int remainingSupply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
 	
 	std::vector<BuildTask*> tasksToAddBack = std::vector<BuildTask*>();
