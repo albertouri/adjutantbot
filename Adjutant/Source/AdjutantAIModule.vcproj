@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BFSBuildingPlacer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\BuildQueue.cpp"
 				>
 			</File>
@@ -202,6 +206,10 @@
 			</File>
 			<File
 				RelativePath=".\HistoricalUnitInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ReservedMap.cpp"
 				>
 			</File>
 			<File
@@ -307,6 +315,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BFSBuildingPlacer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BuildingPlacer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\BuildQueue.h"
 				>
 			</File>
@@ -319,7 +335,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Heap.h"
+				>
+			</File>
+			<File
 				RelativePath=".\HistoricalUnitInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RectangleArray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ReservedMap.h"
 				>
 			</File>
 			<File
@@ -332,6 +360,10 @@
 			</File>
 			<File
 				RelativePath=".\UnitGroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Util.h"
 				>
 			</File>
 			<File

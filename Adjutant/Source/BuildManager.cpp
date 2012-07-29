@@ -1,17 +1,16 @@
 #include "BuildManager.h"
 
-
 BuildManager::BuildManager(void)
 {
+	this->reservedMap->getInstance()->create();
+    this->defaultBuildingPlacer = new BFSBuildingPlacer();
 }
 
 void BuildManager::evalute()
 {
-	BWAPI::Unit* cc = NULL;
-	
-	int gasWorkers = 0;
-	int mineralWorkers = 0;
-
+	/**
+	* Possible move into UnitManager or WorldManager as it could be a proformance hang later
+	*/
 	//comsat
 	if (BWAPI::Broodwar->getFrameCount() > 3000)
 	{
@@ -33,57 +32,73 @@ void BuildManager::evalute()
 
 	for each (BuildTask* buildTask in WorldManager::Instance().buildTaskVector)
 	{
-		if (buildTask->isConstructBuilding() && buildTask->position == BWAPI::TilePositions::Invalid)
+		// Building 
+		if (buildTask->isConstructBuilding())
 		{
-			//If position not defined, construct buildings randomly TODO: Make this not completely random
-			BWAPI::UnitType buildingType = buildTask->unitType;
-			bool isValidPosition = true;
-			int counter = 0;
+			BWAPI::TilePosition buildLocationTile = WorldManager::Instance().myHomeBase->baseLocation->getTilePosition();
+			BuildingPlacer* placer = defaultBuildingPlacer;
 
-			BWAPI::Unit* workerPerformingBuild = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
-			
+			BWAPI::UnitType buildingType = buildTask->unitType;
+			BWAPI::Unit* workerPerformingBuild = 
+					Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
+
 			if (workerPerformingBuild != NULL)
 			{
-				BWAPI::TilePosition buildingTile = WorldManager::Instance().myHomeBase->getTilePosition();
-
-				do
-				{
-					//Start at command center + some random offset from the CC
-					//gradually expand build radious
-					buildingTile = WorldManager::Instance().myHomeBase->getTilePosition();
-					int range = 20 + (int)(30.0*(counter/100));
-					buildingTile.x() += (rand() % (range*2)) - range; 
-					buildingTile.y() += (rand() % (range*2)) - range;
-					
-					isValidPosition = Utils::isValidBuildingLocation(buildingTile, buildingType);
-
-					if (counter > 100) {break;}
-					counter++;	
-				} while (! isValidPosition);
-
-				if (counter > 100)
-				{
-					BWAPI::Broodwar->sendText("Unable to find location for building");
-				}
-				else
+				// Pre-Defined Building Site Location to use
+				if (buildTask->position != BWAPI::TilePositions::Invalid)
 				{
 					//Reserve resources for SCV's travel to building location
 					WorldManager::Instance().reservedGas += buildingType.gasPrice();
 					WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-					WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-						buildingTile, 
-						buildingType);
+					//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
+					//	buildTask->position, 
+					//	buildingType);
 
-					workerPerformingBuild->build(buildingTile, buildingType);
+					workerPerformingBuild->build(buildTask->position, buildingType);
 
 					BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
 						workerPerformingBuild->getPosition().x(),
 						workerPerformingBuild->getPosition().y(),
 						buildingType.getName().c_str(),
-						buildingTile.x(),
-						buildingTile.y());
+						buildTask->position.x(),
+						buildTask->position.y());
 
 					tasksToRemove.push_back(buildTask);
+
+				}
+				// No Pre-Defined Building Site Location to use
+				else
+				{
+					BWAPI::TilePosition buildLocation = placer->findBuildLocation(this->reservedMap->getInstance(), buildingType, 
+						buildLocationTile, workerPerformingBuild);
+			
+					if ( buildLocation != BWAPI::TilePositions::None )
+					{
+						//t->setBuildLocation( buildLocation );
+						this->reservedMap->getInstance()->reserveTiles(buildLocation, buildingType);
+
+						//Reserve resources for SCV's travel to building location
+						WorldManager::Instance().reservedGas += buildingType.gasPrice();
+						WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
+						//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
+						//	buildLocation, 
+						//	buildingType);
+
+						workerPerformingBuild->build(buildLocation, buildingType);
+
+						BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
+							workerPerformingBuild->getPosition().x(),
+							workerPerformingBuild->getPosition().y(),
+							buildingType.getName().c_str(),
+							buildLocation.x(),
+							buildLocation.y());
+
+						tasksToRemove.push_back(buildTask);
+					}
+					else
+					{
+						BWAPI::Broodwar->sendText("Unable to find building Location");
+					}
 				}
 			}
 			else
@@ -91,36 +106,140 @@ void BuildManager::evalute()
 				BWAPI::Broodwar->sendText("No free workers");
 			}
 		}
-		else if (buildTask->isConstructBuilding() && buildTask->position != BWAPI::TilePositions::Invalid)
+		// Train Unit
+		else if (buildTask->isTrainUnit())
 		{
-			BWAPI::Unit* workerPerformingBuild = Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
-			BWAPI::UnitType buildingType = buildTask->unitType;
-
-			if (workerPerformingBuild != NULL)
+			BWAPI::UnitType trainingType = buildTask->unitType;
+	
+			// Pre-Defined Training site to use
+			if( buildTask->buildingToUse != NULL )
 			{
-				//Reserve resources for SCV's travel to building location
-				WorldManager::Instance().reservedGas += buildingType.gasPrice();
-				WorldManager::Instance().reservedMinerals += buildingType.mineralPrice();
-				WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
-					buildTask->position, 
-					buildingType);
+				buildTask->buildingToUse->train(trainingType);
+				BWAPI::Broodwar->printf("Training Unit %s at %s",
+					trainingType.getName().c_str(), 
+					buildTask->buildingToUse->getType().getName().c_str());
 
-				workerPerformingBuild->build(buildTask->position, buildingType);
+				tasksToRemove.push_back(buildTask);
+			}
+			// No Pre-Defined Training site to use
+			else
+			{
+				BWAPI::UnitType trainingSiteType = trainingType.whatBuilds().first;
 
-				BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
-					workerPerformingBuild->getPosition().x(),
-					workerPerformingBuild->getPosition().y(),
-					buildingType.getName().c_str(),
-					buildTask->position.x(),
-					buildTask->position.y());
+				std::vector<BWAPI::Unit*> trainingSites = WorldManager::Instance().myUnitMap[trainingSiteType];
+				if (!trainingSites.empty() && trainingSites.size() > 0)
+				{
+					// TODO look into what happens if trainSite is fully queued
+					// might need to ensure training has a site to train at
+					trainingSites.front()->train(trainingType);
+					BWAPI::Broodwar->printf("Training Unit %s at %s",
+						trainingType.getName().c_str(), 
+						trainingSiteType.getName().c_str());
+
+					tasksToRemove.push_back(buildTask);
+				}
+			}
+		}
+		// Upgrade
+		else if (buildTask->isUpgrade())	
+		{
+			BWAPI::UpgradeType upgradeType = buildTask->upgradeType;
+			BWAPI::UnitType requiredUnitType = upgradeType.whatsRequired();
+
+			std::vector<BWAPI::Unit*> requiredUnits = WorldManager::Instance().myUnitMap[requiredUnitType];
+			if (!requiredUnits.empty() && requiredUnits.size() > 0)
+			{
+				BWAPI::UnitType upgradeUnitType = upgradeType.whatUpgrades();
+
+				std::vector<BWAPI::Unit*> upgradeUnits = WorldManager::Instance().myUnitMap[upgradeUnitType];
+				if (!upgradeUnits.empty() && upgradeUnits.size() > 0)
+				{
+					upgradeUnits.front()->upgrade(upgradeType);
+					BWAPI::Broodwar->printf("Creating Upgrade %s",
+						upgradeType.c_str());
+
+					tasksToRemove.push_back(buildTask);
+				}
+			}
+		}
+		// Tech Advancement
+		else if (buildTask->isTech())
+		{
+			BWAPI::TechType techType = buildTask->techType;
+			BWAPI::UnitType unitType = techType.whatResearches();
+
+			std::vector<BWAPI::Unit*> units = WorldManager::Instance().myUnitMap[unitType];
+			if (!units.empty() && units.size() > 0)
+			{
+				units.front()->research(techType);
+				BWAPI::Broodwar->printf("Researching Tech %s",
+						techType.c_str());
 
 				tasksToRemove.push_back(buildTask);
 			}
 		}
-		else if (buildTask->isTrainUnit())
+		// Add-on
+		else if(buildTask->unitType.isAddon())
 		{
-			buildTask->buildingToUse->train(buildTask->unitType);
-			tasksToRemove.push_back(buildTask);
+			BWAPI::UnitType addonType = buildTask->unitType;
+			BWAPI::Unit* workerPerformingBuild = 
+					Utils::getFreeWorker(WorldManager::Instance().myWorkerVector);
+
+			if (workerPerformingBuild != NULL)
+			{
+				// Pre-Defined Building site to use for the Addon
+				if( buildTask->buildingToUse != NULL )
+				{
+					BWAPI::TilePosition buildUnitLocation = buildTask->buildingToUse->getTilePosition();
+
+					//Reserve resources for SCV's travel to building location
+					WorldManager::Instance().reservedGas += addonType.gasPrice();
+					WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
+					//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
+					//	buildUnitLocation, 
+					//	addonType);
+
+					BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
+						workerPerformingBuild->getPosition().x(),
+						workerPerformingBuild->getPosition().y(),
+						addonType.getName().c_str(),
+						buildUnitLocation.x(),
+						buildUnitLocation.y());
+
+					workerPerformingBuild->buildAddon(addonType);
+
+					tasksToRemove.push_back(buildTask);
+				}
+				// No Pre-Defined Building site to use for the Addon
+				else
+				{
+					BWAPI::UnitType buildingToUse = addonType.whatBuilds().first;
+
+					std::vector<BWAPI::Unit*> availableBuildingToUse = WorldManager::Instance().myUnitMap[buildingToUse];
+					if (!availableBuildingToUse.empty() && availableBuildingToUse.size() > 0)
+					{
+						BWAPI::TilePosition buildUnitLocation = availableBuildingToUse.front()->getTilePosition();
+
+						//Reserve resources for SCV's travel to building location
+						WorldManager::Instance().reservedGas += addonType.gasPrice();
+						WorldManager::Instance().reservedMinerals += addonType.mineralPrice();
+						//WorldManager::Instance().workersBuildingMap[workerPerformingBuild] = new ConstructBuildingAction(buildTask->priority, 
+						//	buildLocation, 
+						//	addonType);
+
+						BWAPI::Broodwar->printf("Worker at %d,%d sent to construct Addon %s at %d,%d",
+							workerPerformingBuild->getPosition().x(),
+							workerPerformingBuild->getPosition().y(),
+							addonType.getName().c_str(),
+							buildUnitLocation.x(),
+							buildUnitLocation.y());
+
+						workerPerformingBuild->buildAddon(addonType);
+
+						tasksToRemove.push_back(buildTask);
+					}
+				}
+			}
 		}
 	}
 
@@ -134,7 +253,7 @@ void BuildManager::evalute()
 	//If building has started (or worker was interrupted), unreserve resources
 	std::vector<BWAPI::Unit*> keysToRemove = std::vector<BWAPI::Unit*>();
 
-	for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> mapPair in WorldManager::Instance().workersBuildingMap)
+	/*for each (std::pair<BWAPI::Unit*, ConstructBuildingAction*> mapPair in WorldManager::Instance().workersBuildingMap)
 	{
 		BWAPI::Unit* worker = mapPair.first;
 		ConstructBuildingAction* action = mapPair.second;
@@ -162,7 +281,7 @@ void BuildManager::evalute()
 			WorldManager::Instance().reservedGas -= action->buildingType.gasPrice();
 			keysToRemove.push_back(worker);
 		}
-	}
+	}*/
 	
 	for each (BWAPI::Unit* key in keysToRemove)
 	{
@@ -173,4 +292,6 @@ void BuildManager::evalute()
 
 BuildManager::~BuildManager(void)
 {
+	this->reservedMap->getInstance()->destroy();
+	delete this->defaultBuildingPlacer;
 }
