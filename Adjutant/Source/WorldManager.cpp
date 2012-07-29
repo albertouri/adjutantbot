@@ -78,14 +78,11 @@ void WorldManager::update(bool isTerrainAnalyzed)
 					bool wasRemoved = false;
 
 					wasRemoved = Utils::vectorRemoveElement(this->myWorkerVector, unit);
-					if (! wasRemoved) {wasRemoved = Utils::vectorRemoveElement(this->myScoutVector, unit);}
+					Utils::vectorRemoveElement(this->myScoutVector, unit);
 					
-					if (! wasRemoved)
+					for each (UnitGroup* group in (*this->myArmyGroups))
 					{
-						for each (UnitGroup* group in (*this->myArmyGroups))
-						{
-							if (group->removeUnit(unit)) {break;}
-						}
+						if (group->removeUnit(unit)) {break;}
 					}
 					break;
 			}
