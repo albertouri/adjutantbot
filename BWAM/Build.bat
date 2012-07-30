@@ -26,11 +26,13 @@ if "%ERRORLEVEL%" == "9009" (
 )
 
 ::Build BroodwarAutoMatchup
-javac "%k_bwamPath%\bwam\controller.java" "%k_bwamPath%\bwam\controller.java" "%k_bwamPath%\bwam\client.java"
+javac "%k_bwamPath%\bwam\controller.java" "%k_bwamPath%\bwam\host.java" "%k_bwamPath%\bwam\client.java"
 if NOT "%ERRORLEVEL%" == "0" goto error
 
 ::Build AutoHotKey Scripts
 "%k_ahkCompiler%" /in "%k_ahkPath%\StartChaoslauncher.ahk"
+if NOT "%ERRORLEVEL%" == "0" goto error
+"%k_ahkCompiler%" /in "%k_ahkPath%\StartGame.ahk"
 if NOT "%ERRORLEVEL%" == "0" goto error
 
 ::Copy built files
