@@ -29,6 +29,7 @@ private:
 
 	//Keeps track of which building we are waiting to finish building
 	BWAPI::UnitType buildOrderBuilding;
+	BWAPI::UnitType productionBuilding;
 
 	BuildQueue* buildQueue;
 	BuildOrder* buildOrder;

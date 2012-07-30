@@ -111,7 +111,9 @@ bool BuildTask::isReady(int minerals, int gas, int supplyRemaining)
 	}
 
 	//Resource constraints
-	if (minerals < mineralCost || gas < gasCost || supplyRemaining < supplyCost)
+	if (std::max(minerals, 0) < mineralCost 
+		|| std::max(gas, 0) < gasCost 
+		|| std::max(supplyRemaining, 0) < supplyCost)
 	{
 		ret = false;
 	}

@@ -18,9 +18,11 @@ std::set<BWAPI::Unit*> Base::getGasWorkers()
 
 bool Base::addWorker(BWAPI::Unit* unit)
 {
-	if (this->mineralWorkers.size() > 6
-		&& this->getCompletedRefineryCount() > 0
-		&& this->gasWorkers.size() < (unsigned int)this->getCompletedRefineryCount() * 3)
+	if (this->getCompletedRefineryCount() > 0
+		&& this->gasWorkers.size() < (unsigned int)this->getCompletedRefineryCount() * 3
+		&& 
+		(this->mineralWorkers.size() > 6
+		|| (BWAPI::Broodwar->getFrameCount() > 10000 && BWAPI::Broodwar->self()->gas() < 200)))
 	{
 		//Add worker to gas
 		for each (BWAPI::Unit* refinery in this->refineryVector)

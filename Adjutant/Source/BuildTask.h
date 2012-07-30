@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include "BWAPI.h"
 #include "Utils.h"
 

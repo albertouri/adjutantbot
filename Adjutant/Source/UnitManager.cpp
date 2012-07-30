@@ -6,6 +6,7 @@ UnitManager::UnitManager(void)
 	this->buildQueue = new BuildQueue();
 	this->buildOrder = LoadBuildOrder::Instance().getBuildOrder();
 	this->buildOrderBuilding = BWAPI::UnitTypes::None;
+	this->productionBuilding = BWAPI::UnitTypes::None;
 }
 
 void UnitManager::evalute()
@@ -184,22 +185,6 @@ void UnitManager::manageResourceGathering()
 		}
 	}
 	
-	//Transfer existing workers to gas if needed
-	Utils::log("manageResourceGathering::Before transfer workers",3);
-	for each(Base* base in WorldManager::Instance().myBaseVector)
-	{
-		if (base->getMineralWorkers().size() >= 10 
-			&& base->getGasWorkers().size() < (unsigned int)(3 * base->getCompletedRefineryCount()))
-		{	
-			// Transfer worker to gas to refinery for gas gathering
-			BWAPI::Unit* unitToTransfer = (*base->getMineralWorkers().begin());
-			base->removeWorker(unitToTransfer);
-			base->addWorker(unitToTransfer);
-
-			break;
-		}
-	}
-
 	// Create refinery task
 	Utils::log("manageResourceGathering::Before create refinery",3);
 	for each (Base* base in WorldManager::Instance().myBaseVector)
@@ -237,51 +222,114 @@ void UnitManager::manageResourceGathering()
 		}
 	}
 
-	//Train workers
-	Utils::log("manageResourceGathering::Before train workers",3);
+	//Transfer existing workers to gas if needed
+	Utils::log("manageResourceGathering::Before transfer workers to gas",3);
+	for each(Base* base in WorldManager::Instance().myBaseVector)
+	{
+		if (base->getMineralWorkers().size() >= 10 
+			&& base->getGasWorkers().size() < (unsigned int)(3 * base->getCompletedRefineryCount()))
+		{	
+			// Transfer worker to gas to refinery for gas gathering
+			BWAPI::Unit* unitToTransfer = (*base->getMineralWorkers().begin());
+			base->removeWorker(unitToTransfer);
+			base->addWorker(unitToTransfer);
+
+			break;
+		}
+	}
+
+	//Transfer existing workers to other bases if needed
+	Utils::log("manageResourceGathering::Before transfer workers to other bases",3);
+	Base* baseNeedingWorkers = NULL;
+
 	for each (Base* base in WorldManager::Instance().myBaseVector)
 	{
-		int numMinerals = base->baseLocation->getMinerals().size();
-		int numGeysers =  base->baseLocation->getGeysers().size();
-
-		if (base->resourceDepot != NULL && ! base->resourceDepot->isTraining()
-			&& ! base->isMinedOut()
-			&& base->getTotalWorkerCount() < (numMinerals * 2) + (numGeysers * 3) + 3 //3 extra workers
-			&& this->inPipelineCount(BWAPI::UnitTypes::Terran_SCV, false) == 0
-			)
+		if (! base->isSaturated())
 		{
-			this->buildQueue->push(new BuildTask(350, BWAPI::UnitTypes::Terran_SCV, base->resourceDepot));
+			baseNeedingWorkers = base;
+			break;
+		}
+	}
+
+	if (baseNeedingWorkers != NULL)
+	{
+		for each (Base* base in WorldManager::Instance().myBaseVector)
+		{
+			int numMinerals = base->baseLocation->getMinerals().size();
+			int numGeysers =  base->baseLocation->getGeysers().size();
+
+			if (base->resourceDepot == NULL
+				|| base->isMinedOut()
+				|| base->getTotalWorkerCount() > (numMinerals * 2) + (numGeysers * 3) + 2
+				)
+			{
+				BWAPI::Unit* worker = Utils::getFreeWorker(&base->getMineralWorkers());
+
+				if (worker != NULL)
+				{
+					base->removeWorker(worker);
+					baseNeedingWorkers->addWorker(worker);
+				}
+			}
+		}
+	}
+
+	//Train workers
+	Utils::log("manageResourceGathering::Before train workers",3);
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_SCV) < 50) //cap workers at 50
+	{
+		for each (Base* base in WorldManager::Instance().myBaseVector)
+		{
+			int numMinerals = base->baseLocation->getMinerals().size();
+			int numGeysers =  base->baseLocation->getGeysers().size();
+
+			if (base->resourceDepot != NULL && Utils::isBuildingReady(base->resourceDepot)
+				&& ! base->isMinedOut()
+				&& base->getTotalWorkerCount() < (numMinerals * 2) + (numGeysers * 3) + 2 //2 extra workers
+				&& this->inPipelineCount(BWAPI::UnitTypes::Terran_SCV, false) == 0
+				)
+			{
+				this->buildQueue->push(new BuildTask(350, BWAPI::UnitTypes::Terran_SCV, base->resourceDepot));
+			}
 		}
 	}
 
 	//Expansion
 	Utils::log("manageResourceGathering::Before Expansion",3);
 	if (BWAPI::Broodwar->getFrameCount() > 10000
-		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Command_Center) == 0
-		&& BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals > 400)
+		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Command_Center) == 0)
 	{
-		BWTA::BaseLocation* expansionLocation = NULL;
-		BWTA::BaseLocation* home = WorldManager::Instance().myHomeBase->baseLocation;
-
-		for each (BWTA::BaseLocation* location in BWTA::getBaseLocations())
+		int resourcesLeft = 0;
+		for each (Base* base in WorldManager::Instance().myBaseVector)
 		{
-			if (! BWTA::isConnected(home->getTilePosition(), location->getTilePosition())) {continue;}
-			if (! Utils::isValidBuildingLocation(location->getTilePosition(), BWAPI::UnitTypes::Terran_Command_Center)) {continue;}
-
-			double newDistance = BWTA::getGroundDistance(location->getTilePosition(), home->getTilePosition());
-
-			if (expansionLocation == NULL 
-				|| newDistance < BWTA::getGroundDistance(expansionLocation->getTilePosition(), home->getTilePosition()))
-			{
-				expansionLocation = location;
-			}
+			resourcesLeft += base->baseLocation->minerals() + base->baseLocation->gas();
 		}
 
-		if (expansionLocation != NULL)
+		if (resourcesLeft < ((7 * 1500) + (5000 * 1)) * 2)
 		{
-			this->buildQueue->push(new BuildTask(500,
-				BWAPI::UnitTypes::Terran_Command_Center, 
-				expansionLocation->getTilePosition()));
+			BWTA::BaseLocation* expansionLocation = NULL;
+			BWTA::BaseLocation* home = WorldManager::Instance().myHomeBase->baseLocation;
+
+			for each (BWTA::BaseLocation* location in BWTA::getBaseLocations())
+			{
+				if (! BWTA::isConnected(home->getTilePosition(), location->getTilePosition())) {continue;}
+				if (! Utils::isValidBuildingLocation(location->getTilePosition(), BWAPI::UnitTypes::Terran_Command_Center)) {continue;}
+
+				double newDistance = BWTA::getGroundDistance(location->getTilePosition(), home->getTilePosition());
+
+				if (expansionLocation == NULL 
+					|| newDistance < BWTA::getGroundDistance(expansionLocation->getTilePosition(), home->getTilePosition()))
+				{
+					expansionLocation = location;
+				}
+			}
+
+			if (expansionLocation != NULL)
+			{
+				this->buildQueue->push(new BuildTask(490,
+					BWAPI::UnitTypes::Terran_Command_Center, 
+					expansionLocation->getTilePosition()));
+			}
 		}
 	}
 
@@ -333,6 +381,7 @@ void UnitManager::manageBuildOrder()
 	this->buildOrder->checkForTransition();
 
 	//Check to see if scheduled units are complete
+	Utils::log("manageBuildOrder::Before scheduled check",3);
 	bool buildingFree = true;
 
 	if (this->buildOrderBuilding != BWAPI::UnitTypes::None)
@@ -363,6 +412,7 @@ void UnitManager::manageBuildOrder()
 	}
 	
 	//Figure out what we should build next
+	Utils::log("manageBuildOrder::Before Figure out what we should build next",3);
 	for each (std::pair<BWAPI::UnitType, float> pair in unitRatioMap)
 	{
 		BWAPI::UnitType unitType = pair.first;
@@ -422,8 +472,10 @@ void UnitManager::manageBuildOrder()
 		}
 	}
 
-	//If we have all of the required buildings, build more production buildings
-	if (buildingFree)
+	//If we are maxing out training, build more production buildings
+	Utils::log("manageBuildOrder::Before production buildings",3);
+	if (this->productionBuilding == BWAPI::UnitTypes::None
+		|| this->inPipelineCount(this->productionBuilding) == 0)
 	{
 		BWAPI::UnitType buildingToBuild = BWAPI::UnitTypes::None;
 		totalUnitCount = 0;
@@ -454,12 +506,58 @@ void UnitManager::manageBuildOrder()
 
 		if (buildingToBuild != BWAPI::UnitTypes::None)
 		{
-			this->buildQueue->push(new BuildTask(510, buildingToBuild));
-			this->buildOrderBuilding = buildingToBuild;
+			bool allTraining = true;
+
+			for each (BWAPI::Unit* building in WorldManager::Instance().myUnitMap[buildingToBuild])
+			{
+				if (! building->isTraining())
+				{
+					allTraining = false;
+					break;
+				}
+			}
+
+			if (allTraining && this->inPipelineCount(buildingToBuild) == 0
+				&& buildingToBuild.mineralPrice() < BWAPI::Broodwar->self()->minerals() - WorldManager::Instance().reservedMinerals
+				&& buildingToBuild.gasPrice() < BWAPI::Broodwar->self()->gas() - WorldManager::Instance().reservedGas)
+			{
+				this->buildQueue->push(new BuildTask(550, buildingToBuild));
+				this->productionBuilding = buildingToBuild;
+			}
+		}
+	}
+
+
+	//Check to see if any units need add-ons and make sure buildings have them
+	Utils::log("manageBuildOrder::Before Add-on Check",3);
+	std::set<BWAPI::UnitType> addOnSet;
+
+	for each(std::pair<BWAPI::UnitType, float> pair in unitRatioMap)
+	{
+		for each (std::pair<BWAPI::UnitType, int> requiredPair in pair.first.requiredUnits())
+		{
+			if (requiredPair.first.isAddon())
+			{
+				addOnSet.insert(requiredPair.first);
+			}
+		}
+	}
+	
+	for each(BWAPI::UnitType addOn in addOnSet)
+	{
+		for each (BWAPI::Unit* unit in WorldManager::Instance().myUnitMap[addOn.whatBuilds().first])
+		{
+			if (unit->getAddon() == NULL
+				&& this->inPipelineCount(addOn) == 0)
+			{
+				this->buildQueue->push(new BuildTask(400, addOn));
+				break; //Only add one type at a time
+			}
 		}
 	}
 
 	//Figure out what tech to research
+	Utils::log("manageBuildOrder::Before tech",3);
 	for each(BWAPI::TechType tech in this->buildOrder->getCurrentUnits()->techTypeVector)
 	{
 		if (! BWAPI::Broodwar->self()->hasResearched(tech) 
@@ -484,6 +582,7 @@ void UnitManager::manageBuildOrder()
 	}
 
 	//Figure out which upgrades to research
+	Utils::log("manageBuildOrder::Before upgrades",3);
 	for each(BWAPI::UpgradeType upgrade in this->buildOrder->getCurrentUnits()->upgradeTypeVector)
 	{
 		int currentLevel = BWAPI::Broodwar->self()->getUpgradeLevel(upgrade);
@@ -506,17 +605,29 @@ void UnitManager::manageBuildOrder()
 				if (upgradeCount == 0 
 					&& this->inPipelineCount(upgradedBy) == 0)
 				{
-					this->buildQueue->push(new BuildTask(333, upgradedBy));
+					this->buildQueue->push(new BuildTask(500, upgradedBy));
 					this->buildOrderBuilding = upgradedBy;
 					buildingFree = false;
 				}
-				else if (requiredUnit != BWAPI::UnitTypes::None 
-					&& requiredCount == 0 
-					&& this->inPipelineCount(requiredUnit) == 0)
+				else if (requiredUnit != BWAPI::UnitTypes::None)
 				{
-					this->buildQueue->push(new BuildTask(222, requiredUnit));
-					this->buildOrderBuilding = requiredUnit;
-					buildingFree = false;
+					if (! Utils::canMakeGivenUnits(requiredUnit))
+					{
+						requiredUnit = this->getNextRequiredUnit(requiredUnit);
+						
+						if (this->inPipelineCount(requiredUnit) == 0)
+						{
+							this->buildQueue->push(new BuildTask(500, requiredUnit));
+							this->buildOrderBuilding = requiredUnit;
+							buildingFree = false;
+						}
+					}
+					else if (requiredCount == 0 && this->inPipelineCount(requiredUnit) == 0)
+					{
+						this->buildQueue->push(new BuildTask(500, requiredUnit));
+						this->buildOrderBuilding = requiredUnit;
+						buildingFree = false;
+					}
 				}
 			}
 		}

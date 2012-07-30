@@ -123,8 +123,8 @@ void BuildManager::evalute()
 				}
 			}
 
-			//If it's been 10 seconds, give up
-			if (BWAPI::Broodwar->getFrameCount() - buildTask->frameStarted > (Utils::FPS * 10)
+			//If it's been 2 minutes, give up
+			if (BWAPI::Broodwar->getFrameCount() - buildTask->frameStarted > (Utils::FPS * 120)
 				&& ! isSuccess)
 			{
 				tasksToRemove.push_back(buildTask);
