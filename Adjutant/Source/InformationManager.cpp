@@ -174,7 +174,7 @@ void  InformationManager::manageUnitCountering()
 		{		
 			if (pair.second > 0)
 			{
-				orderUnits->setUnitRatio(pair.first, (int) (pair.second / totalSuggestedUnits) * 100);
+				orderUnits->setUnitRatio(pair.first, (int)((pair.second / (float)totalSuggestedUnits) * 100.0f));
 			}
 		}
 	}
