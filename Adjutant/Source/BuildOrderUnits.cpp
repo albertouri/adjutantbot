@@ -71,6 +71,13 @@ std::map<BWAPI::UnitType, float> BuildOrderUnits::getWhatBuildsNormalized()
 	return this->whatBuildsMapNormalized;
 }
 
+void BuildOrderUnits::clear()
+{
+	this->unitRatioMap.clear();
+	this->isUnitRatioValid = false;
+	this->isWhatBuildsValid = false;
+}
+
 BuildOrderUnits::~BuildOrderUnits(void)
 {
 }

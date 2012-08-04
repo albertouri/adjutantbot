@@ -75,14 +75,12 @@ void WorldManager::update(bool isTerrainAnalyzed)
 					break;
 				
 				case BWAPI::EventType::UnitDestroy:
-					bool wasRemoved = false;
-
-					wasRemoved = Utils::vectorRemoveElement(this->myWorkerVector, unit);
+					Utils::vectorRemoveElement(this->myWorkerVector, unit);
 					Utils::vectorRemoveElement(this->myScoutVector, unit);
 					
 					for each (UnitGroup* group in (*this->myArmyGroups))
 					{
-						if (group->removeUnit(unit)) {break;}
+						group->removeUnit(unit);
 					}
 					break;
 			}

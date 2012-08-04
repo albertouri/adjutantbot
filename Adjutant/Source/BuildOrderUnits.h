@@ -10,6 +10,7 @@ public:
 	void setUnitRatio(BWAPI::UnitType unitType, int ratio);
 	std::map<BWAPI::UnitType, float> getUnitRatioNormalized();
 	std::map<BWAPI::UnitType, float> BuildOrderUnits::getWhatBuildsNormalized();
+	void clear();
 
 	//List of tech types to be researched for these units
 	std::vector<BWAPI::TechType> techTypeVector;

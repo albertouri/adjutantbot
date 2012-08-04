@@ -19,13 +19,15 @@ void AdjutantAIModule::onStart()
 	analyzed=false;
 	analysisJustFinished=false;
 
+	isBotEnabled=true;
+	showGeneralInfo=true;
 	showTerrain=true;
 	showBullets=false;
 	showVisibilityData=false;
-	isBotEnabled=true;
 	showStats=false;
+	showBuildOrder=true;
 	showArmies=true;
-
+	
 	//Initialize member variables
 	this->informationManager = new InformationManager();
 	this->unitManager = new UnitManager();
@@ -80,10 +82,7 @@ void AdjutantAIModule::onFrame()
 {
 	CPrecisionTimer timer = CPrecisionTimer();
 	timer.Start();
-	if (showVisibilityData) {drawVisibilityData();}
-	if (showBullets) {drawBullets();}	
-	if (showStats) { drawStats();}
-	if (analyzed && showTerrain) {drawTerrainData();}
+
 	if (Broodwar->isReplay()) {return;}
 
 	if (isBotEnabled)
@@ -95,9 +94,23 @@ void AdjutantAIModule::onFrame()
 		this->buildManager->evalute();
 		this->scoutingManager->evalute();
 		this->militaryManager->evalute();
-		
-		if (showArmies) {drawArmies();}
+	}
 
+	if (analysisJustFinished)
+	{
+		Broodwar->printf("Finished analyzing map.");
+		analysisJustFinished=false;
+	}
+
+	if (showVisibilityData) {drawVisibilityData();}
+	if (showBullets) {drawBullets();}	
+	if (showStats) { drawStats();}
+	if (analyzed && showTerrain) {drawTerrainData();}
+	if (showArmies) {drawArmies();}
+	if (showBuildOrder) {drawBuildOrder();}
+
+	if (showGeneralInfo)
+	{
 		//Mouse position
 		BWAPI::Position mousePosition = BWAPI::Broodwar->getMousePosition();
 		if (BWAPI::Broodwar->getScreenPosition() != NULL && mousePosition != NULL)
@@ -112,13 +125,10 @@ void AdjutantAIModule::onFrame()
 				mouseTile.x(), mouseTile.y());
 		}
 
-		//Opponent Modeling stats
-		Broodwar->drawTextScreen(500,80,"Army Value: %d vs %d)",
+		//General Info stats
+		Broodwar->drawTextScreen(500,80,"Army Value: %d vs %d",
 			WorldManager::Instance().getMyArmyValue(), 
-			WorldManager::Instance().getEnemyArmyValue());
-
-		Broodwar->drawTextScreen(500,96,"Range Weight: %1.2f",
-			WorldManager::Instance().getEnemyRangedWeight());	
+			WorldManager::Instance().getEnemyArmyValue());	
 
 		BWAPI::Broodwar->drawTextScreen(500,160,"Reserved %d/%d", WorldManager::Instance().reservedMinerals, WorldManager::Instance().reservedGas);
 
@@ -128,12 +138,6 @@ void AdjutantAIModule::onFrame()
 				WorldManager::Instance().myHomeBase->getMineralWorkers().size(),
 				WorldManager::Instance().myHomeBase->getGasWorkers().size());
 		}
-	}
-
-	if (analysisJustFinished)
-	{
-		Broodwar->printf("Finished analyzing map.");
-		analysisJustFinished=false;
 	}
 
 	//Latency
@@ -147,21 +151,31 @@ void AdjutantAIModule::onFrame()
 		maxLat = lat;
 	}
 
-	Broodwar->drawTextScreen(500,112,"Latency (ms): %f", lat);
-	Broodwar->drawTextScreen(500,128,"Avg Lat (ms): %f", totalLat / BWAPI::Broodwar->getFrameCount());
-	Broodwar->drawTextScreen(500,144,"Max Lat (ms): %f", maxLat);
+	if (showGeneralInfo)
+	{
+		Broodwar->drawTextScreen(500,112,"Latency (ms): %.3f", lat);
+		Broodwar->drawTextScreen(500,128,"Avg Lat (ms): %.3f", totalLat / BWAPI::Broodwar->getFrameCount());
+		Broodwar->drawTextScreen(500,144,"Max Lat (ms): %.3f", maxLat);
+	}
 
+	std::stringstream temp;
+	temp << lat;
+	Utils::log(temp.str(), 99);
 }
 
 void AdjutantAIModule::onSendText(std::string text)
 {
-	if (text=="/show bullets")
-	{
-		showBullets = !showBullets;
-	}
-	else if (text=="/enable bot")
+	if (text=="/enable bot")
 	{
 		isBotEnabled = !isBotEnabled;
+	}
+	else if (text=="/show build")
+	{
+		showBuildOrder = !showBuildOrder;
+	}
+	else if (text=="/show bullets")
+	{
+		showBullets = !showBullets;
 	}
 	else if (text=="/show stats")
 	{
@@ -195,10 +209,6 @@ void AdjutantAIModule::onSendText(std::string text)
 			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 		}
 	} 
-	else if (text=="/show")
-	{
-
-	}
 	else
 	{
 		Broodwar->printf("You typed '%s'!",text.c_str());
@@ -498,6 +508,29 @@ void AdjutantAIModule::drawArmies()
 				center.x(), center.y(), Colors::Red);
 			
 			Broodwar->drawCircleMap(unit->getPosition().x(), unit->getPosition().y(), 10, Colors::Red);
+		}
+	}
+}
+
+void AdjutantAIModule::drawBuildOrder()
+{
+	BuildOrder* buildOrder = WorldManager::Instance().buildOrder;
+
+	if (buildOrder != NULL)
+	{
+		BuildOrderUnits* bou = buildOrder->getCurrentUnits();
+		int line=0;
+
+		Broodwar->drawTextScreen(5,16*line,"Build Order (Unit:Weight)");
+		line++;
+
+		for each (std::pair<BWAPI::UnitType, float> pair in bou->getUnitRatioNormalized())
+		{
+			BWAPI::UnitType type = pair.first;
+			float weight = pair.second;
+
+			Broodwar->drawTextScreen(5,16*line,"%s: %.3f",type.c_str(),weight);
+			line++;
 		}
 	}
 }

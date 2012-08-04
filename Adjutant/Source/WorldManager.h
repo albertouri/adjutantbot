@@ -2,6 +2,7 @@
 #include "Base.h"
 #include <BWAPI.h>
 #include "BWTA.h"
+#include "BuildOrder.h"
 #include "BuildTask.h"
 #include "HistoricalUnitInfo.h"
 #include "Threat.h"
@@ -58,6 +59,9 @@ public:
 
 	//Reserved gas
 	int reservedMinerals;
+
+	//Our current build order (managed by UnitManager, updated by InformationManager)
+	BuildOrder* buildOrder;
 
 	//*****Opponent Model*****
 	//Enemy

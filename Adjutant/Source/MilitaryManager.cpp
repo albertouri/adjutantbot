@@ -66,7 +66,8 @@ void MilitaryManager::evalute()
 			static bool searchAndDestroy = false;
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
 
-			if (myArmyGroups->at(1)->getCentroid().getDistance(WorldManager::Instance().enemyHomeRegion->getCenter()) < 200
+			if (myArmyGroups->at(1)->getCentroid().getDistance(WorldManager::Instance().enemyHomeRegion->getCenter()) < 400
+				|| (BWAPI::Broodwar->getFrameCount() > 25000 && WorldManager::Instance().getMyArmyValue() > (WorldManager::Instance().getEnemyArmyValue() * 10))
 				|| BWAPI::Broodwar->getFrameCount() > 50000)
 			{
 				searchAndDestroy = true;

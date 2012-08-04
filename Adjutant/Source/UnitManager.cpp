@@ -7,6 +7,9 @@ UnitManager::UnitManager(void)
 	this->buildOrder = LoadBuildOrder::Instance().getBuildOrder();
 	this->buildOrderBuilding = BWAPI::UnitTypes::None;
 	this->productionBuilding = BWAPI::UnitTypes::None;
+	this->showDebugText = true;
+
+	WorldManager::Instance().buildOrder = this->buildOrder;
 }
 
 void UnitManager::evalute()
@@ -63,28 +66,31 @@ void UnitManager::evalute()
 		buildQueue->push(task);
 	}
 
-	std::vector<std::string> textVector = std::vector<std::string>();
-	std::stringstream stream;
-	stream << "Build Queue(" << tasksToAddBack.size() << ")";
-	stream << " at frame " << BWAPI::Broodwar->getFrameCount();
-	stream << " Now=" << BWAPI::Broodwar->getFrameCount();
-	std::string titleText = stream.str();
-
-	textVector.push_back(titleText);
-	for each (BuildTask* task in tasksToAddBack)
+	if (showDebugText)
 	{
-		textVector.push_back(task->toString());
-	}
+		std::vector<std::string> textVector = std::vector<std::string>();
+		std::stringstream stream;
+		stream << "Build Queue(" << tasksToAddBack.size() << ")";
+		stream << " at frame " << BWAPI::Broodwar->getFrameCount();
+		stream << " Now=" << BWAPI::Broodwar->getFrameCount();
+		std::string titleText = stream.str();
 
-	textVector.push_back("In BuildTaskVector");
-	for each (BuildTask* task in WorldManager::Instance().buildTaskVector)
-	{
-		textVector.push_back(task->toString());
-	}
+		textVector.push_back(titleText);
+		for each (BuildTask* task in tasksToAddBack)
+		{
+			textVector.push_back(task->toString());
+		}
 
-	for(int i=0; i<(int)textVector.size(); i++)
-	{
-		BWAPI::Broodwar->drawTextScreen(200, 16*i, textVector.at(i).c_str());
+		textVector.push_back("In BuildTaskVector");
+		for each (BuildTask* task in WorldManager::Instance().buildTaskVector)
+		{
+			textVector.push_back(task->toString());
+		}
+
+		for(int i=0; i<(int)textVector.size(); i++)
+		{
+			BWAPI::Broodwar->drawTextScreen(200, 16*i, textVector.at(i).c_str());
+		}
 	}
 
 	Utils::log("Leaving UnitManager", 1);

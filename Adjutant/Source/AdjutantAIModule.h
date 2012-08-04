@@ -47,15 +47,18 @@ public:
 	void drawBullets();
 	void drawVisibilityData();
 	void drawTerrainData();
+	void drawBuildOrder();
 	void drawArmies();
 	void showPlayers();
 	void showForces();
 	
 
+	bool isBotEnabled;
+	bool showBuildOrder;
+	bool showGeneralInfo;
 	bool showBullets;
 	bool showStats;
 	bool showTerrain;
-	bool isBotEnabled;
 	bool showArmies;
 	bool showVisibilityData;
 	

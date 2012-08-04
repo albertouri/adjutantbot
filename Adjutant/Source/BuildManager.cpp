@@ -4,6 +4,7 @@ BuildManager::BuildManager(void)
 {
 	this->reservedMap->getInstance()->create();
     this->defaultBuildingPlacer = new BFSBuildingPlacer();
+	this->showDebugInfo = true;
 }
 
 void BuildManager::evalute()
@@ -109,12 +110,15 @@ void BuildManager::evalute()
 								buildLocation);
 							WorldManager::Instance().workersBuildingMap[workerPerformingBuild]->frameStarted = BWAPI::Broodwar->getFrameCount();
 
-							BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
-								workerPerformingBuild->getPosition().x(),
-								workerPerformingBuild->getPosition().y(),
-								buildingType.getName().c_str(),
-								buildLocation.x(),
-								buildLocation.y());
+							if (showDebugInfo)
+							{
+								BWAPI::Broodwar->printf("Worker at %d,%d sent to construct %s at %d,%d",
+									workerPerformingBuild->getPosition().x(),
+									workerPerformingBuild->getPosition().y(),
+									buildingType.getName().c_str(),
+									buildLocation.x(),
+									buildLocation.y());
+							}
 
 							isSuccess = true;
 							tasksToRemove.push_back(buildTask);
@@ -153,9 +157,13 @@ void BuildManager::evalute()
 
 			if (buildingToUse != NULL && buildingToUse->train(unitToBuild))
 			{
-				BWAPI::Broodwar->printf("Training Unit %s at %s",
+				if (showDebugInfo)
+				{				
+					BWAPI::Broodwar->printf("Training Unit %s at %s",
 						unitToBuild.getName().c_str(), 
 						buildingToUse->getType().getName().c_str());
+				}
+
 				tasksToRemove.push_back(buildTask);
 			}
 		}
@@ -174,9 +182,13 @@ void BuildManager::evalute()
 				{
 					if (Utils::isBuildingReady(building))
 					{
+						if (showDebugInfo)
+						{
+							BWAPI::Broodwar->printf("Upgrading %s",
+								upgradeType.c_str());
+						}
+
 						building->upgrade(upgradeType);
-						BWAPI::Broodwar->printf("Upgrading %s",
-							upgradeType.c_str());
 						tasksToRemove.push_back(buildTask);
 						break;
 					}
@@ -196,9 +208,13 @@ void BuildManager::evalute()
 				{
 					if (Utils::isBuildingReady(building))
 					{
+						if (showDebugInfo)
+						{
+							BWAPI::Broodwar->printf("Researching Tech %s",
+									techType.c_str());
+						}
+
 						building->research(techType);
-						BWAPI::Broodwar->printf("Researching Tech %s",
-								techType.c_str());
 						tasksToRemove.push_back(buildTask);
 						break;
 					}

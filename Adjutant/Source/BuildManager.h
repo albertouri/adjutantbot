@@ -14,4 +14,6 @@ class BuildManager
 	private:
 		ReservedMap* reservedMap;
 		BFSBuildingPlacer* defaultBuildingPlacer;
+		
+		bool showDebugInfo;
 };

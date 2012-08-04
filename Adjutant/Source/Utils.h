@@ -101,6 +101,19 @@ public:
 		}
 	}
 
+	template <typename T, typename U>
+	static bool mapContains(std::map<T, U>* map, T* key)
+	{
+		if (map->find((*key)) != map->end())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 private:
 	static int writeCount;
 	static int fileCount;

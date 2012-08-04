@@ -33,4 +33,6 @@ private:
 
 	BuildQueue* buildQueue;
 	BuildOrder* buildOrder;
+
+	bool showDebugText;
 };
