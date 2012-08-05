@@ -177,27 +177,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Action.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionComparator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionQueue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\AdjutantAIModule.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Base.cpp"
+				RelativePath=".\AwarenessModule.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BFSBuildingPlacer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildQueue.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildTask.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildTaskComparator.cpp"
+				RelativePath=".\BuildingManager.cpp"
 				>
 			</File>
 			<File
@@ -209,11 +209,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReservedMap.cpp"
+				RelativePath=".\MacroModule.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Threat.cpp"
+				RelativePath=".\MicroModule.cpp"
 				>
 			</File>
 			<File
@@ -221,59 +221,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Utils.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Managers"
-			>
-			<File
-				RelativePath=".\BuildManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InformationManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InformationManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MilitaryManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\MilitaryManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ScoutingManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ScoutingManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\UnitManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\UnitManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WorldManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WorldManager.h"
+				RelativePath=".\WorldModel.cpp"
 				>
 			</File>
 		</Filter>
@@ -283,7 +231,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Action.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ActionComparator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ActionQueue.h"
 				>
 			</File>
 			<File
@@ -291,31 +247,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Base.h"
+				RelativePath=".\AwarenessModule.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BFSBuildingPlacer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildingPlacer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildQueue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildTask.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BuildTaskComparator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Heap.h"
+				RelativePath=".\BuildingManager.h"
 				>
 			</File>
 			<File
@@ -323,15 +259,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RectangleArray.h"
+				RelativePath=".\MacroModule.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ReservedMap.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Threat.h"
+				RelativePath=".\MicroModule.h"
 				>
 			</File>
 			<File
@@ -343,39 +275,55 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Util.h"
+				RelativePath=".\Utils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Utils.h"
+				RelativePath=".\WorldModel.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="BuilOrder"
+			Name="Actions"
 			>
 			<File
-				RelativePath=".\BuildOrder.cpp"
+				RelativePath=".\AttackAction.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BuildOrder.h"
+				RelativePath=".\AttackAction.h"
 				>
 			</File>
 			<File
-				RelativePath=".\BuildOrderUnits.cpp"
+				RelativePath=".\ConstructBuildingAction.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\BuildOrderUnits.h"
+				RelativePath=".\ConstructBuildingAction.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LoadBuildOrder.cpp"
+				RelativePath=".\GatherResourceAction.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LoadBuildOrder.h"
+				RelativePath=".\GatherResourceAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MoveAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MoveAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TrainUnitAction.h"
 				>
 			</File>
 		</Filter>

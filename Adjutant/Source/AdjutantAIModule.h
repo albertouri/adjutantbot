@@ -4,15 +4,14 @@
 #include <queue>
 #include <vector>
 #include <time.h>
-#include "InformationManager.h"
-#include "UnitManager.h"
-#include "BuildManager.h"
-#include "ScoutingManager.h"
-#include "MilitaryManager.h"
-#include "Threat.h"
+#include "ActionQueue.h"
+#include "AwarenessModule.h"
+#include "MacroModule.h"
+#include "MicroModule.h"
 #include "Timer.h"
+#include "TrainUnitAction.h"
 #include "Utils.h"
-#include "WorldManager.h"
+#include "WorldModel.h"
 
 extern bool analyzed;
 extern bool analysisJustFinished;
@@ -47,24 +46,27 @@ public:
 	void drawBullets();
 	void drawVisibilityData();
 	void drawTerrainData();
-	void drawBuildOrder();
-	void drawArmies();
 	void showPlayers();
 	void showForces();
-	
 
-	bool isBotEnabled;
-	bool showBuildOrder;
-	bool showGeneralInfo;
+	//Mark the last time we captured the queue to display it to the screen
+	int lastQueueCapture;
+
 	bool showBullets;
 	bool showStats;
+	bool showQueueStats;
 	bool showTerrain;
-	bool showArmies;
+	bool isBotEnabled;
 	bool showVisibilityData;
 	
-	InformationManager* informationManager;
-	UnitManager* unitManager;
-	BuildManager* buildManager;
-	ScoutingManager* scoutingManager;
-	MilitaryManager* militaryManager;
+	WorldModel* worldModel;
+	AwarenessModule* awarenessModule;
+	MacroModule* macroModule;
+	MicroModule* microModule;
+
+	ActionQueue actionQueue;
+	std::vector<std::string>* queueTextVector;
+
+	//Global
+	static const bool useOpponentModeling = true;
 };
