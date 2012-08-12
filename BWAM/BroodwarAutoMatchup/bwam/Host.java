@@ -69,13 +69,7 @@ public class Host extends Thread
 					//Switch to correct host AI
 					System.out.println("Switching AI module/race");
 					Controller.switchAIModule(currentSeries.hostAIDll, currentSeries.hostAIRace, false);
-					
-					//Create the host game
-					System.out.println("Starting StarCraft");
-					Controller.startStarCraft();
-					inGame = true;
-					Thread.sleep(5000); //let game come up
-					
+
 					//Tell client to switch
 					System.out.println("Telling client to switch");
 					out.writeUTF(Controller.CMD_SWITCH
@@ -84,8 +78,14 @@ public class Host extends Thread
 
 					//Wait until client is ready
 					System.out.println("Waiting for client to switch");
-					String response = in.readUTF();
-
+					in.readUTF();
+					
+					//Create the host game
+					System.out.println("Starting StarCraft");
+					Controller.startStarCraft();
+					inGame = true;
+					Thread.sleep(5000); //let game come up
+					
 					//Tell client to join the game
 					System.out.println("Tell client to join game");
 					out.writeUTF(Controller.CMD_JOIN_GAME);
@@ -129,6 +129,9 @@ public class Host extends Thread
 						
 						f.delete();
 					}
+					
+					//Check every 15 seconds
+					try { Thread.sleep(15000); } catch (Exception e) {};
 				}
 			}
 			catch(Exception e)
