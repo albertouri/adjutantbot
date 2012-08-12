@@ -20,13 +20,13 @@ void AdjutantAIModule::onStart()
 	analysisJustFinished=false;
 
 	isBotEnabled=true;
-	showGeneralInfo=true;
-	showTerrain=true;
+	showGeneralInfo=false;
+	showTerrain=false;
 	showBullets=false;
 	showVisibilityData=false;
 	showStats=false;
-	showBuildOrder=true;
-	showArmies=true;
+	showBuildOrder=false;
+	showArmies=false;
 	
 	//Initialize member variables
 	this->informationManager = new InformationManager();

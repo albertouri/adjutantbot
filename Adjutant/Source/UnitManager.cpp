@@ -7,7 +7,7 @@ UnitManager::UnitManager(void)
 	this->buildOrder = LoadBuildOrder::Instance().getBuildOrder();
 	this->buildOrderBuilding = BWAPI::UnitTypes::None;
 	this->productionBuilding = BWAPI::UnitTypes::None;
-	this->showDebugText = true;
+	this->showDebugText = false;
 
 	WorldManager::Instance().buildOrder = this->buildOrder;
 }

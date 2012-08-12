@@ -4,7 +4,7 @@ BuildManager::BuildManager(void)
 {
 	this->reservedMap->getInstance()->create();
     this->defaultBuildingPlacer = new BFSBuildingPlacer();
-	this->showDebugInfo = true;
+	this->showDebugInfo = false;
 }
 
 void BuildManager::evalute()

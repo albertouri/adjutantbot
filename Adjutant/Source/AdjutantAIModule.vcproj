@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../BWAPI 3.7.2/include"
+				AdditionalIncludeDirectories="../../BWAPI/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ADJUTANTAIMODULE_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;../../BWAPI 3.7.2/lib/BWAPId.lib&quot; &quot;../../BWAPI 3.7.2/lib/BWTAd.lib&quot; &quot;../../BWAPI 3.7.2/lib/tinyxmld.lib&quot; &quot;../../BWAPI 3.7.2/lib/CGAL-vc90-mt-gd.lib&quot; &quot;../../BWAPI 3.7.2/lib/libboost_thread-vc90-mt-gd-1_40.lib&quot; &quot;../../BWAPI 3.7.2/lib/gmp-vc90-mt-gd.lib&quot; &quot;../../BWAPI 3.7.2/lib/mpfr-vc90-mt-gd.lib&quot;"
+				AdditionalDependencies="&quot;../../BWAPI/lib/BWAPId.lib&quot; &quot;../../BWAPI/lib/BWTAd.lib&quot; &quot;../../BWAPI/lib/tinyxmld.lib&quot; &quot;../../BWAPI/lib/CGAL-vc90-mt-gd.lib&quot; &quot;../../BWAPI/lib/libboost_thread-vc90-mt-gd-1_40.lib&quot; &quot;../../BWAPI/lib/gmp-vc90-mt-gd.lib&quot; &quot;../../BWAPI/lib/mpfr-vc90-mt-gd.lib&quot;"
 				OutputFile="$(OutDir)\$(ProjectName)D.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../BWAPI 3.7.2/include"
+				AdditionalIncludeDirectories="../../BWAPI/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ADJUTANTAIMODULE_EXPORTS;_SECURE_SCL 0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;../../BWAPI 3.7.2/lib/BWAPI.lib&quot; &quot;../../BWAPI 3.7.2/lib/BWTA.lib&quot; &quot;../../BWAPI 3.7.2/lib/tinyxml.lib&quot; &quot;../../BWAPI 3.7.2/lib/CGAL-vc90-mt.lib&quot; &quot;../../BWAPI 3.7.2/lib/libboost_thread-vc90-mt-1_40.lib&quot; &quot;../../BWAPI 3.7.2/lib/gmp-vc90-mt.lib&quot; &quot;../../BWAPI 3.7.2/lib/mpfr-vc90-mt.lib&quot;"
+				AdditionalDependencies="&quot;../../BWAPI/lib/BWAPI.lib&quot; &quot;../../BWAPI/lib/BWTA.lib&quot; &quot;../../BWAPI/lib/tinyxml.lib&quot; &quot;../../BWAPI/lib/CGAL-vc90-mt.lib&quot; &quot;../../BWAPI/lib/libboost_thread-vc90-mt-1_40.lib&quot; &quot;../../BWAPI/lib/gmp-vc90-mt.lib&quot; &quot;../../BWAPI/lib/mpfr-vc90-mt.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="false"
 				SubSystem="2"

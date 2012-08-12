@@ -26,7 +26,7 @@ if NOT EXIST "%k_chaosLauncherDir%" (
 )
 
 ::Execute chaos launcher
-set PATH=%PATH%;%CD%\BWAPI 3.7.2\WINDOWS
+set PATH=%PATH%;%CD%\BWAPI\WINDOWS
 cd /D "%k_chaosLauncherDir%"
 "%k_chaosLauncherDir%\Chaoslauncher - MultiInstance.exe"
 

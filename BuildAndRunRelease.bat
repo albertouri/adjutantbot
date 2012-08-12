@@ -46,7 +46,7 @@ if NOT EXIST "%k_starcraftDir%" (
 
 ::Setup Environment
 call "%k_vsDir%\vcvarsall.bat"
-set PATH=%PATH%;%CD%\BWAPI 3.7.2\WINDOWS
+set PATH=%PATH%;%CD%\BWAPI\WINDOWS
 
 ::Build Adjutant
 devenv "%k_projectFolder%\Adjutant.sln" /build Release
