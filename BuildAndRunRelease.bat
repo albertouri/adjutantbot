@@ -57,7 +57,7 @@ if NOT "%ERRORLEVEL%" == "0" (
 )
 
 ::Copy built AI module and bwapi.ini
-XCOPY /Y "%k_projectFolder%\Release\AdjutantAIModule.dll" "%k_starcraftDir%\bwapi-data\AI\"
+XCOPY /Y "%k_projectFolder%\Release\Adjutant.dll" "%k_starcraftDir%\bwapi-data\AI\"
 if NOT "%ERRORLEVEL%" == "0" goto error
 XCOPY /Y "%k_projectFolder%\bwapi.ini" "%k_starcraftDir%\bwapi-data\"
 if NOT "%ERRORLEVEL%" == "0" goto error
