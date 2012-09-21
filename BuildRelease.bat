@@ -8,7 +8,7 @@ set k_originalPath=%PATH%
 set k_projectFolder=%CD%\Adjutant
 
 if EXIST "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC" set k_vsDir=C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC
-if EXIST "C:\Program Files \Microsoft Visual Studio 9.0\VC" set k_vsDir=C:\Program Files \Microsoft Visual Studio 9.0\VC
+if EXIST "C:\Program Files\Microsoft Visual Studio 9.0\VC" set k_vsDir=C:\Program Files\Microsoft Visual Studio 9.0\VC
 
 if NOT EXIST "%k_vsDir%" (
 	echo Could not find Visual Studio 2008 directory
@@ -17,7 +17,7 @@ if NOT EXIST "%k_vsDir%" (
 
 ::Setup Environment
 call "%k_vsDir%\vcvarsall.bat"
-if NOT DEFINED BWAPI_LIB set BWAPI_DIR=%CD%\BWAPI
+if NOT DEFINED BWAPI_DIR set BWAPI_DIR=%CD%\BWAPI
 
 ::Build Adjutant
 devenv "%k_projectFolder%\Adjutant.sln" /build Release

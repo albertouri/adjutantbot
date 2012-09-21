@@ -8,8 +8,8 @@
 //*************************************************************************************************
 //Host_DLL				Host_Race		Client_DLL			Client_Race		Number_Of_Games
 //*************************************************************************************************
-AdjutantAIModule.dll	Terran			Skynet.dll			Protoss			2
-AdjutantAIModule.dll	Terran			Quorum.dll			Zerg			4
-AdjutantAIModule.dll	Terran			Aiur.dll			Protoss			5
+Adjutant.dll			Terran			Skynet.dll			Protoss			2
+Adjutant.dll			Terran			Quorum.dll			Zerg			4
+Adjutant.dll			Terran			Aiur.dll			Protoss			5
 
 
