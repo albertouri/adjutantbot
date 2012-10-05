@@ -54,6 +54,7 @@ public:
 	
 
 	bool isBotEnabled;
+	bool isUctTraining;
 	bool showBuildOrder;
 	bool showGeneralInfo;
 	bool showBullets;

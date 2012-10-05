@@ -27,7 +27,10 @@ void MilitaryManager::evalute()
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Positions::None)
 		{
-			baseGroup->targetPosition = WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter();
+			if (WorldManager::Instance().myHomeBase != NULL)
+			{
+				baseGroup->targetPosition = WorldManager::Instance().myHomeBase->baseLocation->getRegion()->getCenter();
+			}
 		}
 
 		if (baseGroup->size() > 0)
@@ -101,7 +104,7 @@ void MilitaryManager::evalute()
 				armyPosition = WorldManager::Instance().enemyHomeRegion->getCenter();
 			}
 		}
-		else
+		else if (WorldManager::Instance().myHomeBase != NULL)
 		{
 			//TODO:account for multiple chokepoints
 			BWTA::Region* homeRegion = WorldManager::Instance().myHomeBase->baseLocation->getRegion();
