@@ -14,6 +14,7 @@ public:
 	int removeType(BWAPI::UnitType type);
 	void removeAllUnits();
 	int size();
+	int getEffectiveHealth();
 
 	std::vector<BWAPI::Unit*>* unitVector;
 	BWAPI::Position targetPosition;

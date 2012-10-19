@@ -25,6 +25,15 @@ BWAPI::Position UnitGroup::getCentroid()
 	return BWAPI::Position((int)centerX, (int)centerY);
 }
 
+int UnitGroup::getEffectiveHealth()
+{
+	int ret = 0;
+	
+	//iterate units and sum health then square the sum?
+
+	return ret;
+}
+
 void UnitGroup::addUnit(BWAPI::Unit* unit)
 {
 	this->unitVector->push_back(unit);

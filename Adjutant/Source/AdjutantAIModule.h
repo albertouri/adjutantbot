@@ -13,6 +13,7 @@
 #include "Timer.h"
 #include "Utils.h"
 #include "WorldManager.h"
+#include "UCTManager.h"
 
 extern bool analyzed;
 extern bool analysisJustFinished;
@@ -68,4 +69,5 @@ public:
 	BuildManager* buildManager;
 	ScoutingManager* scoutingManager;
 	MilitaryManager* militaryManager;
+	UCTManager* uctManager;
 };

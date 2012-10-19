@@ -261,6 +261,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\UCTManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UnitManager.cpp"
 				>
 			</File>
@@ -376,6 +384,34 @@
 			</File>
 			<File
 				RelativePath=".\LoadBuildOrder.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="UCT"
+			>
+			<File
+				RelativePath=".\UCTAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTAttackAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTAttackAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTNode.h"
 				>
 			</File>
 		</Filter>
