@@ -10,4 +10,5 @@ public:
 
 	std::vector<UnitGroup*> myGroups;
 	std::vector<UnitGroup*> enemyGroups;
+	UCTNode* parent;
 };
