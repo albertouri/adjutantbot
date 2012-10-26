@@ -69,7 +69,7 @@ void WorldManager::update(bool isTerrainAnalyzed)
 						this->myArmyVector->push_back(unit);
 
 						//We always add units to the "0th" group - micro manager might split army using other groups
-						this->myArmyGroups->front()->addUnit(unit);
+						//this->myArmyGroups->front()->addUnit(unit);
 					}
 
 					break;

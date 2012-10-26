@@ -26,7 +26,7 @@ void AdjutantAIModule::onStart()
 	showVisibilityData=false;
 	showStats=false;
 	showBuildOrder=false;
-	showArmies=false;
+	showArmies=true;
 	isUctTraining=true;
 
 	//Initialize member variables

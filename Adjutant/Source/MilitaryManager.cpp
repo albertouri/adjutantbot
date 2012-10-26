@@ -33,6 +33,7 @@ void MilitaryManager::evalute()
 			}
 		}
 
+		/*
 		if (baseGroup->size() > 0)
 		{
 			for each (BWAPI::Unit* unit in (*baseGroup->unitVector))
@@ -43,12 +44,24 @@ void MilitaryManager::evalute()
 
 			baseGroup->removeAllUnits();
 		}
-		
+		*/
+
 		//Determine army behavior
 		BWAPI::Position armyPosition = BWAPI::Positions::None;
+		std::map<UnitGroup*, Threat*> groupAttackMap = WorldManager::Instance().groupAttackMap;
 
 		//Threats
-		if (WorldManager::Instance().enemy->getUnits().size() != 0)
+		if (groupAttackMap.size() > 0)
+		{
+			for each (UnitGroup* group in *myArmyGroups)
+			{
+				if (Utils::mapContains(&groupAttackMap, &group))
+				{
+					group->targetPosition = groupAttackMap[group]->getCentroid();
+				}
+			}
+		}
+		else if (WorldManager::Instance().enemy->getUnits().size() != 0)
 		{
 			static BWAPI::Position oldPosition = BWAPI::Position(0,0);
 
@@ -120,44 +133,47 @@ void MilitaryManager::evalute()
 			}
 		}
 
-		myArmyGroups->at(1)->targetPosition = armyPosition;
+		//myArmyGroups->at(1)->targetPosition = armyPosition;
 
 		//Attack to location for all not near it
-		for each (BWAPI::Unit* unit in (*myArmyGroups->at(1)->unitVector))
+		for each (UnitGroup* armyGroup in *myArmyGroups)
 		{
-			bool useLowLevelControl = false;
-			BWAPI::Unit* closestEnemy = NULL;
-
-			if (WorldManager::Instance().enemy->getUnits().size() != 0)
+			for each (BWAPI::Unit* unit in *armyGroup->unitVector)
 			{
-				closestEnemy = Utils::getClosestUnit(unit, &WorldManager::Instance().enemy->getUnits());
-				if (closestEnemy->getDistance(unit) < 500)
-				{
-					useLowLevelControl = true;
-				}	
-			}
+				bool useLowLevelControl = false;
+				BWAPI::Unit* closestEnemy = NULL;
 
-			if (useLowLevelControl)
-			{
-				if (! unit->isAttacking())
+				if (WorldManager::Instance().enemy->getUnits().size() != 0)
 				{
-					if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
+					closestEnemy = Utils::getClosestUnit(unit, &WorldManager::Instance().enemy->getUnits());
+					if (closestEnemy->getDistance(unit) < 500)
 					{
-						unit->attack(closestEnemy);
-					}
-					else
+						useLowLevelControl = true;
+					}	
+				}
+
+				if (useLowLevelControl)
+				{
+					if (! unit->isAttacking())
 					{
-						unit->attack(closestEnemy->getPosition());					
+						if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
+						{
+							unit->attack(closestEnemy);
+						}
+						else
+						{
+							unit->attack(closestEnemy->getPosition());					
+						}
 					}
 				}
-			}
-			else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
-			{
-				unit->attack(myArmyGroups->at(1)->getCentroid());
-			}
-			else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
-			{
-				unit->attack(myArmyGroups->at(1)->targetPosition);
+				else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
+				{
+					unit->attack(armyGroup->getCentroid());
+				}
+				else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
+				{
+					unit->attack(armyGroup->targetPosition);
+				}
 			}
 		}
 

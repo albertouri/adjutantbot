@@ -22,9 +22,11 @@ void InformationManager::manageThreatDetection()
 	//For now, clear previous threats (no memory)
 	for each (Threat* t in WorldManager::Instance().threatVector)
 	{
-		delete t;
+		if (t->getUnits().size() == 0)
+		{
+			delete t;
+		}
 	}
-	WorldManager::Instance().threatVector.clear();
 
 	//Determine threat units
 	for each (BWAPI::Unit* unit in WorldManager::Instance().enemy->getUnits())
@@ -44,6 +46,15 @@ void InformationManager::manageThreatDetection()
 	for each (BWAPI::Unit* unit in threatUnits)
 	{
 		unitThreatGroupMap[unit] = NULL;
+
+		for each (Threat* t in WorldManager::Instance().threatVector)
+		{
+			if (Utils::setContains(&(t->getUnits()), unit))
+			{
+				unitThreatGroupMap[unit] = t;
+				break;
+			}
+		}
 	}
 
 	for each (BWAPI::Unit* unit in threatUnits)

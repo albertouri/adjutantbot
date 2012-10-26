@@ -96,6 +96,9 @@ public:
 	static int getMyAttackValue();
 	double getEnemyRangedWeight();
 
+	//Map of which of our armies ar attacking which threats
+	std::map<UnitGroup*, Threat*> groupAttackMap;
+
 private:
 	WorldManager(void);
 	WorldManager(const WorldManager&);
