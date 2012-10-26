@@ -21,6 +21,7 @@ public:
 	BWAPI::Position getCentroid();
 	int getAttackValue();
 	int getArmyValue();
+	int removeNonExistentUnits();
 
 private:
 	bool isVisibleVar;

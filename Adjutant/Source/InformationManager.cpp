@@ -17,15 +17,39 @@ void InformationManager::manageThreatDetection()
 {
 	const int MAX_CLUSTER_DISTANCE = 300;
 	std::set<BWAPI::Unit*> threatUnits;
+	std::set<Threat*> threatRemovedSet = std::set<Threat*>();
+	std::set<UnitGroup*> groupRemovedSet = std::set<UnitGroup*>();
 	std::map<BWAPI::Unit*, Threat*> unitThreatGroupMap;
-
-	//For now, clear previous threats (no memory)
+	
+	//Update each threat set and delete if unit no longer exists
 	for each (Threat* t in WorldManager::Instance().threatVector)
 	{
+		t->removeNonExistentUnits();
+
 		if (t->getUnits().size() == 0)
 		{
-			delete t;
+			threatRemovedSet.insert(t);
 		}
+	}
+
+	for each (Threat* t in threatRemovedSet)
+	{
+		Utils::vectorRemoveElement(&WorldManager::Instance().threatVector, t);
+
+		for each (std::pair<UnitGroup*, Threat*> pair in WorldManager::Instance().groupAttackMap)
+		{
+			if (pair.second == t)
+			{
+				groupRemovedSet.insert(pair.first);
+			}
+		}
+
+		for each (UnitGroup* group in groupRemovedSet)
+		{
+			WorldManager::Instance().groupAttackMap.erase(group);
+		}
+
+		delete t;
 	}
 
 	//Determine threat units

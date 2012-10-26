@@ -96,6 +96,28 @@ int Threat::getAttackValue()
 	return value;
 }
 
+int Threat::removeNonExistentUnits()
+{
+	int removedCount = 0;
+	std::set<BWAPI::Unit*> unitToRemoveSet = std::set<BWAPI::Unit*>();
+
+	for each (BWAPI::Unit* unit in this->unitSet)
+	{
+		if (! unit->exists())
+		{
+			unitToRemoveSet.insert(unit);
+		}
+	}
+
+	for each (BWAPI::Unit* unit in unitToRemoveSet)
+	{
+		Utils::setRemoveElement(&this->unitSet, unit);
+		removedCount++;
+	}
+
+	return removedCount;
+}
+
 Threat::~Threat(void)
 {
 }
