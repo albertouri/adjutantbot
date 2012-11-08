@@ -118,6 +118,20 @@ int Threat::removeNonExistentUnits()
 	return removedCount;
 }
 
+float Threat::getEffectiveHealth()
+{
+	float ret = 0;
+	
+	for each (BWAPI::Unit* unit in this->unitSet)
+	{
+		ret += std::sqrt((float)unit->getHitPoints());
+	}
+
+	ret = std::pow(ret, 2);
+
+	return ret;
+}
+
 Threat::~Threat(void)
 {
 }

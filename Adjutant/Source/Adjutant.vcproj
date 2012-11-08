@@ -407,6 +407,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\UCTGroup.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTGroup.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UCTNode.cpp"
 				>
 			</File>

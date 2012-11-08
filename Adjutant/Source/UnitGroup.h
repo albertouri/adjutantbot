@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include "BWAPI.h"
 #include "Utils.h"
 #include <vector>
@@ -14,7 +15,7 @@ public:
 	int removeType(BWAPI::UnitType type);
 	void removeAllUnits();
 	int size();
-	int getEffectiveHealth();
+	float getEffectiveHealth();
 
 	std::vector<BWAPI::Unit*>* unitVector;
 	BWAPI::Position targetPosition;

@@ -25,11 +25,16 @@ BWAPI::Position UnitGroup::getCentroid()
 	return BWAPI::Position((int)centerX, (int)centerY);
 }
 
-int UnitGroup::getEffectiveHealth()
+float UnitGroup::getEffectiveHealth()
 {
-	int ret = 0;
+	float ret = 0;
 	
-	//iterate units and sum health then square the sum?
+	for each (BWAPI::Unit* unit in (*this->unitVector))
+	{
+		ret += std::sqrt((float)unit->getHitPoints());
+	}
+
+	ret = std::pow(ret, 2);
 
 	return ret;
 }

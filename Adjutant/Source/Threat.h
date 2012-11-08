@@ -22,6 +22,7 @@ public:
 	int getAttackValue();
 	int getArmyValue();
 	int removeNonExistentUnits();
+	float getEffectiveHealth();
 
 private:
 	bool isVisibleVar;

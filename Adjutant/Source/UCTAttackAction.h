@@ -1,10 +1,13 @@
 #pragma once
-#include "uctaction.h"
+#include "UCTAction.h"
+#include "UCTGroup.h"
 
-class UCTAttackAction :
-	public UCTAction
+class UCTAttackAction : public UCTAction
 {
 public:
-	UCTAttackAction(void);
+	UCTAttackAction(int myGroupIndex, int enemyGroupIndex);
 	~UCTAttackAction(void);
+
+	int myGroupIndex;
+	int enemyGroupIndex;
 };
