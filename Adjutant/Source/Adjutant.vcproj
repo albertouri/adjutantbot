@@ -407,11 +407,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\UCTGameState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTGameState.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UCTGroup.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\UCTGroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTJoinAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UCTJoinAction.h"
 				>
 			</File>
 			<File

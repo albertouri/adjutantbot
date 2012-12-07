@@ -9,15 +9,18 @@ void MilitaryManager::evalute()
 {
 	Utils::log("Entering MilitaryManager", 1);
 
-	if (WorldManager::Instance().isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
+	if (WorldManager::Instance().isTerrainAnalyzed 
+		&& (BWAPI::Broodwar->getFrameCount() % 25 == 0 || BWAPI::Broodwar->getFrameCount() == 5))
 	{
 		std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
 
 		//For now, just have the whole army in group(1)
+		/*
 		if (myArmyGroups->size() < 2)
 		{
 			myArmyGroups->push_back(new UnitGroup());
 		}
+		*/
 
 		UnitGroup* baseGroup = myArmyGroups->front();
 
@@ -46,19 +49,61 @@ void MilitaryManager::evalute()
 		}
 		*/
 
+		
+		
+
 		//Determine army behavior
 		BWAPI::Position armyPosition = BWAPI::Positions::None;
 		std::map<UnitGroup*, Threat*> groupAttackMap = WorldManager::Instance().groupAttackMap;
+		std::vector<std::vector<UnitGroup*>*> groupJoinVector = WorldManager::Instance().groupJoinVector;
+		std::vector<std::vector<UnitGroup*>*> joiningGroupsToDelete;
 
 		//Threats
-		if (groupAttackMap.size() > 0)
+		if (groupAttackMap.size() > 0 || groupJoinVector.size() > 0)
 		{
-			for each (UnitGroup* group in *myArmyGroups)
+			//Our groups that are attacking
+			for each (std::pair<UnitGroup*, Threat*> pair in groupAttackMap)
 			{
-				if (Utils::mapContains(&groupAttackMap, &group))
+				UnitGroup* myGroup = pair.first;
+				Threat* enemyGroup = pair.second;
+				myGroup->targetPosition = enemyGroup->getCentroid();
+			}
+
+			//Our groups that are joining one another
+			for each (std::vector<UnitGroup*>* joiningGroups in groupJoinVector)
+			{
+				double distribution = 0.0;
+				BWAPI::Position centroid = Utils::getCentroid(joiningGroups);
+
+				for each (UnitGroup* group in (*joiningGroups))
 				{
-					group->targetPosition = groupAttackMap[group]->getCentroid();
+					group->targetPosition = centroid;
+					distribution += centroid.getDistance(group->getCentroid());
 				}
+
+				//Check to see if joining groups are close enough to merge together
+				distribution /= joiningGroups->size();
+				if (distribution < 150)
+				{
+					UnitGroup* mainGroup = joiningGroups->at(0);
+
+					for (unsigned int i=1; i<joiningGroups->size(); i++)
+					{
+						UnitGroup* otherGroup = joiningGroups->at(i);
+						mainGroup->merge(otherGroup);
+
+						Utils::vectorRemoveElement(WorldManager::Instance().myArmyGroups, otherGroup);
+						delete otherGroup;
+					}
+
+					joiningGroupsToDelete.push_back(joiningGroups);
+				}
+			}
+
+			for each (std::vector<UnitGroup*>* joiningGroupsToRemove in joiningGroupsToDelete)
+			{
+				Utils::vectorRemoveElement(&WorldManager::Instance().groupJoinVector, joiningGroupsToRemove);
+				delete joiningGroupsToRemove;
 			}
 		}
 		else if (WorldManager::Instance().enemy->getUnits().size() != 0)
@@ -166,11 +211,11 @@ void MilitaryManager::evalute()
 						}
 					}
 				}
-				else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
+				else if (unit->getDistance(armyGroup->getCentroid()) > 500)
 				{
 					unit->attack(armyGroup->getCentroid());
 				}
-				else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
+				else if (unit->getDistance(armyGroup->targetPosition) > 100)
 				{
 					unit->attack(armyGroup->targetPosition);
 				}

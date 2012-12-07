@@ -20,7 +20,7 @@ void AdjutantAIModule::onStart()
 	analysisJustFinished=false;
 
 	isBotEnabled=true;
-	showGeneralInfo=false;
+	showGeneralInfo=true;
 	showTerrain=false;
 	showBullets=false;
 	showVisibilityData=false;
@@ -169,6 +169,8 @@ void AdjutantAIModule::onFrame()
 		Broodwar->drawTextScreen(500,128,"Avg Lat (ms): %.3f", totalLat / BWAPI::Broodwar->getFrameCount());
 		Broodwar->drawTextScreen(500,144,"Max Lat (ms): %.3f", maxLat);
 	}
+	
+	Broodwar->drawTextScreen(500,192,"Frame: %d", BWAPI::Broodwar->getFrameCount());
 
 	std::stringstream temp;
 	temp << lat;

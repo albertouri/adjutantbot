@@ -49,6 +49,14 @@ bool UnitGroup::removeUnit(BWAPI::Unit* unit)
 	return Utils::vectorRemoveElement(this->unitVector, unit);
 }
 
+void UnitGroup::merge(UnitGroup* otherGroup)
+{
+	for each (BWAPI::Unit* unit in (*otherGroup->unitVector))
+	{
+		this->addUnit(unit);
+	}
+}
+
 int UnitGroup::removeType(BWAPI::UnitType type)
 {
 	int count = 0;

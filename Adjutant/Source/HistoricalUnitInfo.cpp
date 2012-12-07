@@ -5,6 +5,7 @@ HistoricalUnitInfo::HistoricalUnitInfo()
 	this->id = -1;
 	this->setPosition(BWAPI::Position(0,0));
 	this->setType(BWAPI::UnitTypes::Unknown);
+	this->hitPoints = -1;
 }
 
 HistoricalUnitInfo::HistoricalUnitInfo(int id, BWAPI::UnitType unitType, BWAPI::Position position)
@@ -12,6 +13,15 @@ HistoricalUnitInfo::HistoricalUnitInfo(int id, BWAPI::UnitType unitType, BWAPI::
 	this->id = id;
 	this->setPosition(position);
 	this->setType(unitType);
+	this->hitPoints = -1;
+}
+
+HistoricalUnitInfo::HistoricalUnitInfo(int id, BWAPI::UnitType unitType, BWAPI::Position position, int hitPoints)
+{
+	this->id = id;
+	this->setPosition(position);
+	this->setType(unitType);
+	this->hitPoints = hitPoints;
 }
 
 int HistoricalUnitInfo::getID()
@@ -19,9 +29,19 @@ int HistoricalUnitInfo::getID()
 	return this->id;
 }
 
-void  HistoricalUnitInfo::setID(int id)
+void HistoricalUnitInfo::setID(int id)
 {
 	this->id = id;
+}
+
+int HistoricalUnitInfo::getHitPoints()
+{
+	return this->hitPoints;
+}
+
+void HistoricalUnitInfo::setHitPoints(int hitPoints)
+{
+	this->hitPoints = hitPoints;
 }
 
 BWAPI::UnitType HistoricalUnitInfo::getType()

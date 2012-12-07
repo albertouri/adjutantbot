@@ -1,4 +1,6 @@
 #include "Utils.h"
+#include "UCTGroup.h"
+#include "UnitGroup.h"
 
 //Init static member variables
 int Utils::writeCount = 0;
@@ -253,4 +255,38 @@ void Utils::onEnd()
 	{
 		Utils::logFile.close();
 	}
+}
+
+
+UCTGroup* Utils::getGroupById(std::vector<UCTGroup*>* groupVector, int groupId)
+{
+	for each (UCTGroup* group in (*groupVector))
+	{
+		if (group->groupId == groupId)
+		{
+			return group;
+		}
+	}
+
+	return NULL;
+}
+
+BWAPI::Position Utils::getCentroid(std::vector<UnitGroup*>* groupVector)
+{
+	if (groupVector->size() == 0) {return BWAPI::Positions::None;}
+
+	double centerX = 0.0;
+	double centerY = 0.0;
+
+	for each (UnitGroup* group in (*groupVector))
+	{
+		BWAPI::Position centroid = group->getCentroid();
+		centerX += centroid.x();
+		centerY += centroid.y();
+	}
+
+	centerX /= groupVector->size();
+	centerY /= groupVector->size();
+
+	return BWAPI::Position((int)centerX, (int)centerY);
 }

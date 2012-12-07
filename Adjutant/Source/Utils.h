@@ -7,6 +7,10 @@
 #include <sstream>
 #include <vector>
 
+//Forward declratation of UCTGroup class in order to avoid circular dependency
+class UCTGroup;
+class UnitGroup;
+
 class Utils
 {
 public:
@@ -36,6 +40,10 @@ public:
 	//Get a worker unit that isn't occupied
 	static BWAPI::Unit* getFreeWorker(std::vector<BWAPI::Unit*>* workerVector, BWAPI::Position position);
 	static BWAPI::Unit* getFreeWorker(std::set<BWAPI::Unit*>* workerSet, BWAPI::Position position);
+
+	//Used for UCT
+	static UCTGroup* getGroupById(std::vector<UCTGroup*>* groupVector, int groupId);
+	static BWAPI::Position getCentroid(std::vector<UnitGroup*>* groupVector);
 
 	//Functions using templates must be defined in here
 	static BWAPI::Unit* getFreeWorker(std::vector<BWAPI::Unit*>* workerVector)

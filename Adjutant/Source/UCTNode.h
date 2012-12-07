@@ -1,20 +1,18 @@
 #pragma once
-#include "UCTGroup.h"
-#include "UCTAction.h"
+#include "UCTAttackAction.h"
+#include "UCTJoinAction.h"
 #include <vector>
 
 
 class UCTNode
 {
 public:
-	UCTNode(void);
+	UCTNode(int maxFriendlyGroups, int maxEnemyGroups);
 	~UCTNode(void);
-	bool equals(const UCTNode& node);
 
 	std::vector<UCTAction*> possibleActions;
-	std::vector<UCTGroup*> myGroups;
-	std::vector<UCTGroup*> enemyGroups;
-	std::map<UCTGroup*, UCTAction*> groupActionMap;
+	int visitCount;
 
-	UCTNode* parent;
+private:
+	void populatePossibleActions(int myGroupCount, int enemyGroupCount);
 };

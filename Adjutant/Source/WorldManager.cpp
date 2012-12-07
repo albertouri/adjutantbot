@@ -78,10 +78,41 @@ void WorldManager::update(bool isTerrainAnalyzed)
 					Utils::vectorRemoveElement(this->myWorkerVector, unit);
 					Utils::vectorRemoveElement(this->myScoutVector, unit);
 					
+					std::vector<UnitGroup*> groupsToRemove;
+
 					for each (UnitGroup* group in (*this->myArmyGroups))
 					{
 						group->removeUnit(unit);
+
+						//Clean up group is no units left
+						if (group->size() == 0)
+						{
+							groupsToRemove.push_back(group);
+						}
 					}
+
+					for each (UnitGroup* group in groupsToRemove)
+					{
+						this->groupAttackMap.erase(group);
+						Utils::vectorRemoveElement(this->myArmyGroups, group);
+						std::vector<UnitGroup*>* joiningGroupsToRemove = NULL;
+
+						for each (std::vector<UnitGroup*>* joiningGroups in this->groupJoinVector)
+						{
+							if (Utils::vectorContains(joiningGroups, group))
+							{
+								joiningGroupsToRemove = joiningGroups;
+								break;
+							}
+						}
+						
+						if (joiningGroupsToRemove != NULL)
+						{
+							Utils::vectorRemoveElement(&this->groupJoinVector, joiningGroupsToRemove);
+							delete joiningGroupsToRemove;
+						}
+					}
+
 					break;
 			}
 		}

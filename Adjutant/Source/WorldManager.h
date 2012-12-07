@@ -6,6 +6,7 @@
 #include "BuildTask.h"
 #include "HistoricalUnitInfo.h"
 #include "Threat.h"
+#include "UCTAction.h"
 #include "UnitGroup.h"
 #include "Utils.h"
 #include <vector>
@@ -98,6 +99,9 @@ public:
 
 	//Map of which of our armies ar attacking which threats
 	std::map<UnitGroup*, Threat*> groupAttackMap;
+
+	//Map each group to which action they are executing
+	std::vector<std::vector<UnitGroup*>*> groupJoinVector;
 
 private:
 	WorldManager(void);

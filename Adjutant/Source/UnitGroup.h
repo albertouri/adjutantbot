@@ -12,6 +12,7 @@ public:
 	void addUnit(BWAPI::Unit* unit);
 	BWAPI::Position getCentroid();
 	bool removeUnit(BWAPI::Unit* unit);
+	void merge(UnitGroup* otherGroup);
 	int removeType(BWAPI::UnitType type);
 	void removeAllUnits();
 	int size();
