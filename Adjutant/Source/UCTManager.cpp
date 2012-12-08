@@ -8,6 +8,8 @@ UCTManager::UCTManager(void)
 
 void UCTManager::evaluate()
 {
+	Utils::log("Entering UCTManager - evaluate", 1);
+
 	int myUnitCount = WorldManager::Instance().myArmyVector->size();
 	int enemyUnitCount = WorldManager::Instance().enemyHistoricalUnitMap.size();
 
@@ -45,11 +47,13 @@ void UCTManager::evaluate()
 	{
 		this->onDecisionPoint(NULL);
 	}
+
+	Utils::log("Leaving UCTManager - evaluate", 1);
 }
 
 void UCTManager::onRoundStart()
 {
-	BWAPI::Broodwar->printf("Entering - OnRoundStart()");
+	Utils::log("Entering UCTManager - onRoundStart", 2);
 
 	//Form groups
 	this->formMyGroups();
@@ -61,41 +65,20 @@ void UCTManager::onRoundStart()
 
 	//Manually trigger a decision point with the root node
 	this->onDecisionPoint(this->rootRoundNode);
+
+	Utils::log("Leaving UCTManager - onRoundStart", 2);
 }
 
 void UCTManager::onRoundEnd()
 {
-	//Temp
-	for each (UCTAction* action in this->rootRoundNode->possibleActions)
-	{
-		if (action->type == UCTAction::AttackAction)
-		{
-			UCTAttackAction* attackAction = (UCTAttackAction*)action;
-
-			double averageReward = 0;
-
-			if (attackAction->visitCount > 0)
-			{
-				averageReward = attackAction->totalReward / attackAction->visitCount;
-			}
-
-			BWAPI::Broodwar->printf("Attack %d->%d [v:%d][avg_r:%f]", 
-				attackAction->myGroupIndex, 
-				attackAction->enemyGroupIndex,
-				attackAction->visitCount,
-				averageReward);
-		}
-	}
+	Utils::log("Entering onRoundEnd", 2);
 
 	//Clean up data structures
 	WorldManager::Instance().groupAttackMap.clear();
 	WorldManager::Instance().groupJoinVector.clear();
 	this->rootRoundNode = NULL;
 
-	for each (UCTNode* node in allNodes)
-	{
-		delete node;
-	}
+	Utils::log("Leaving onRoundEnd", 2);
 }
 
 void UCTManager::onDecisionPoint(UCTNode* rootNode)
@@ -104,6 +87,8 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 	{
 		rootNode = new UCTNode(this->maxFriendlyGroups, this->maxEnemyGroups);
 	}
+
+	this->allNodes.insert(rootNode);
 
 	for (int i=0; i<UCTManager::UCT_TOTAL_RUNS; i++)
 	{
@@ -148,6 +133,28 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 			WorldManager::Instance().groupJoinVector.push_back(groupVector);
 		}
 	}
+
+	if (Utils::debugLevel >= 5)
+	{
+		//Print out tree to log
+		std::vector<std::string> stringVector;
+		stringVector.push_back("UCTManager - Printout of UCT Decision Tree\n");
+		this->getTreeStringBFS(rootNode, &stringVector);
+
+		std::ostringstream stream;
+		for each (std::string line in stringVector)
+		{
+			stream << line;
+		}
+		Utils::log(stream.str(), 5);
+	}
+
+	//Clean up allocated memory
+	for each (UCTNode* node in this->allNodes)
+	{
+		delete node;
+	}
+	this->allNodes.clear();
 }
 
 UCTGameState* UCTManager::getCurrentGameState()
@@ -207,13 +214,6 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 			validActions.push_back(action);
 		}
 
-		if (validActions.size() > 5)
-		{
-			int test = 3;;//TODO: REmove
-			test++;
-			test = test - 2;
-		}
-
 		//Trim actions down to those that can actually be performed
 		for each (UCTAction* action in validActions)
 		{
@@ -229,18 +229,14 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 		}
 
 		//Determine unexplored actions.
-		//For simulated actions, we explore them at least a set number of times
-		//For non-simulated actions (picking actions before all groups are busy), only explore once
+		//Explore each action at least a set number of times
 		for each(UCTAction* action in validActions)
 		{
-			bool triggersSimulation = gameState->willTriggerSimulation(action);
-
 			if (action->visitCount == 0)
 			{
 				unexploredActions.push_back(action);
 			}
-			else if (triggersSimulation 
-				&& action->visitCount < UCTManager::UCT_PER_ACTION_TRIES) //TODO: Fix
+			else if (action->visitCount < UCTManager::UCT_PER_ACTION_TRIES)
 			{
 				unexploredActions.push_back(action);
 			}
@@ -255,21 +251,7 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 		}
 		else
 		{
-			actionToExecute = validActions.at(0);
-			//TODO: Fix
-			double highestQValue = actionToExecute->totalReward / actionToExecute->visitCount;
-			
-			for each (UCTAction* action in validActions)
-			{
-				//TODO: Fix
-				double qValue = action->totalReward / action->visitCount;
-
-				if (qValue > highestQValue)
-				{
-					actionToExecute = action;
-					highestQValue = qValue;
-				}
-			}
+			actionToExecute = getMaxQValue(currentNode, &validActions, isPolicyRun);
 		}
 
 		//Mark that we have take this action
@@ -300,6 +282,7 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 		if (nextNode == NULL)
 		{
 			nextNode = new UCTNode(this->maxFriendlyGroups, this->maxEnemyGroups);
+			this->allNodes.insert(nextNode);
 			actionToExecute->resultantNode = nextNode;
 		}
 
@@ -309,7 +292,7 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 
 void UCTManager::formMyGroups()
 {
-const int MAX_CLUSTER_DISTANCE = 100;
+	const int MAX_CLUSTER_DISTANCE = 100;
 	std::map<BWAPI::Unit*, UnitGroup*> unitGroupMap;
 	std::set<BWAPI::Unit*> myMen = std::set<BWAPI::Unit*>();
 	std::vector<UnitGroup*>* unitGroupVector = new std::vector<UnitGroup*>();
@@ -368,6 +351,61 @@ const int MAX_CLUSTER_DISTANCE = 100;
 	}
 
 	WorldManager::Instance().myArmyGroups = unitGroupVector;
+}
+
+UCTAction* UCTManager::getMaxQValue(UCTNode* currentNode, std::vector<UCTAction*>* actionVector, bool isExploitOnly)
+{
+	UCTAction* bestAction = NULL;
+	double highestQValue = 0;
+	
+	for each (UCTAction* action in (*actionVector))
+	{
+		//Exploitation
+		double qValue = action->getAverageReward();
+
+		//Exploration
+		if (! isExploitOnly)
+		{
+			double explorationFactor = abs(qValue);
+			double explorationBonus = explorationFactor * sqrt(log((double)currentNode->visitCount) / action->visitCount);
+			qValue += explorationBonus;
+		}
+
+		if (bestAction == NULL || qValue > highestQValue)
+		{
+			bestAction = action;
+			highestQValue = qValue;
+		}
+	}
+
+	return bestAction;
+}
+
+void UCTManager::getTreeStringBFS(UCTNode* node, std::vector<std::string>* stringVector)
+{
+	if (node == NULL) {return;}
+
+	std::stringstream stream;
+	stream << "Node[" << node << "][n:" << node->visitCount << "]\n";
+	stringVector->push_back(stream.str());
+
+	for each (UCTAction* action in node->possibleActions)
+	{
+		if (action->visitCount > 0)
+		{
+			stream.str("");
+			stream << "  Action" << action->toString() << "\n";
+			stringVector->push_back(stream.str());
+		}
+	}
+
+	for each (UCTAction* action in node->possibleActions)
+	{
+		if (action->resultantNode != NULL)
+		{
+			this->getTreeStringBFS(action->resultantNode, stringVector);
+		}
+	}
 }
 
 UCTManager::~UCTManager(void)

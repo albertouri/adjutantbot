@@ -15,7 +15,7 @@ public:
 
 	void evaluate();
 private:
-	static const int UCT_TOTAL_RUNS = 5000;
+	static const int UCT_TOTAL_RUNS = 1000;
 	static const int UCT_PER_ACTION_TRIES = 10;
 
 	std::set<UCTNode*> allNodes;
@@ -35,4 +35,7 @@ private:
 	void onRoundEnd();
 	void onDecisionPoint(UCTNode* node);
 	void uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPolicyRun);
+	UCTAction* getMaxQValue(UCTNode* currentNode, std::vector<UCTAction*>* actionVector, bool isExploitOnly);
+
+	void getTreeStringBFS(UCTNode* node, std::vector<std::string>* stream);
 };

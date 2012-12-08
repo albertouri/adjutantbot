@@ -9,6 +9,8 @@ class UCTAction
 public:
 	UCTAction(void);
 	~UCTAction(void);
+	double getAverageReward();
+	std::string toString();
 
 	enum UCTActionType
 	{
