@@ -9,7 +9,7 @@ void MilitaryManager::evalute()
 {
 	Utils::log("Entering MilitaryManager", 1);
 
-	if (WorldManager::Instance().isTerrainAnalyzed 
+	if (WorldManager::Instance().isTerrainAnalyzed  && WorldManager::Instance().myArmyGroups->size() > 0
 		&& (BWAPI::Broodwar->getFrameCount() % 25 == 0 || BWAPI::Broodwar->getFrameCount() == 5))
 	{
 		std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
