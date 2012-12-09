@@ -23,7 +23,7 @@ private:
 		Isolated
 	}; 
 
-	static const int UCT_TOTAL_RUNS = 1000;
+	static const int UCT_TOTAL_RUNS = 5000;
 	static const int UCT_PER_ACTION_TRIES = 10;
 	static HeuristicType heuristicOnly;
 

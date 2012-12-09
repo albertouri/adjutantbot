@@ -42,7 +42,7 @@ void UCTNode::populatePossibleActions(int myGroupCount, int enemyGroupCount)
 	//Generate attack actions
 	for (int i=0; i<myGroupCount; i++)
 	{
-		for (int j=0; j<myGroupCount; j++)
+		for (int j=0; j<enemyGroupCount; j++)
 		{
 			this->possibleActions.push_back(new UCTAttackAction(i, j));
 		}

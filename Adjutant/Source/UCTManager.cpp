@@ -2,10 +2,10 @@
 
 //Used for testing specific heuristics. When enabled, will disable any UCT
 //functionality and only make decisions based on heuristic value
-//UCTManager::HeuristicType UCTManager::heuristicOnly = None;
+UCTManager::HeuristicType UCTManager::heuristicOnly = None;
 //UCTManager::HeuristicType UCTManager::heuristicOnly = Closest;
 //UCTManager::HeuristicType UCTManager::heuristicOnly = Random;
-UCTManager::HeuristicType UCTManager::heuristicOnly = Isolated;
+//UCTManager::HeuristicType UCTManager::heuristicOnly = Isolated;
 
 UCTManager::UCTManager(void)
 {
@@ -132,6 +132,7 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 		this->nodesVisited.clear();
 
 		this->uctRun(rootNode, gameState, false);
+		delete gameState;
 	}
 
 	Utils::log("UCTManager - onDecisionPoint - After UCT Runs", 2);
@@ -227,6 +228,7 @@ UCTGameState* UCTManager::getCurrentGameState()
 
 void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPolicyRun)
 {
+	Utils::log("Entering UCTManager - uctRun", 3);
 	//If we have reached an end state (one of the forces is destoryed)
 	if (gameState->isLeaf())
 	{
@@ -335,13 +337,14 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 
 		this->uctRun(nextNode, gameState, isPolicyRun);
 	}
+	Utils::log("Leaving UCTManager - uctRun", 3);
 }
 
 void UCTManager::formMyGroups()
 {
 	Utils::log("Entering UCTManager - formMyGroups", 2);
 
-	const int MAX_CLUSTER_DISTANCE = 100;
+	const int MAX_CLUSTER_DISTANCE = 200;
 	std::map<BWAPI::Unit*, UnitGroup*> unitGroupMap;
 	std::set<BWAPI::Unit*> myMen = std::set<BWAPI::Unit*>();
 	std::vector<UnitGroup*>* unitGroupVector = new std::vector<UnitGroup*>();

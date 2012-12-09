@@ -14,6 +14,7 @@ bool UCTGameState::isLeaf()
 
 bool UCTGameState::isValidAction(UCTAction* action)
 {
+	Utils::log("Entering UCTGameState - isValidAction", 6);
 	bool isValid = true;
 	std::vector<int> friendlyGroupsNeeded = std::vector<int>();
 	std::vector<int> enemyGroupsNeeded = std::vector<int>();
@@ -84,6 +85,7 @@ bool UCTGameState::isValidAction(UCTAction* action)
 		}
 	}
 
+	Utils::log("Leaving UCTGameState - isValidAction", 6);
 	return isValid;
 }
 
@@ -155,6 +157,7 @@ void UCTGameState::markGroupsForAction(UCTAction* action)
 
 void UCTGameState::simulate()
 {
+	Utils::log("Entering UCTManager - simulate", 4);
 	//this->enemyGroups.clear();	
 	int freeGroupCount = 0;
 	
@@ -276,11 +279,14 @@ void UCTGameState::simulate()
 		attackingGroups.clear();
 		freeGroupCount = this->myGroups.size() - this->groupActionMap.size();
 	}
+
+	Utils::log("Leaving UCTManager - simulate", 4);
 }
 
 void UCTGameState::simulateAttacks(std::map<UCTGroup*, std::set<UCTGroup*>>* attackingGroups)
 {
-	std::vector<UCTGroup*> groupsToDelete;
+	Utils::log("Entering UCTManager - simulateAttacks", 5);
+	std::set<UCTGroup*> groupsToDelete;
 
 	for each (std::pair<UCTGroup*, std::set<UCTGroup*>> pair in (*attackingGroups))
 	{
@@ -382,7 +388,7 @@ void UCTGameState::simulateAttacks(std::map<UCTGroup*, std::set<UCTGroup*>>* att
 					}
 				}
 
-				groupsToDelete.push_back(myGroup);
+				groupsToDelete.insert(myGroup);
 			}
 		}
 
@@ -413,7 +419,7 @@ void UCTGameState::simulateAttacks(std::map<UCTGroup*, std::set<UCTGroup*>>* att
 			}
 
 			
-			groupsToDelete.push_back(enemyGroup); 
+			groupsToDelete.insert(enemyGroup); 
 		}
 	}
 
@@ -421,10 +427,13 @@ void UCTGameState::simulateAttacks(std::map<UCTGroup*, std::set<UCTGroup*>>* att
 	{
 		delete g;
 	}
+
+	Utils::log("Leaving UCTManager - simulateAttacks", 5);
 }
 
 void UCTGameState::simulateJoins(std::map<UCTJoinAction*, std::set<UCTGroup*>>* joiningGroups)
 {
+	Utils::log("Entering UCTManager - simulateJoins", 5);
 	for each (std::pair<UCTJoinAction*, std::set<UCTGroup*>> pair in (*joiningGroups))
 	{
 		UCTJoinAction* joinAction = pair.first;
@@ -452,6 +461,7 @@ void UCTGameState::simulateJoins(std::map<UCTJoinAction*, std::set<UCTGroup*>>* 
 			delete otherGroup;
 		}
 	}
+	Utils::log("Leaving UCTManager - simulateJoins", 5);
 }
 
 UCTGroup* UCTGameState::getClosestGroup(UCTGroup* group, std::vector<UCTGroup*>* otherGroups)

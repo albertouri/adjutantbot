@@ -18,7 +18,7 @@ UCTGroup::UCTGroup(int groupId, UnitGroup* group)
 			unit->getID(), 
 			unit->getType(), 
 			unit->getPosition(),
-			unit->getHitPoints())
+			unit->getHitPoints() + unit->getShields())
 			);
 	}
 

@@ -25,7 +25,7 @@ void MilitaryManager::evalute()
 		UnitGroup* baseGroup = myArmyGroups->front();
 
 		//Recruit worker if needed
-		manageFightingWorkers();
+		//manageFightingWorkers();
 
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Positions::None)
