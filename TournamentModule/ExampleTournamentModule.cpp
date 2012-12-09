@@ -16,52 +16,66 @@ void ExampleTournamentAI::onStart()
   Broodwar->setGUI(false);
   Broodwar->setLocalSpeed(0);
 
+  this->roundCount = 0;
   this->maxEventTime = 0;
-  this->home = Broodwar->self();
-  this->away = Broodwar->enemy();
+  this->player1 = Broodwar->getPlayer(0);
+  this->player2 = Broodwar->getPlayer(1);
+  this->roundInProgress = false;
 }
 
 void ExampleTournamentAI::onEnd(bool isWinner)
 {
-	int status = (isWinner ? 0 : 1);
-	recordEndGameStats(status);
 
-	//Create file that tells the automation tool that the game is over
-	std::ofstream myfile;
-	myfile.open ("C:\\BroodwarAutoMatchup_GameOverFlag.txt");
-	myfile << "Game is over";
-	myfile.close();
 }
 
 void ExampleTournamentAI::onFrame()
 {
-  // If the elapsed game time has exceeded 1 hour in game time
-  if ( Broodwar->getFrameCount() > 86400 ) 
-  {
-    Broodwar->leaveGame();
-	recordEndGameStats(2);
-  }
-	
   int lastEventTime = Broodwar->getLastEventTime();
 
-/*
-	if (Broodwar->getFrameCount() >= 2 && lastEventTime > )
-	{
-		lastEventTime	
-	}
-	else if (Broodwar->getFrameCount() >= 10)
-	{
-
-	}
-	else if (Broodwar->getFrameCount() >= 10)
-	{
-
-	}
-*/
   if (lastEventTime > maxEventTime)
   {
 	  maxEventTime = lastEventTime;
   }
+
+  int p1UnitCount = 0;
+  int p2UnitCount = 0;
+
+  for each (BWAPI::Unit* unit in this->player1->getUnits())
+  {
+	  if (unit->getType().canMove())
+	  {
+			p1UnitCount++;
+	  }
+  }
+
+  for each (BWAPI::Unit* unit in this->player2->getUnits())
+  {
+	  if (unit->getType().canMove())
+	  {
+			p2UnitCount++;
+	  }
+  }
+
+	//Check for round beginning and end
+	if (this->roundInProgress)
+	{
+		//Round just ended
+		  if (p1UnitCount == 0 || p2UnitCount == 0)
+		  {
+			this->recordEndRoundStats();
+			this->roundInProgress = false;
+		  }
+	}
+	else
+	{
+		//Round just started
+		if (p1UnitCount > 0 && p2UnitCount > 0)
+		{
+			this->roundInProgress = true;
+		}
+	}
+
+
 }
 
 void ExampleTournamentAI::onSendText(std::string text)
@@ -170,53 +184,44 @@ void ExampleTournamentModule::onFirstAdvertisement()
   Broodwar->sendText("Brought to you by " SPONSORS ".");
 }
 
-void ExampleTournamentAI::recordEndGameStats(int status)
+void ExampleTournamentAI::recordEndRoundStats()
 {
-	//Temporarily enable complete map info so that we can get the enemy score
-	Broodwar->enableFlag(Flag::CompleteMapInformation);
-	Player* victor = NULL;
-	int homeScore = home->getUnitScore() + home->getKillScore() + home->getBuildingScore() + home->getRazingScore() + home->getCustomScore();
-	int awayScore = away->getUnitScore() + away->getKillScore() + away->getBuildingScore() + away->getRazingScore() + away->getCustomScore();
-	bool isTimeout = false;
+	float finalScore = 0;
+
+	for each (BWAPI::Unit* unit in this->player1->getUnits())
+	{
+		if (unit->getType().canMove())
+		{
+			// (% of HP) * (resource cost)
+			finalScore += ((float)unit->getHitPoints() / (float)unit->getType().maxHitPoints()) 
+				* (unit->getType().mineralPrice() + unit->getType().gasPrice());
+		}
+	}
+
+	for each (BWAPI::Unit* unit in this->player2->getUnits())
+	{
+		if (unit->getType().canMove())
+		{
+			finalScore -= ((float)unit->getHitPoints() / (float)unit->getType().maxHitPoints()) 
+				* (unit->getType().mineralPrice() + unit->getType().gasPrice());
+		}
+	}
+
 	std::string outputFile = "SCMatchResults.csv";
 
-	if (status == 0)
-	{
-		victor = home;
-	}
-	else if (status == 1)
-	{
-		victor = away;
-	}
-	else
-	{
-		isTimeout = true;
-
-		if (homeScore >= awayScore)
-		{
-			victor = home;
-		}
-		else
-		{
-			victor = away;
-		}
-	}
-
 	//Record stats to a file
-	std::string titleLine = "HostName, HomeRace, AwayName, AwayRace, VictorName, TotalFrames, isTimeout Map, TimeStamp, HomeScore, AwayScore, MaxFrameTime, Timestamp";
+	std::string titleLine = "Round, HostName, HomeRace, AwayName, AwayRace, FinalScore, TotalFrames, Map, TimeStamp, MaxFrameTime, Timestamp";
 
 	time_t timestamp = time(NULL);
 	std::stringstream outputLine;
-	outputLine << home->getName() << ",";
-	outputLine << home->getRace().c_str() << ",";
-	outputLine << away->getName() << ",";
-	outputLine << away->getRace().c_str() << ",";
-	outputLine << victor->getName() << ",";
+	outputLine << roundCount << ",";
+	outputLine << player1->getName() << ",";
+	outputLine << player1->getRace().c_str() << ",";
+	outputLine << player2->getName() << ",";
+	outputLine << player2->getRace().c_str() << ",";
+	outputLine << finalScore << ",";
 	outputLine << Broodwar->getFrameCount() << ",";
-	outputLine << (isTimeout ? "true" : "false") << ",";
 	outputLine << Broodwar->mapFileName() << ",";
-	outputLine << homeScore << ",";
-	outputLine << awayScore << ",";
 	outputLine << maxEventTime << ",";
 	outputLine << asctime(gmtime(&timestamp));
 	
@@ -242,4 +247,5 @@ void ExampleTournamentAI::recordEndGameStats(int status)
 
 	resultsFile << outputLine.str();
 	resultsFile.close();
+	this->roundCount++;
 }

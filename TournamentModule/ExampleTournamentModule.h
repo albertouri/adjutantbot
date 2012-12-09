@@ -34,9 +34,11 @@ public:
   virtual void onUnitComplete(BWAPI::Unit *unit);
   virtual void onPlayerDropped(BWAPI::Player* player);
 
-  void recordEndGameStats(int status);
+  void recordEndRoundStats();
 
-  BWAPI::Player* home;
-  BWAPI::Player* away;
+  BWAPI::Player* player1;
+  BWAPI::Player* player2;
   int maxEventTime;
+  int roundCount;
+  bool roundInProgress;
 };
