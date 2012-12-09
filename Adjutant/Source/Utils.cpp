@@ -99,6 +99,28 @@ BWAPI::Unit* Utils::getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit
 	return closestUnit;
 }
 
+BWAPI::Unit* Utils::getClosestMovableUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector)
+{
+	BWAPI::Unit* closestUnit = NULL;
+	double minDist = -1;
+
+	for each (BWAPI::Unit* otherUnit in (*otherVector))
+	{
+		if(otherUnit->getType().canMove())
+		{
+			double newDist = otherUnit->getDistance(unit);
+
+			if (closestUnit == NULL || minDist < newDist)
+			{
+				minDist = newDist;
+				closestUnit = otherUnit;
+			}
+		}
+	}
+
+	return closestUnit;
+}
+
 
 bool Utils::canMakeGivenUnits(BWAPI::UnitType type)
 {

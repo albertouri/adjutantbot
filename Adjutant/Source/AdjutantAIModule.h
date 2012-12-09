@@ -9,6 +9,7 @@
 #include "BuildManager.h"
 #include "ScoutingManager.h"
 #include "MilitaryManager.h"
+#include "UnitTraining.h"
 #include "Threat.h"
 #include "Timer.h"
 #include "Utils.h"
@@ -68,4 +69,5 @@ public:
 	BuildManager* buildManager;
 	ScoutingManager* scoutingManager;
 	MilitaryManager* militaryManager;
+	UnitTraining* unitTraining;
 };

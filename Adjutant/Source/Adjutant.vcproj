@@ -352,7 +352,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="BuilOrder"
+			Name="BuildOrder"
 			>
 			<File
 				RelativePath=".\BuildOrder.cpp"
@@ -376,6 +376,26 @@
 			</File>
 			<File
 				RelativePath=".\LoadBuildOrder.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Unit Training"
+			>
+			<File
+				RelativePath=".\MatchUp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MatchUp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UnitTraining.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UnitTraining.h"
 				>
 			</File>
 		</Filter>

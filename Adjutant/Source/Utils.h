@@ -30,6 +30,7 @@ public:
 	static bool isBuildingReady(BWAPI::Unit* building);
 	static bool isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType);
 	static BWAPI::Unit* getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
+	static BWAPI::Unit* getClosestMovableUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
 	static bool canMakeGivenUnits(BWAPI::UnitType type);
 	static void log(std::string text, int level);
 
