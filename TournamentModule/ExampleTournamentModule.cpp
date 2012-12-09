@@ -192,9 +192,12 @@ void ExampleTournamentAI::recordEndRoundStats()
 	{
 		if (unit->getType().canMove())
 		{
-			// (% of HP) * (resource cost)
-			finalScore += ((float)unit->getHitPoints() / (float)unit->getType().maxHitPoints()) 
-				* (unit->getType().mineralPrice() + unit->getType().gasPrice());
+			// (% of HP/Shields) * (resource cost)
+			float healthPercent = ((float)unit->getHitPoints() + (float)unit->getShields()) 
+				/ ((float)unit->getType().maxHitPoints() + (float)unit->getType().maxShields());
+			float value = (float)unit->getType().mineralPrice() + unit->getType().gasPrice();
+
+			finalScore += healthPercent * value;
 		}
 	}
 
@@ -202,8 +205,12 @@ void ExampleTournamentAI::recordEndRoundStats()
 	{
 		if (unit->getType().canMove())
 		{
-			finalScore -= ((float)unit->getHitPoints() / (float)unit->getType().maxHitPoints()) 
-				* (unit->getType().mineralPrice() + unit->getType().gasPrice());
+			// (% of HP/Shields) * (resource cost)
+			float healthPercent = ((float)unit->getHitPoints() + (float)unit->getShields()) 
+				/ ((float)unit->getType().maxHitPoints() + (float)unit->getType().maxShields());
+			float value = (float)unit->getType().mineralPrice() + unit->getType().gasPrice();
+
+			finalScore -= healthPercent * value;
 		}
 	}
 
