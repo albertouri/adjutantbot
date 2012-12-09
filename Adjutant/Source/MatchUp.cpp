@@ -18,7 +18,7 @@ MatchUp::MatchUp(BWAPI::Unit* myUnit, BWAPI::Unit* enemyUnit)
 	this->enemyUnitInitialHitPoints = enemyUnit->getInitialHitPoints();
 }
 
-private void printResults(std::ofstream& file)
+void printResults(std::ofstream& file)
 {
 	if (file.is_open())
 	{

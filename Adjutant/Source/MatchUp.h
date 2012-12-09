@@ -11,7 +11,7 @@ public:
 	MatchUp(void);
 	MatchUp::MatchUp(BWAPI::Unit* myUnit, BWAPI::Unit* enemyUnit);
 	~MatchUp(void);
-	void printResults(ofstream& file);
+	//void printResults(ofstream& file);
 
 	BWAPI::Unit* myUnit;
 	BWAPI::Unit* enemyUnit;

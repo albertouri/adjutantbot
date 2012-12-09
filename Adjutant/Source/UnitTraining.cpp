@@ -53,7 +53,7 @@ void UnitTraining::evalute()
 
 			for each (BWAPI::Unit* unit in (*this->myUnitVector))
 			{
-				this->matchUpMap.find(unit)->printResults(file);
+				//this->matchUpMap.find(unit)->printResults(file);
 			}
 
 			file << "This is another line.\n";
