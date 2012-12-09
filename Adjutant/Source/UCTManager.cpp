@@ -1,5 +1,12 @@
 #include "UCTManager.h"
 
+//Used for testing specific heuristics. When enabled, will disable any UCT
+//functionality and only make decisions based on heuristic value
+//UCTManager::HeuristicType UCTManager::heuristicOnly = None;
+//UCTManager::HeuristicType UCTManager::heuristicOnly = Closest;
+//UCTManager::HeuristicType UCTManager::heuristicOnly = Random;
+UCTManager::HeuristicType UCTManager::heuristicOnly = Isolated;
+
 UCTManager::UCTManager(void)
 {
 	this->rootRoundNode = NULL;
@@ -83,10 +90,37 @@ void UCTManager::onRoundEnd()
 
 void UCTManager::onDecisionPoint(UCTNode* rootNode)
 {
+	Utils::log("Entering UCTManager - onDecisionPoint", 2);
+
+	//Handle cases where we want to only use heuristics
+	if (UCTManager::heuristicOnly != None)
+	{
+		if (rootNode != NULL) {delete rootNode;}
+
+		if (UCTManager::heuristicOnly == UCTManager::Closest)
+		{
+			this->heuristicClosest();	
+		}
+		else if (UCTManager::heuristicOnly == UCTManager::Random)
+		{
+			this->heuristicRandom();
+		}
+		else if (UCTManager::heuristicOnly == UCTManager::Isolated)
+		{
+			this->heuristicIsolated();
+		}
+		
+		return;
+	}
+
+	Utils::log("UCTManager - onDecisionPoint - After heuristic check", 2);
+
 	if (rootNode == NULL)
 	{
 		rootNode = new UCTNode(this->maxFriendlyGroups, this->maxEnemyGroups);
 	}
+
+	Utils::log("UCTManager - onDecisionPoint - After rootNode", 2);
 
 	this->allNodes.insert(rootNode);
 
@@ -100,6 +134,8 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 		this->uctRun(rootNode, gameState, false);
 	}
 
+	Utils::log("UCTManager - onDecisionPoint - After UCT Runs", 2);
+
 	//Do policy run to get set of initial actions with highest Q value
 	this->actionsTaken.clear();
 	this->nodesVisited.clear();
@@ -107,9 +143,42 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 	this->uctRun(rootNode, gameState, true);
 	delete gameState;
 
+	Utils::log("UCTManager - onDecisionPoint - After Policy run", 2);
+
+	this->executeActions(&this->actionsTaken);
+
+	Utils::log("UCTManager - onDecisionPoint - After Action Execution", 2);
+
+	if (Utils::debugLevel >= 5)
+	{
+		//Print out tree to log
+		std::vector<std::string> stringVector;
+		stringVector.push_back("UCTManager - Printout of UCT Decision Tree\n");
+		this->getTreeStringBFS(rootNode, &stringVector);
+
+		std::ostringstream stream;
+		for each (std::string line in stringVector)
+		{
+			stream << line;
+		}
+		Utils::log(stream.str(), 5);
+	}
+
+	//Clean up allocated memory
+	for each (UCTNode* node in this->allNodes)
+	{
+		delete node;
+	}
+	this->allNodes.clear();
+
+	Utils::log("Leaving UCTManager - onDecisionPoint", 2);
+}
+
+void UCTManager::executeActions(std::vector<UCTAction*>* actionVector)
+{
 	//Note: We can match each action's group IDs with group indexs because of 
 	//the deterministic way the initial game state was created for simulation
-	for each (UCTAction* action in this->actionsTaken)
+	for each (UCTAction* action in (*actionVector))
 	{
 		if (action->type == UCTAction::AttackAction)
 		{
@@ -133,28 +202,6 @@ void UCTManager::onDecisionPoint(UCTNode* rootNode)
 			WorldManager::Instance().groupJoinVector.push_back(groupVector);
 		}
 	}
-
-	if (Utils::debugLevel >= 5)
-	{
-		//Print out tree to log
-		std::vector<std::string> stringVector;
-		stringVector.push_back("UCTManager - Printout of UCT Decision Tree\n");
-		this->getTreeStringBFS(rootNode, &stringVector);
-
-		std::ostringstream stream;
-		for each (std::string line in stringVector)
-		{
-			stream << line;
-		}
-		Utils::log(stream.str(), 5);
-	}
-
-	//Clean up allocated memory
-	for each (UCTNode* node in this->allNodes)
-	{
-		delete node;
-	}
-	this->allNodes.clear();
 }
 
 UCTGameState* UCTManager::getCurrentGameState()
@@ -292,6 +339,8 @@ void UCTManager::uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPo
 
 void UCTManager::formMyGroups()
 {
+	Utils::log("Entering UCTManager - formMyGroups", 2);
+
 	const int MAX_CLUSTER_DISTANCE = 100;
 	std::map<BWAPI::Unit*, UnitGroup*> unitGroupMap;
 	std::set<BWAPI::Unit*> myMen = std::set<BWAPI::Unit*>();
@@ -351,6 +400,8 @@ void UCTManager::formMyGroups()
 	}
 
 	WorldManager::Instance().myArmyGroups = unitGroupVector;
+
+	Utils::log("Leaving UCTManager - formMyGroups", 2);
 }
 
 UCTAction* UCTManager::getMaxQValue(UCTNode* currentNode, std::vector<UCTAction*>* actionVector, bool isExploitOnly)
@@ -404,6 +455,113 @@ void UCTManager::getTreeStringBFS(UCTNode* node, std::vector<std::string>* strin
 		if (action->resultantNode != NULL)
 		{
 			this->getTreeStringBFS(action->resultantNode, stringVector);
+		}
+	}
+}
+
+void UCTManager::heuristicClosest()
+{
+	for each (UnitGroup* myGroup in (*WorldManager::Instance().myArmyGroups))
+	{
+		if (WorldManager::Instance().groupAttackMap[myGroup] == NULL)
+		{
+			BWAPI::Position fromPos = myGroup->getCentroid();
+			double minDist = 0;
+			Threat* closestThreat = NULL;
+
+			for each (Threat* threat in WorldManager::Instance().threatVector)
+			{
+				double dist = fromPos.getDistance(threat->getCentroid());
+
+				if (closestThreat == NULL || dist < minDist)
+				{
+					closestThreat = threat;
+					minDist = dist;
+				}
+			}
+
+			WorldManager::Instance().groupAttackMap[myGroup] = closestThreat;
+		}
+	}
+}
+
+
+void UCTManager::heuristicRandom()
+{
+	std::vector<UCTAction*> actionsTaken;
+	UCTNode* currentNode = new UCTNode(this->maxFriendlyGroups, this->maxEnemyGroups);
+	UCTGameState* gameState = this->getCurrentGameState();
+	int freeGroupCount = gameState->myGroups.size() - gameState->groupActionMap.size();
+
+	while (freeGroupCount > 0)
+	{
+		std::vector<UCTAction*> actionsToRemove = std::vector<UCTAction*>();
+		std::vector<UCTAction*> validActions = std::vector<UCTAction*>();
+		UCTAction* actionToExecute = NULL;
+
+		for each (UCTAction* action in currentNode->possibleActions)
+		{
+			validActions.push_back(action);
+		}
+
+		//Trim actions down to those that can actually be performed
+		for each (UCTAction* action in validActions)
+		{
+			if (! gameState->isValidAction(action))
+			{
+				actionsToRemove.push_back(action);
+			}
+		}
+
+		for each (UCTAction* action in actionsToRemove)
+		{
+			Utils::vectorRemoveElement(&validActions, action);
+		}
+
+		int choice = rand() % validActions.size();
+		actionToExecute = validActions.at(choice);
+		actionsTaken.push_back(actionToExecute);
+		gameState->markGroupsForAction(actionToExecute);
+
+		freeGroupCount = gameState->myGroups.size() - gameState->groupActionMap.size();
+	}
+
+	this->executeActions(&actionsTaken);
+	delete gameState;
+	delete currentNode;
+}
+
+void UCTManager::heuristicIsolated()
+{
+	Threat* isolatedThreat = NULL;
+	double maxDist = 0;
+
+	//Get threat that is farthest away from all othe threats (most isolated)
+	for each (Threat* threat in WorldManager::Instance().threatVector)
+	{
+		BWAPI::Position basePos = threat->getCentroid();
+		double dist = 0;
+
+		for each (Threat* testThreat in WorldManager::Instance().threatVector)
+		{
+			if (testThreat != threat)
+			{
+				dist += basePos.getDistance(testThreat->getCentroid());
+			}
+		}
+
+		if (isolatedThreat == NULL || dist > maxDist)
+		{
+			isolatedThreat = threat;
+			maxDist = dist;
+		}
+	}
+
+	for each (UnitGroup* myGroup in (*WorldManager::Instance().myArmyGroups))
+	{
+		if (WorldManager::Instance().groupAttackMap[myGroup] == NULL)
+		{
+			WorldManager::Instance().groupAttackMap[myGroup] = isolatedThreat;
 		}
 	}
 }

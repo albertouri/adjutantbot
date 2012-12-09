@@ -72,8 +72,6 @@ float UCTGroup::getEffectiveResourceValue()
 			* (unit->getType().mineralPrice() + unit->getType().gasPrice());
 	}
 
-	ret = std::pow(ret, 2);
-
 	return ret;
 }
 

@@ -45,12 +45,6 @@ void UCTJoinAction::init(int myGroupIndex0, int myGroupIndex1, int myGroupIndex2
 	}
 
 	this->name = stream.str();
-
-	if (this->name == "")
-	{
-		int test2 = 3;//TODO: REmove
-		test2++;
-	}
 }
 
 void UCTJoinAction::getCentroid(std::vector<UCTGroup*>* allGroups, int* x, int* y)

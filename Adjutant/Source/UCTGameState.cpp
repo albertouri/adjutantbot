@@ -114,12 +114,12 @@ float UCTGameState::getRewardValue()
 
 	for each (UCTGroup* myGroup in this->myGroups)
 	{
-		reward += myGroup->getEffectiveHealth();
+		reward += myGroup->getEffectiveResourceValue();
 	}
 
 	for each (UCTGroup* enemyGroup in this->enemyGroups)
 	{
-		reward -= enemyGroup->getEffectiveHealth();
+		reward -= enemyGroup->getEffectiveResourceValue();
 	}
 
 	return reward;
@@ -250,6 +250,25 @@ void UCTGameState::simulate()
 		//Resolve joins
 		if (joiningGroups.size() > 0)
 		{
+			std::vector<UCTJoinAction*> actionsToRemove;
+
+			for each (std::pair<UCTJoinAction*, std::set<UCTGroup*>> pair in joiningGroups)
+			{
+				UCTJoinAction* joinAction = pair.first;
+				std::set<UCTGroup*> groups = pair.second;
+
+				//If not all groups ready, don't join yet
+				if (joinAction->groupIdVector.size() != groups.size())
+				{
+					actionsToRemove.push_back(joinAction);
+				}
+			}
+
+			for each (UCTJoinAction* joinAction in actionsToRemove)
+			{
+				joiningGroups.erase(joinAction);
+			}
+
 			this->simulateJoins(&joiningGroups);
 		}
 
@@ -351,7 +370,7 @@ void UCTGameState::simulateAttacks(std::map<UCTGroup*, std::set<UCTGroup*>>* att
 				this->groupActionMap.erase(myGroup);
 
 				//If was joining, set other involved groups to idle
-				if (action->type == UCTAction::JoinAction)
+				if (action != NULL && action->type == UCTAction::JoinAction)
 				{
 					UCTJoinAction* joinAction = (UCTJoinAction*)action;
 					

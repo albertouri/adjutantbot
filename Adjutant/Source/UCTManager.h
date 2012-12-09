@@ -15,8 +15,17 @@ public:
 
 	void evaluate();
 private:
+	enum HeuristicType
+	{
+		None,
+		Closest,
+		Random,
+		Isolated
+	}; 
+
 	static const int UCT_TOTAL_RUNS = 1000;
 	static const int UCT_PER_ACTION_TRIES = 10;
+	static HeuristicType heuristicOnly;
 
 	std::set<UCTNode*> allNodes;
 	UCTNode* rootRoundNode;
@@ -34,8 +43,13 @@ private:
 	void onRoundStart();
 	void onRoundEnd();
 	void onDecisionPoint(UCTNode* node);
+	void executeActions(std::vector<UCTAction*>* actionVector);
 	void uctRun(UCTNode* currentNode, UCTGameState* gameState, bool isPolicyRun);
 	UCTAction* getMaxQValue(UCTNode* currentNode, std::vector<UCTAction*>* actionVector, bool isExploitOnly);
-
 	void getTreeStringBFS(UCTNode* node, std::vector<std::string>* stream);
+
+	//Heuristics only
+	void heuristicClosest();
+	void heuristicRandom();
+	void heuristicIsolated();
 };
