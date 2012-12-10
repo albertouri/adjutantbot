@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "UnitTraining.h"
 #include "AdjutantAIModule.h"
 
@@ -8,7 +11,6 @@ UnitTraining::UnitTraining(void)
 
 void UnitTraining::evalute()
 {
-	bool test = isTrainerInitialized;
 	// Should run the first time only
 	if(!isTrainerInitialized)
 	{
@@ -46,18 +48,33 @@ void UnitTraining::evalute()
 	{
 		// if Hero_Jim_Raynor_Marine is dead then the round is over
 		// so cycle through Array of Battle objects 
-		if (this->heroTrigger == NULL)
+		if (!this->heroTrigger->exists())
 		{
+			isTrainerInitialized = false;
 			std::ofstream file;
-			file.open ("AdjutResultExample.txt");
+			file.open ("AdjutResultExample.txt", std::ios::app);
 
+			std::string roundType;
 			for each (BWAPI::Unit* unit in (*this->myUnitVector))
 			{
-				//this->matchUpMap.find(unit)->printResults(file);
+				MatchUp* matchUp = this->matchUpMap.find(unit)->second;
+				roundType = matchUp->myUnitType.getName();
+
+				file << "MY Type: " << matchUp->myUnit->getType() << ", ";
+				file << "TypeName: " << matchUp->myUnitType.getName() << ", ";
+				file << "S_HP: " << matchUp->myUnit->getInitialHitPoints() << ", ";
+				file << "E_HP: " << matchUp->myUnit->getHitPoints() << " ####### ";
+
+				file << "ENEMY Type: " << matchUp->enemyUnit->getType() << ", ";
+				file << "TypeName: " << matchUp->enemyUnitType.getName() << ", ";
+				file << "S_HP: " << matchUp->enemyUnit->getInitialHitPoints() << ", ";
+				file << "E_HP: " << matchUp->enemyUnit->getHitPoints() << std::endl;
 			}
 
-			file << "This is another line.\n";
+			file << "END OF ROUND. " << roundType << "\n";
 			file.close();
+
+			this->myUnitVector->clear();
 		}
 	}
 
