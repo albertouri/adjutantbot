@@ -91,7 +91,7 @@ BWAPI::Unit* Utils::getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit
 	{
 		double newDist = otherUnit->getDistance(unit);
 
-		if (closestUnit == NULL || minDist < newDist)
+		if (closestUnit == NULL || newDist < minDist)
 		{
 			minDist = newDist;
 			closestUnit = otherUnit;
