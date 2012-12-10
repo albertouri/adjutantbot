@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <math.h>
+#include <iomanip>
 #include "UnitTraining.h"
 #include "AdjutantAIModule.h"
 
@@ -29,7 +31,9 @@ void UnitTraining::evalute()
 				this->heroTrigger = unit;
 			}
 			// Find closes enemy to each of my units
-			else if (Utils::unitIsMine(unit) && unit->getType().canMove())
+			else if (this->heroTrigger != NULL 
+					&& this->heroTrigger->exists() 
+					&& Utils::unitIsMine(unit) && unit->getType().canMove())
 			{
 				this->myUnitVector->push_back(unit);
 
@@ -60,15 +64,31 @@ void UnitTraining::evalute()
 				MatchUp* matchUp = this->matchUpMap.find(unit)->second;
 				roundType = matchUp->myUnitType.getName();
 
-				file << "MY Type: " << matchUp->myUnit->getType() << ", ";
-				file << "TypeName: " << matchUp->myUnitType.getName() << ", ";
-				file << "S_HP: " << matchUp->myUnit->getInitialHitPoints() << ", ";
-				file << "E_HP: " << matchUp->myUnit->getHitPoints() << " ####### ";
+				int myUnitInitial = matchUp->myUnitInitialHitPoints;
+				int myUnitFinal = matchUp->myUnit->getHitPoints();
+				int enemyUnitInitial = matchUp->enemyUnitInitialHitPoints;
+				int enemyUnitFinal = matchUp->enemyUnit->getHitPoints();
 
-				file << "ENEMY Type: " << matchUp->enemyUnit->getType() << ", ";
-				file << "TypeName: " << matchUp->enemyUnitType.getName() << ", ";
-				file << "S_HP: " << matchUp->enemyUnit->getInitialHitPoints() << ", ";
-				file << "E_HP: " << matchUp->enemyUnit->getHitPoints() << std::endl;
+				int enemyHP = enemyUnitInitial - enemyUnitFinal;
+				if(enemyHP <= 0)
+				{
+					enemyHP = 1;
+				}
+				int myHP = myUnitInitial - myUnitFinal;
+				if(myHP <= 0)
+				{
+					myHP = 1;
+				}
+
+				float matchUpRatio = (float) enemyHP / myHP;
+
+				file << "MY Type:," << matchUp->myUnitType << ",";
+				file << "TypeName:," << matchUp->myUnitType.getName() << ",";
+
+				file << "ENEMY Type:," << matchUp->enemyUnitType << ",";
+				file << "TypeName:," << matchUp->enemyUnitType.getName() << ",";
+
+				file << "RATIO1:," << std::setprecision(2) << std::fixed << matchUpRatio << std::endl;
 			}
 
 			file << "END OF ROUND. " << roundType << "\n";

@@ -14,21 +14,8 @@ MatchUp::MatchUp(BWAPI::Unit* myUnit, BWAPI::Unit* enemyUnit)
 	this->enemyUnit = enemyUnit;
 	this->myUnitType = myUnit->getType();
 	this->enemyUnitType = enemyUnit->getType();
-	this->myUnitInitialHitPoints = myUnit->getInitialHitPoints();
-	this->enemyUnitInitialHitPoints = enemyUnit->getInitialHitPoints();
-}
-
-void printResults(std::ofstream& file)
-{
-	if (file.is_open())
-	{
-		// This will cause problems if dividing by 0 ever happens
-		//float matchUpComparsion = (float) (enemyUnitInitial - enemyUnitFinal) / (myUnitInitial - myUnitFinal);
-	}
-	else
-	{
-		//cout << "Unable to open file";
-	}
+	this->myUnitInitialHitPoints = myUnit->getHitPoints();
+	this->enemyUnitInitialHitPoints = enemyUnit->getHitPoints();
 }
 
 MatchUp::~MatchUp(void)

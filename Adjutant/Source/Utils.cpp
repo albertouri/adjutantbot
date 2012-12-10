@@ -89,7 +89,7 @@ BWAPI::Unit* Utils::getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit
 	{
 		double newDist = otherUnit->getDistance(unit);
 
-		if (closestUnit == NULL || minDist < newDist)
+		if (closestUnit == NULL || minDist > newDist)
 		{
 			minDist = newDist;
 			closestUnit = otherUnit;
@@ -110,7 +110,7 @@ BWAPI::Unit* Utils::getClosestMovableUnit(BWAPI::Unit* unit, const std::set<BWAP
 		{
 			double newDist = otherUnit->getDistance(unit);
 
-			if (closestUnit == NULL || minDist < newDist)
+			if (closestUnit == NULL || minDist > newDist)
 			{
 				minDist = newDist;
 				closestUnit = otherUnit;
