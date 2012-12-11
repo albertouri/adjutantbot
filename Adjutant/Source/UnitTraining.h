@@ -16,5 +16,6 @@ public:
 	std::map<BWAPI::Unit*, MatchUp*> matchUpMap;
 	std::vector<BWAPI::Unit*>* myUnitVector;
 	BWAPI::Unit* heroTrigger;
+	BWAPI::UnitType roundTypeUnit;
 	bool isTrainerInitialized;
 };

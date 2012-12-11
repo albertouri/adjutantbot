@@ -30,6 +30,7 @@ void UnitTraining::evalute()
 					&& this->heroTrigger->exists() 
 					&& Utils::unitIsMine(unit) && unit->getType().canMove())
 			{
+				this->roundTypeUnit = unit->getType();
 				this->myUnitVector->push_back(unit);
 
 				// Create std::map<BWAPI::Unit*, MatchUp*> matchUpMap; Object
@@ -45,42 +46,61 @@ void UnitTraining::evalute()
 	}
 	else 
 	{
-		/** TEST */
-		for each (BWAPI::Unit* unit in (*this->myUnitVector))
-		{
-			MatchUp* matchUp = this->matchUpMap.find(unit)->second;
+		std::vector<BWAPI::Unit*> keysToRemove = std::vector<BWAPI::Unit*>();
 
-			// if one of the units in the MatchUp is dead then that MatchUp is over
-			if(matchUp != NULL && (!matchUp->myUnit->exists() || !matchUp->enemyUnit->exists()))
+		for each (std::pair<BWAPI::Unit*, MatchUp*> mapPair in matchUpMap)
+		{
+			BWAPI::Unit* unit = mapPair.first;
+			MatchUp* matchUp = mapPair.second;
+
+			// If one of the units in the MatchUp is dead then that MatchUp is over
+			if(matchUp != NULL 
+				&& (!matchUp->myUnit->exists() || !matchUp->enemyUnit->exists()))
 			{ 
-				// Print results and Erase from matchUpMap
+				// Print results
 				printResults(matchUp);
-				this->matchUpMap.erase(unit);
+				keysToRemove.push_back(unit);
 			}
 		}
-		/** END TEST */
 
+		for each (BWAPI::Unit* key in keysToRemove)
+		{
+			delete this->matchUpMap[key];
+			this->matchUpMap.erase(key);
+		}
+		keysToRemove.clear();
 
 		// If Hero_Jim_Raynor_Marine is dead then the round is over
 		// so cycle through Array of Battle objects 
 		if (!this->heroTrigger->exists())
 		{
 			isTrainerInitialized = false;
-			std::string roundType;
 			
-			for each (BWAPI::Unit* unit in (*this->myUnitVector))
+			for each (std::pair<BWAPI::Unit*, MatchUp*> mapPair in matchUpMap)
 			{
-				MatchUp* matchUp = this->matchUpMap.find(unit)->second;
-				if(matchUp != NULL)
-				{
-					roundType = matchUp->myUnitType.getName();
+				BWAPI::Unit* unit = mapPair.first;
+				MatchUp* matchUp = mapPair.second;
+
+				// If one of the units in the MatchUp is dead then that MatchUp is over
+				if(matchUp != NULL 
+					&& (!matchUp->myUnit->exists() || !matchUp->enemyUnit->exists()))
+				{ 
+					// Print results
 					printResults(matchUp);
+					keysToRemove.push_back(unit);
 				}
 			}
 
+			for each (BWAPI::Unit* key in keysToRemove)
+			{
+				delete this->matchUpMap[key];
+				this->matchUpMap.erase(key);
+			}
+			keysToRemove.clear();
+
 			std::ofstream file;
 			file.open ("AdjutResultExample.txt", std::ios::app);
-			file << "END OF ROUND. " << roundType << "\n";
+			file << "END OF ROUND. " << roundTypeUnit.getName() << "\n";
 			file.close();
 
 			this->myUnitVector->clear();
