@@ -7,9 +7,11 @@
 class UCTGameState
 {
 public:
+	static float** matrix;
+
 	UCTGameState(void);
 	~UCTGameState(void);
-
+	void initTrainingMatrix();
 	bool isLeaf();
 	bool isValidAction(UCTAction* action);
 	bool willTriggerSimulation(UCTAction* action);
@@ -20,7 +22,6 @@ public:
 	std::vector<UCTGroup*> myGroups;
 	std::vector<UCTGroup*> enemyGroups;
 	std::map<UCTGroup*, UCTAction*> groupActionMap;
-
 private:
 	static const int SIM_FRAMES_PER_STEP = 50;
 	static const int SIM_JOIN_DISTANCE = 50;
