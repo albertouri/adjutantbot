@@ -21,11 +21,6 @@ void UnitTraining::evalute()
 		// Get list of my units
 		for each (BWAPI::Unit* unit in BWAPI::Broodwar->getAllUnits())
 		{	
-			/*	Get Hero Trigger
-			*	Terran -> Jim Raynor [Hero_Jim_Raynor_Marine], 
-			*	Protoss -> Zeratul [Hero_Zeratul], 
-			*	Zerg -> Devouring One [Hero_Devouring_One]
-			*/
 			if (unit->getType() == BWAPI::UnitTypes::Hero_Jim_Raynor_Marine)
 			{
 				this->heroTrigger = unit;
@@ -50,47 +45,41 @@ void UnitTraining::evalute()
 	}
 	else 
 	{
-		// if Hero_Jim_Raynor_Marine is dead then the round is over
+		/** TEST */
+		for each (BWAPI::Unit* unit in (*this->myUnitVector))
+		{
+			MatchUp* matchUp = this->matchUpMap.find(unit)->second;
+
+			// if one of the units in the MatchUp is dead then that MatchUp is over
+			if(matchUp != NULL && (!matchUp->myUnit->exists() || !matchUp->enemyUnit->exists()))
+			{ 
+				// Print results and Erase from matchUpMap
+				printResults(matchUp);
+				this->matchUpMap.erase(unit);
+			}
+		}
+		/** END TEST */
+
+
+		// If Hero_Jim_Raynor_Marine is dead then the round is over
 		// so cycle through Array of Battle objects 
 		if (!this->heroTrigger->exists())
 		{
 			isTrainerInitialized = false;
-			std::ofstream file;
-			file.open ("AdjutResultExample.txt", std::ios::app);
-
 			std::string roundType;
+			
 			for each (BWAPI::Unit* unit in (*this->myUnitVector))
 			{
 				MatchUp* matchUp = this->matchUpMap.find(unit)->second;
-				roundType = matchUp->myUnitType.getName();
-
-				int myUnitInitial = matchUp->myUnitInitialHitPoints;
-				int myUnitFinal = matchUp->myUnit->getHitPoints();
-				int enemyUnitInitial = matchUp->enemyUnitInitialHitPoints;
-				int enemyUnitFinal = matchUp->enemyUnit->getHitPoints();
-
-				int enemyHP = enemyUnitInitial - enemyUnitFinal;
-				if(enemyHP <= 0)
+				if(matchUp != NULL)
 				{
-					enemyHP = 1;
+					roundType = matchUp->myUnitType.getName();
+					printResults(matchUp);
 				}
-				int myHP = myUnitInitial - myUnitFinal;
-				if(myHP <= 0)
-				{
-					myHP = 1;
-				}
-
-				float matchUpRatio = (float) enemyHP / myHP;
-
-				file << "MY Type:," << matchUp->myUnitType << ",";
-				file << "TypeName:," << matchUp->myUnitType.getName() << ",";
-
-				file << "ENEMY Type:," << matchUp->enemyUnitType << ",";
-				file << "TypeName:," << matchUp->enemyUnitType.getName() << ",";
-
-				file << "RATIO1:," << std::setprecision(2) << std::fixed << matchUpRatio << std::endl;
 			}
 
+			std::ofstream file;
+			file.open ("AdjutResultExample.txt", std::ios::app);
 			file << "END OF ROUND. " << roundType << "\n";
 			file.close();
 
@@ -99,6 +88,40 @@ void UnitTraining::evalute()
 	}
 
 	Utils::log("Leaving UnitTraining", 1);
+}
+
+void UnitTraining::printResults(MatchUp* matchUp)
+{
+	std::ofstream file;
+	file.open ("AdjutResultExample.txt", std::ios::app);
+
+	int myUnitInitial = matchUp->myUnitInitialHitPoints;
+	int myUnitFinal = matchUp->myUnit->getHitPoints();
+	int enemyUnitInitial = matchUp->enemyUnitInitialHitPoints;
+	int enemyUnitFinal = matchUp->enemyUnit->getHitPoints();
+
+	int enemyHP = enemyUnitInitial - enemyUnitFinal;
+	if(enemyHP <= 0)
+	{
+		enemyHP = 1;
+	}
+	int myHP = myUnitInitial - myUnitFinal;
+	if(myHP <= 0)
+	{
+		myHP = 1;
+	}
+
+	float matchUpRatio = (float) enemyHP / myHP;
+
+	file << "MY Type:," << matchUp->myUnitType << ",";
+	file << "TypeName:," << matchUp->myUnitType.getName() << ",";
+
+	file << "ENEMY Type:," << matchUp->enemyUnitType << ",";
+	file << "TypeName:," << matchUp->enemyUnitType.getName() << ",";
+
+	file << "RATIO1:," << std::setprecision(2) << std::fixed << matchUpRatio << std::endl;
+
+	file.close();
 }
 
 UnitTraining::~UnitTraining(void)

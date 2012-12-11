@@ -11,6 +11,7 @@ public:
 	UnitTraining(void);
 	~UnitTraining(void);
 	void evalute();
+	void printResults(MatchUp* matchUp);
 
 	std::map<BWAPI::Unit*, MatchUp*> matchUpMap;
 	std::vector<BWAPI::Unit*>* myUnitVector;
