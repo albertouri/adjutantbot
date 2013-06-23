@@ -27,7 +27,7 @@ void AdjutantAIModule::onStart()
 	showStats=false;
 	showBuildOrder=false;
 	showArmies=false;
-	isUctTraining=true;
+	isUctTraining=false;
 
 	//Initialize member variables
 	this->informationManager = new InformationManager();
@@ -93,9 +93,12 @@ void AdjutantAIModule::onFrame()
 		//Main loop
 		WorldManager::Instance().update(analyzed);
 		this->informationManager->evaluate();
-		this->unitTraining->evalute();
 
-		if (! isUctTraining)
+		if (isUctTraining)
+		{
+			this->unitTraining->evalute();
+		}
+		else
 		{
 			this->unitManager->evalute();
 			this->buildManager->evalute();
