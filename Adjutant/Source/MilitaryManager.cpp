@@ -255,7 +255,10 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
 	//-------------------------------------------------------------------------
 	else if (type == BWAPI::UnitTypes::Terran_Vulture)
 	{
-		//TODO
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
+		{
+			//TODO
+		}
 	}
 	//-------------------------------------------------------------------------
 	// Seige Tanks
@@ -263,14 +266,17 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
 	else if (type == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode
 		|| type == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
 	{
-		//TODO
-		if (unit->isSieged())
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
 		{
+			//TODO
+			if (unit->isSieged())
+			{
 
-		}
-		else
-		{
+			}
+			else
+			{
 
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -278,7 +284,24 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
 	//-------------------------------------------------------------------------
 	else if (type == BWAPI::UnitTypes::Terran_Science_Vessel)
 	{
-		//TODO
+		//TODO: BWAPI does not appear to expose range of friendly abilities
+		const int DEFENSIVE_MATRIX_RANGE = 10 * 32;
+
+		if (unit->getEnergy() >= BWAPI::TechTypes::Defensive_Matrix.energyUsed())
+		{
+			std::set<BWAPI::Unit*> unitsInRange = BWAPI::Broodwar->getUnitsInRadius(
+				unit->getPosition(), 
+				DEFENSIVE_MATRIX_RANGE);
+
+			for each (BWAPI::Unit* targetUnit in unitsInRange)
+			{
+				if (targetUnit->isUnderAttack() && (! targetUnit->isDefenseMatrixed()))
+				{
+					unit->useTech(BWAPI::TechTypes::Defensive_Matrix, targetUnit);
+					break;
+				}
+			}
+		}
 	}
 }
 
