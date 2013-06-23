@@ -9,7 +9,7 @@ void MilitaryManager::evalute()
 {
 	Utils::log("Entering MilitaryManager", 1);
 
-	if (WorldManager::Instance().isTerrainAnalyzed && BWAPI::Broodwar->getFrameCount() % 50 == 0)
+	if (WorldManager::Instance().isTerrainAnalyzed)
 	{
 		std::vector<UnitGroup*>* myArmyGroups = WorldManager::Instance().myArmyGroups;
 
@@ -122,7 +122,6 @@ void MilitaryManager::evalute()
 
 		myArmyGroups->at(1)->targetPosition = armyPosition;
 
-		//Attack to location for all not near it
 		for each (BWAPI::Unit* unit in (*myArmyGroups->at(1)->unitVector))
 		{
 			bool useLowLevelControl = false;
@@ -137,29 +136,36 @@ void MilitaryManager::evalute()
 				}	
 			}
 
-			if (useLowLevelControl)
+			manageUnitAbilities(unit);
+
+			//Need delay because constantly issuing attack command causes unit to do nothing
+			if (BWAPI::Broodwar->getFrameCount() % 50 == 0)
 			{
-				if (! unit->isAttacking())
+				if (useLowLevelControl)
 				{
-					if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
+					if (! unit->isAttacking())
 					{
-						unit->attack(closestEnemy);
-					}
-					else
-					{
-						unit->attack(closestEnemy->getPosition());					
+						if (closestEnemy->getDistance(unit) < unit->getType().groundWeapon().maxRange())
+						{
+							unit->attack(closestEnemy);
+						}
+						else
+						{
+							unit->attack(closestEnemy->getPosition());					
+						}
 					}
 				}
-			}
-			else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
-			{
-				unit->attack(myArmyGroups->at(1)->getCentroid());
-			}
-			else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
-			{
-				unit->attack(myArmyGroups->at(1)->targetPosition);
+				else if (unit->getDistance(myArmyGroups->at(1)->getCentroid()) > 500)
+				{
+					unit->attack(myArmyGroups->at(1)->getCentroid());
+				}
+				else if (unit->getDistance(myArmyGroups->at(1)->targetPosition) > 300)
+				{
+					unit->attack(myArmyGroups->at(1)->targetPosition);
+				}
 			}
 		}
+
 
 		//Control comsat use
 		std::vector<BWAPI::Unit*> comsatVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Comsat_Station];
@@ -226,9 +232,54 @@ void MilitaryManager::manageFightingWorkers()
 	}
 }
 
-void MilitaryManager::manageDefense()
+void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
 {
+	BWAPI::UnitType type = unit->getType();
 
+	//-------------------------------------------------------------------------
+	// Marines and Firebats
+	//-------------------------------------------------------------------------
+	if (type == BWAPI::UnitTypes::Terran_Marine
+		|| type == BWAPI::UnitTypes::Terran_Firebat)
+	{
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Stim_Packs))
+		{
+			if (unit->isAttacking() && (! unit->isStimmed()))
+			{
+				unit->useTech(BWAPI::TechTypes::Stim_Packs);
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	// Vulture
+	//-------------------------------------------------------------------------
+	else if (type == BWAPI::UnitTypes::Terran_Vulture)
+	{
+		//TODO
+	}
+	//-------------------------------------------------------------------------
+	// Seige Tanks
+	//-------------------------------------------------------------------------
+	else if (type == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode
+		|| type == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
+	{
+		//TODO
+		if (unit->isSieged())
+		{
+
+		}
+		else
+		{
+
+		}
+	}
+	//-------------------------------------------------------------------------
+	// Science Vessel
+	//-------------------------------------------------------------------------
+	else if (type == BWAPI::UnitTypes::Terran_Science_Vessel)
+	{
+		//TODO
+	}
 }
 
 MilitaryManager::~MilitaryManager(void)

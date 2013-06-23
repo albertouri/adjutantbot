@@ -12,5 +12,6 @@ public:
 	~MilitaryManager(void);
 	void evalute();
 	void manageFightingWorkers();
+	void manageUnitAbilities(BWAPI::Unit* unit);
 	void manageDefense();
 };
