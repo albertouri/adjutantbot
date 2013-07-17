@@ -226,16 +226,18 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dark_Archon][BWAPI::UnitTypes::Terran_Vulture] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dark_Templar][BWAPI::UnitTypes::Terran_Missile_Turret] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dark_Templar][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.8f;
+	this->unitCounters[BWAPI::UnitTypes::Protoss_Dark_Templar][BWAPI::UnitTypes::Terran_Vulture] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dragoon][BWAPI::UnitTypes::Terran_Marine] = 0.8f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dragoon][BWAPI::UnitTypes::Terran_Medic] = 0.8f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Dragoon][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 1.0f;
-	this->unitCounters[BWAPI::UnitTypes::Protoss_Dragoon][BWAPI::UnitTypes::Terran_Vulture] = 0.5f;
+	this->unitCounters[BWAPI::UnitTypes::Protoss_Dragoon][BWAPI::UnitTypes::Terran_Vulture] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_High_Templar][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_High_Templar][BWAPI::UnitTypes::Terran_Vulture] = 0.8f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Observer][BWAPI::UnitTypes::Terran_Missile_Turret] = 1.0f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Observer][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.9f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Photon_Cannon][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 1.0f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Reaver][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 1.0f;
+	this->unitCounters[BWAPI::UnitTypes::Protoss_Reaver][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Scout][BWAPI::UnitTypes::Terran_Goliath] = 1.0f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Scout][BWAPI::UnitTypes::Terran_Marine] = 0.9f;
 	this->unitCounters[BWAPI::UnitTypes::Protoss_Scout][BWAPI::UnitTypes::Terran_Medic] = 0.9f;
@@ -286,6 +288,7 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Terran_Ghost][BWAPI::UnitTypes::Protoss_Photon_Cannon] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Ghost][BWAPI::UnitTypes::Terran_Missile_Turret] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Ghost][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.7f;
+	this->unitCounters[BWAPI::UnitTypes::Terran_Ghost][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Ghost][BWAPI::UnitTypes::Zerg_Spore_Colony] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Protoss_Dragoon] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Protoss_Reaver] = 0.3f;
@@ -293,6 +296,7 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Terran_Marine] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Terran_Medic] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.8f;
+	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Zerg_Hydralisk] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Zerg_Mutalisk] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Goliath][BWAPI::UnitTypes::Zerg_Zergling] = 0.8f;
@@ -302,9 +306,11 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Terran_Marine] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Terran_Medic] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.7f;
+	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Zerg_Hydralisk] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Zerg_Lurker] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Marine][BWAPI::UnitTypes::Zerg_Zergling] = 0.2f;
+	this->unitCounters[BWAPI::UnitTypes::Terran_Medic][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Missile_Turret][BWAPI::UnitTypes::Zerg_Guardian] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Science_Vessel][BWAPI::UnitTypes::Protoss_Dark_Archon] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Science_Vessel][BWAPI::UnitTypes::Terran_Goliath] = 0.5f;
@@ -327,6 +333,7 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Protoss_Dragoon] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Terran_Goliath] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.8f;
+	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Terran_Vulture] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Zerg_Hydralisk] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Zerg_Lurker] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Terran_Vulture][BWAPI::UnitTypes::Zerg_Ultralisk] = 0.5f;
@@ -343,15 +350,19 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Defiler][BWAPI::UnitTypes::Terran_Firebat] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Defiler][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.8f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Defiler][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.8f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Defiler][BWAPI::UnitTypes::Terran_Vulture] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Guardian][BWAPI::UnitTypes::Terran_Goliath] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Guardian][BWAPI::UnitTypes::Terran_Valkyrie] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Guardian][BWAPI::UnitTypes::Terran_Wraith] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Hydralisk][BWAPI::UnitTypes::Terran_Marine] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Hydralisk][BWAPI::UnitTypes::Terran_Medic] = 0.5f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Hydralisk][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.8f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Hydralisk][BWAPI::UnitTypes::Terran_Vulture] = 0.4f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Infested_Terran][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 1.0f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Infested_Terran][BWAPI::UnitTypes::Terran_Vulture] = 0.1f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Lurker][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Lurker][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.7f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Lurker][BWAPI::UnitTypes::Terran_Vulture] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Mutalisk][BWAPI::UnitTypes::Terran_Marine] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Mutalisk][BWAPI::UnitTypes::Terran_Medic] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Mutalisk][BWAPI::UnitTypes::Terran_Valkyrie] = 1.0f;
@@ -364,8 +375,10 @@ void InformationManager::initUnitCounters()
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Ultralisk][BWAPI::UnitTypes::Terran_Medic] = 0.6f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Ultralisk][BWAPI::UnitTypes::Terran_Science_Vessel] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Ultralisk][BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = 0.9f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Ultralisk][BWAPI::UnitTypes::Terran_Vulture] = 0.2f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Zergling][BWAPI::UnitTypes::Terran_Firebat] = 1.0f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Zergling][BWAPI::UnitTypes::Terran_Marine] = 0.7f;
 	this->unitCounters[BWAPI::UnitTypes::Zerg_Zergling][BWAPI::UnitTypes::Terran_Medic] = 1.0f;
+	this->unitCounters[BWAPI::UnitTypes::Zerg_Zergling][BWAPI::UnitTypes::Terran_Vulture] = 0.6f;
 	//STOP - this code generated by excel macro
 }
