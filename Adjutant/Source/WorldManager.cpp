@@ -64,7 +64,7 @@ void WorldManager::update(bool isTerrainAnalyzed)
 					{
 						this->myWorkerVector->push_back(unit);
 					}
-					else if (unit->getType().canMove())
+					else if (unit->getType().canMove() && unit->getType() != BWAPI::UnitTypes::Terran_Vulture_Spider_Mine)
 					{
 						this->myArmyVector->push_back(unit);
 
@@ -77,7 +77,8 @@ void WorldManager::update(bool isTerrainAnalyzed)
 				case BWAPI::EventType::UnitDestroy:
 					Utils::vectorRemoveElement(this->myWorkerVector, unit);
 					Utils::vectorRemoveElement(this->myScoutVector, unit);
-					
+					this->vulturesMiningMap.erase(unit);
+
 					for each (UnitGroup* group in (*this->myArmyGroups))
 					{
 						group->removeUnit(unit);

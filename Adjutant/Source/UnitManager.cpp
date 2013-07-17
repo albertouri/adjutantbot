@@ -68,11 +68,13 @@ void UnitManager::evalute()
 
 	if (showDebugText)
 	{
+		int minutes = (BWAPI::Broodwar->getFrameCount() / Utils::FPS) / 60;
+		int seconds = (BWAPI::Broodwar->getFrameCount() / Utils::FPS) % 60;
 		std::vector<std::string> textVector = std::vector<std::string>();
 		std::stringstream stream;
 		stream << "Build Queue(" << tasksToAddBack.size() << ")";
 		stream << " at frame " << BWAPI::Broodwar->getFrameCount();
-		stream << " Now=" << BWAPI::Broodwar->getFrameCount();
+		stream << " Time=" << minutes << ":" << seconds;
 		std::string titleText = stream.str();
 
 		textVector.push_back(titleText);
@@ -303,6 +305,7 @@ void UnitManager::manageResourceGathering()
 	//Expansion
 	Utils::log("manageResourceGathering::Before Expansion",3);
 	if (BWAPI::Broodwar->getFrameCount() > 10000
+		&& BWAPI::Broodwar->getFrameCount() % (10 * Utils::FPS) == 0
 		&& this->inPipelineCount(BWAPI::UnitTypes::Terran_Command_Center) == 0)
 	{
 		int resourcesLeft = 0;
@@ -321,10 +324,10 @@ void UnitManager::manageResourceGathering()
 				if (! BWTA::isConnected(home->getTilePosition(), location->getTilePosition())) {continue;}
 				if (! Utils::isValidBuildingLocation(location->getTilePosition(), BWAPI::UnitTypes::Terran_Command_Center)) {continue;}
 
-				double newDistance = BWTA::getGroundDistance(location->getTilePosition(), home->getTilePosition());
+				int newDistance = location->getPosition().getApproxDistance(home->getPosition());
 
 				if (expansionLocation == NULL 
-					|| newDistance < BWTA::getGroundDistance(expansionLocation->getTilePosition(), home->getTilePosition()))
+					|| newDistance < expansionLocation->getPosition().getApproxDistance(home->getPosition()))
 				{
 					expansionLocation = location;
 				}

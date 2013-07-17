@@ -48,6 +48,9 @@ public:
 	//Army - split into groups
 	std::vector<UnitGroup*>* myArmyGroups;
 
+	//Army - vultures on the way to lay a spider mine (mapp to distance away from home base to lay mine)
+	std::map<BWAPI::Unit*, int> vulturesMiningMap;
+
 	//Workers that are on their way to build a building
 	std::map<BWAPI::Unit*, BuildTask*> workersBuildingMap;
 

@@ -24,6 +24,9 @@ void MilitaryManager::evalute()
 		//Recruit worker if needed
 		manageFightingWorkers();
 
+		//Manage vultures as they go to lay mines
+		manageVultureMining();
+
 		//Init baseGroup location
 		if (baseGroup->targetPosition == BWAPI::Positions::None)
 		{
@@ -120,7 +123,9 @@ void MilitaryManager::evalute()
 			}
 		}
 
+
 		myArmyGroups->at(1)->targetPosition = armyPosition;
+		std::set<BWAPI::Unit*> unitToRemoveSet = std::set<BWAPI::Unit*>();
 
 		for each (BWAPI::Unit* unit in (*myArmyGroups->at(1)->unitVector))
 		{
@@ -136,7 +141,13 @@ void MilitaryManager::evalute()
 				}	
 			}
 
-			manageUnitAbilities(unit);
+			bool isUnitToRemove = false;
+			manageUnitAbilities(unit, &isUnitToRemove);
+			
+			if (isUnitToRemove)
+			{
+				unitToRemoveSet.insert(unit);
+			}
 
 			//Need delay because constantly issuing attack command causes unit to do nothing
 			if (BWAPI::Broodwar->getFrameCount() % 50 == 0)
@@ -188,6 +199,15 @@ void MilitaryManager::evalute()
 				}
 			}
 		}
+
+		//Remove units from army that are under the control of other processes
+		for each (UnitGroup* group in  (*WorldManager::Instance().myArmyGroups))
+		{
+			for each (BWAPI::Unit* unit in unitToRemoveSet)
+			{
+				group->removeUnit(unit);
+			}
+		}
 	}
 
 	Utils::log("Leaving MilitaryManager", 1);
@@ -232,7 +252,54 @@ void MilitaryManager::manageFightingWorkers()
 	}
 }
 
-void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
+void MilitaryManager::manageVultureMining()
+{
+	if (WorldManager::Instance().vulturesMiningMap.size() > 0
+		&& BWAPI::Broodwar->getFrameCount() % (1 * Utils::FPS) == 0)
+	{
+		std::set<BWAPI::Unit*> unitToRemoveSet = std::set<BWAPI::Unit*>();
+
+		for each (std::pair<BWAPI::Unit*, int> pair in WorldManager::Instance().vulturesMiningMap)
+		{
+			BWAPI::Unit* unit = pair.first;
+			int distanceFromHomeToMine = pair.second;
+
+			bool isEnemyClose = false;
+
+			int curDist = unit->getDistance(WorldManager::Instance().myHomeBase->baseLocation->getPosition());
+			
+			std::set<BWAPI::Unit*> unitsInRange = unit->getUnitsInRadius(unit->getType().sightRange());
+
+			for each (BWAPI::Unit* unit in unitsInRange)
+			{
+				if (Utils::unitIsEnemy(unit))
+				{
+					isEnemyClose = true;
+					break;
+				}
+			}
+			
+			if (unit->isMoving() && 
+				(curDist >= distanceFromHomeToMine
+				|| isEnemyClose))
+			{
+				unit->useTech(BWAPI::TechTypes::Spider_Mines, unit->getPosition());
+			}
+			else if (unit->isIdle())
+			{
+				unitToRemoveSet.insert(unit);
+			}
+		}
+
+		for each (BWAPI::Unit* unitToRemove in unitToRemoveSet)
+		{
+			WorldManager::Instance().vulturesMiningMap.erase(unitToRemove);
+			WorldManager::Instance().myArmyGroups->front()->addUnit(unitToRemove);
+		}
+	}
+}
+
+void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemove)
 {
 	BWAPI::UnitType type = unit->getType();
 
@@ -255,9 +322,22 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit)
 	//-------------------------------------------------------------------------
 	else if (type == BWAPI::UnitTypes::Terran_Vulture)
 	{
-		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines)
+			&& WorldManager::Instance().myHomeBase != NULL
+			&& WorldManager::Instance().enemyHomeRegion != NULL
+			&& BWAPI::Broodwar->getFrameCount() % (Utils::FPS * 5) == 0)
 		{
 			//TODO
+			if (! unit->isAttacking() && unit->getSpiderMineCount() > 0)
+			{
+				BWAPI::Position homePos = WorldManager::Instance().myHomeBase->baseLocation->getPosition();
+				BWAPI::Position enemyPos = WorldManager::Instance().enemyHomeRegion->getCenter();
+				double maxDist = homePos.getDistance(enemyPos);
+				
+				WorldManager::Instance().vulturesMiningMap[unit] = rand() % (int)maxDist;
+				unit->move(WorldManager::Instance().enemyHomeRegion->getCenter());
+				*isUnitToRemove = true;
+			}
 		}
 	}
 	//-------------------------------------------------------------------------

@@ -12,6 +12,7 @@ public:
 	~MilitaryManager(void);
 	void evalute();
 	void manageFightingWorkers();
-	void manageUnitAbilities(BWAPI::Unit* unit);
+	void manageVultureMining();
+	void manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemove);
 	void manageDefense();
 };
