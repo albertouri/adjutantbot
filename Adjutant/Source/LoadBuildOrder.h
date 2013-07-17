@@ -14,5 +14,7 @@ public:
 	~LoadBuildOrder(void);
 	BuildOrder* getBuildOrder();
 
+	std::map<std::string, BuildOrder*> buildOrderMap;
+
 	BuildOrder* marineTank;
 };

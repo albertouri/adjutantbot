@@ -544,6 +544,22 @@ void AdjutantAIModule::drawBuildOrder()
 			Broodwar->drawTextScreen(5,16*line,"%s: %.3f",type.c_str(),weight);
 			line++;
 		}
+		
+		line++;
+		Broodwar->drawTextScreen(5,16*line,"Tech/Upgrades:");
+		line++;
+
+		for each (BWAPI::TechType techType in bou->techTypeVector)
+		{
+			Broodwar->drawTextScreen(5,16*line,"%s",techType.c_str());
+			line++;
+		}
+
+		for each (BWAPI::UpgradeType upgradeType in bou->upgradeTypeVector)
+		{
+			Broodwar->drawTextScreen(5,16*line,"%s",upgradeType.c_str());
+			line++;
+		}
 	}
 }
 

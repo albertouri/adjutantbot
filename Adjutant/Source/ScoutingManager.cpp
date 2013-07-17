@@ -24,6 +24,20 @@ void ScoutingManager::evalute()
 			}
 		}
 
+		if (BWAPI::Broodwar->getFrameCount() < 2000
+			&& positionToExplore == BWAPI::Position(0,0))
+		{
+			//Get natural
+			BWAPI::Region* homeRegion = BWAPI::Broodwar->getRegionAt(WorldManager::Instance().myHomeBase->baseLocation->getPosition());
+			BWTA::BaseLocation* natural = BWTA::getNearestBaseLocation(homeRegion->getClosestAccessibleRegion()->getCenter());
+			
+			if (! BWAPI::Broodwar->isExplored(natural->getTilePosition()))
+			{
+				positionToExplore = natural->getPosition();
+			}
+		}
+		
+
 		if (BWAPI::Broodwar->getFrameCount() > 2000
 			&& BWAPI::Broodwar->getFrameCount() % (2000 + (int)((1.0 - scoutingWeight) * 4000.0)) < 50
 			&& WorldManager::Instance().myScoutVector->empty())

@@ -38,7 +38,7 @@ bool Utils::isBuildingReady(BWAPI::Unit* building)
 bool Utils::isValidBuildingLocation(BWAPI::TilePosition tilePosition, BWAPI::UnitType buildingType)
 {
 	bool isValidLocation = true;
-	bool drawBuildingLocation = true;
+	bool drawBuildingLocation = false;
 	
 	//Special case for refineries
 	if (buildingType.getID() == BWAPI::UnitTypes::Terran_Refinery)

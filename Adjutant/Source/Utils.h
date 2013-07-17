@@ -63,6 +63,19 @@ public:
 	}
 
 	template <typename T>
+	static bool vectorContains(std::vector<T>* v, T e)
+	{
+		if (std::find(v->begin(), v->end(), e) != v->end())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	template <typename T>
 	static bool setContains(const std::set<T*>* set, T* e)
 	{
 		if (set->find(e) != set->end())

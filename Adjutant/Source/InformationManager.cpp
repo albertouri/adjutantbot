@@ -10,6 +10,7 @@ void InformationManager::evaluate()
 	Utils::log("Entering InformationManager", 1);
 	this->manageThreatDetection();
 	this->manageUnitCountering();
+	this->manageResearch();
 	Utils::log("Leaving InformationManager", 1);
 }
 
@@ -85,7 +86,7 @@ void InformationManager::manageThreatDetection()
 	}
 }
 
-void  InformationManager::manageUnitCountering()
+void InformationManager::manageUnitCountering()
 {
 	std::map<BWAPI::UnitType, float> suggestedUnitMap;
 	std::map<BWAPI::UnitType, float> enemyTypeMap;
@@ -176,6 +177,29 @@ void  InformationManager::manageUnitCountering()
 			{
 				orderUnits->setUnitRatio(pair.first, (int)((pair.second / (float)totalSuggestedUnits) * 100.0f));
 			}
+		}
+	}
+}
+
+void InformationManager::manageResearch()
+{
+	std::map<BWAPI::UnitType, BWAPI::TechType> unitToTechMap;
+	unitToTechMap[BWAPI::UnitTypes::Terran_Vulture] = BWAPI::TechTypes::Spider_Mines;
+	unitToTechMap[BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode] = BWAPI::TechTypes::Tank_Siege_Mode;
+
+	BuildOrderUnits* orderUnits = WorldManager::Instance().buildOrder->getCurrentUnits();
+	std::map<BWAPI::UnitType, float> unitRatioMap = orderUnits->getUnitRatioNormalized();
+
+	for each(std::pair<BWAPI::UnitType, BWAPI::TechType> pair in unitToTechMap)
+	{
+		BWAPI::UnitType unitType = pair.first;
+		BWAPI::TechType tech = pair.second;
+
+		if (Utils::mapContains(&unitRatioMap, &unitType)
+			&& ! BWAPI::Broodwar->self()->hasResearched(tech) 
+			&& ! Utils::vectorContains(&orderUnits->techTypeVector, tech))
+		{
+			orderUnits->techTypeVector.push_back(tech);
 		}
 	}
 }
