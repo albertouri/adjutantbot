@@ -77,6 +77,7 @@ void WorldManager::update(bool isTerrainAnalyzed)
 				case BWAPI::EventType::UnitDestroy:
 					Utils::vectorRemoveElement(this->myWorkerVector, unit);
 					Utils::vectorRemoveElement(this->myScoutVector, unit);
+					Utils::vectorRemoveElement(this->myArmyVector, unit);
 					this->vulturesMiningMap.erase(unit);
 
 					for each (UnitGroup* group in (*this->myArmyGroups))
