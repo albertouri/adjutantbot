@@ -24,8 +24,7 @@ void ScoutingManager::evalute()
 			}
 		}
 
-		if (BWAPI::Broodwar->getFrameCount() < 2000
-			&& positionToExplore == BWAPI::Position(0,0))
+		if (positionToExplore == BWAPI::Position(0,0))
 		{
 			//Get natural
 			BWAPI::Region* homeRegion = BWAPI::Broodwar->getRegionAt(WorldManager::Instance().myHomeBase->baseLocation->getPosition());
