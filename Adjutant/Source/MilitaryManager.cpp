@@ -150,7 +150,8 @@ void MilitaryManager::evalute()
 			}
 
 			//Need delay because constantly issuing attack command causes unit to do nothing
-			if (BWAPI::Broodwar->getFrameCount() % 50 == 0)
+			if (BWAPI::Broodwar->getFrameCount() % 50 == 0 
+				&& unit->getType() != BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
 			{
 				if (useLowLevelControl)
 				{
@@ -348,14 +349,41 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemov
 	{
 		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
 		{
-			//TODO
-			if (unit->isSieged())
-			{
+			std::string currentOrder = unit->getOrder().getName();
+			BWAPI::Broodwar->printf("Order: %s", unit->getOrder().getName().c_str());
 
-			}
-			else
+			if( (currentOrder.compare(BWAPI::Orders::Unsieging.getName()) != 0) 
+				&& (currentOrder.compare(BWAPI::Orders::Sieging.getName()) != 0) )
 			{
+				std::vector<BWAPI::Unit*> marineVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Marine];
+				std::set<BWAPI::Unit*> marineSet(marineVector.begin(), marineVector.end());
 
+				BWAPI::Unit* closestEnemy = Utils::getClosestUnit(unit, &WorldManager::Instance().enemy->getUnits());
+				BWAPI::Unit* closestFriendly = Utils::getClosestUnit(unit, &marineSet);
+				int enemyDistance = unit->getDistance(closestEnemy);
+				int friendlyDistance = unit->getDistance(closestFriendly);
+
+				BWAPI::Broodwar->printf("Unit ID: %d", unit->getID());
+				BWAPI::Broodwar->printf("EnemyDistance: %d", enemyDistance);
+				BWAPI::Broodwar->printf("FriendlyDistance: %d", friendlyDistance);
+				
+				if (unit->isSieged())
+				{
+					if ( enemyDistance > 300 && friendlyDistance > 100 )
+					{
+						BWAPI::Broodwar->printf("Unsiege");
+						unit->unsiege();
+					}
+				}
+				else 
+				{
+					//64 <= enemyDistance && 
+					if ( enemyDistance <= 300 )  
+					{
+						BWAPI::Broodwar->printf("Siege");
+						unit->siege();
+					}
+				}
 			}
 		}
 	}

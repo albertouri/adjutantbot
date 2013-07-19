@@ -35,7 +35,7 @@ void AdjutantAIModule::onStart()
 	this->buildManager = new BuildManager();
 	this->scoutingManager = new ScoutingManager();
 	this->militaryManager = new MilitaryManager();
-	this->unitTraining = new UnitTraining();
+	//this->unitTraining = new UnitTraining();
 
 	//Init random number generator
 	srand((unsigned int)time(NULL));
@@ -77,7 +77,7 @@ void AdjutantAIModule::onEnd(bool isWinner)
 	delete this->unitManager;
 	delete this->scoutingManager;
 	delete this->buildManager;
-	delete this->unitTraining;
+	//delete this->unitTraining;
 	Utils::onEnd();
 }
 
@@ -96,7 +96,7 @@ void AdjutantAIModule::onFrame()
 
 		if (isUctTraining)
 		{
-			this->unitTraining->evalute();
+			//this->unitTraining->evalute();
 		}
 		else
 		{

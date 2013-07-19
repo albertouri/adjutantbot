@@ -14,5 +14,6 @@ public:
 	void manageFightingWorkers();
 	void manageVultureMining();
 	void manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemove);
+	//void manageUnitAbilities(BWAPI::Unit* unit, BWAPI::Unit* closestEnemy);
 	void manageDefense();
 };
