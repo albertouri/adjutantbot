@@ -76,7 +76,11 @@ bool Base::addWorker(BWAPI::Unit* unit)
 			targetMineral = (*it);
 		}
 		
-		unit->gather(targetMineral);
+		//Interrupts initial initial set of workers
+		if (BWAPI::Broodwar->getFrameCount() > (BWAPI::UnitTypes::Terran_SCV.buildTime() - 10))
+		{
+			unit->gather(targetMineral);
+		}
 
 		this->mineralWorkers.insert(unit);
 	}

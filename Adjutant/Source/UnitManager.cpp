@@ -66,6 +66,15 @@ void UnitManager::evalute()
 		buildQueue->push(task);
 	}
 
+	//Cancel all incomplete buildings
+	for each (BWAPI::Unit* myUnit in BWAPI::Broodwar->self()->getUnits())
+	{
+		if (myUnit->getType().isBuilding() && (! myUnit->isCompleted()) && (! myUnit->isBeingConstructed()))
+		{
+			myUnit->cancelConstruction();
+		}
+	}
+
 	if (showDebugText)
 	{
 		int minutes = (BWAPI::Broodwar->getFrameCount() / Utils::FPS) / 60;
