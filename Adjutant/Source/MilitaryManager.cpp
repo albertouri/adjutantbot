@@ -350,37 +350,32 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemov
 		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
 		{
 			std::string currentOrder = unit->getOrder().getName();
-			BWAPI::Broodwar->printf("Order: %s", unit->getOrder().getName().c_str());
 
 			if( (currentOrder.compare(BWAPI::Orders::Unsieging.getName()) != 0) 
 				&& (currentOrder.compare(BWAPI::Orders::Sieging.getName()) != 0) )
 			{
-				std::vector<BWAPI::Unit*> marineVector = WorldManager::Instance().myUnitMap[BWAPI::UnitTypes::Terran_Marine];
-				std::set<BWAPI::Unit*> marineSet(marineVector.begin(), marineVector.end());
+				std::vector<BWAPI::Unit*> armyVector = *WorldManager::Instance().myArmyGroups->at(1)->unitVector;
+				std::set<BWAPI::Unit*> myArmySet(armyVector.begin(), armyVector.end());
 
-				BWAPI::Unit* closestEnemy = Utils::getClosestUnit(unit, &WorldManager::Instance().enemy->getUnits());
-				BWAPI::Unit* closestFriendly = Utils::getClosestUnit(unit, &marineSet);
+				BWAPI::Unit* closestEnemy = Utils::getClosestAttackableUnit(unit, &WorldManager::Instance().enemy->getUnits());
+				BWAPI::Unit* closestFriendly = Utils::getClosestUnitNotOfType(unit, &myArmySet);
 				int enemyDistance = unit->getDistance(closestEnemy);
 				int friendlyDistance = unit->getDistance(closestFriendly);
 
-				BWAPI::Broodwar->printf("Unit ID: %d", unit->getID());
-				BWAPI::Broodwar->printf("EnemyDistance: %d", enemyDistance);
-				BWAPI::Broodwar->printf("FriendlyDistance: %d", friendlyDistance);
+				BWAPI::Broodwar->printf("closestEnemy: %s", closestEnemy->getType().getName().c_str());
+				BWAPI::Broodwar->printf("closestFriendly: %s", closestFriendly->getType().getName().c_str());
 				
 				if (unit->isSieged())
 				{
 					if ( enemyDistance > 300 && friendlyDistance > 100 )
 					{
-						BWAPI::Broodwar->printf("Unsiege");
 						unit->unsiege();
 					}
 				}
 				else 
 				{
-					//64 <= enemyDistance && 
 					if ( enemyDistance <= 300 )  
 					{
-						BWAPI::Broodwar->printf("Siege");
 						unit->siege();
 					}
 				}
