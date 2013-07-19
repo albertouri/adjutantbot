@@ -121,6 +121,50 @@ BWAPI::Unit* Utils::getClosestMovableUnit(BWAPI::Unit* unit, const std::set<BWAP
 	return closestUnit;
 }
 
+BWAPI::Unit* Utils::getClosestAttackableUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector)
+{
+	BWAPI::Unit* closestUnit = NULL;
+	double minDist = -1;
+
+	for each (BWAPI::Unit* otherUnit in (*otherVector))
+	{
+		if(otherUnit->getType().canAttack())
+		{
+			double newDist = otherUnit->getDistance(unit);
+
+			if (closestUnit == NULL || minDist > newDist)
+			{
+				minDist = newDist;
+				closestUnit = otherUnit;
+			}
+		}
+	}
+
+	return closestUnit;
+}
+
+
+BWAPI::Unit* Utils::getClosestUnitNotOfType(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector)
+{
+	BWAPI::Unit* closestUnit = NULL;
+	double minDist = -1;
+
+	for each (BWAPI::Unit* otherUnit in (*otherVector))
+	{
+		if(otherUnit->getType() != BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
+		{
+			double newDist = otherUnit->getDistance(unit);
+
+			if (closestUnit == NULL || minDist > newDist)
+			{
+				minDist = newDist;
+				closestUnit = otherUnit;
+			}
+		}
+	}
+
+	return closestUnit;
+}
 
 bool Utils::canMakeGivenUnits(BWAPI::UnitType type)
 {
