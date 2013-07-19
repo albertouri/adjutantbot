@@ -357,13 +357,13 @@ void MilitaryManager::manageUnitAbilities(BWAPI::Unit* unit, bool* isUnitToRemov
 				std::vector<BWAPI::Unit*> armyVector = *WorldManager::Instance().myArmyGroups->at(1)->unitVector;
 				std::set<BWAPI::Unit*> myArmySet(armyVector.begin(), armyVector.end());
 
-				BWAPI::Unit* closestEnemy = Utils::getClosestAttackableUnit(unit, &WorldManager::Instance().enemy->getUnits());
+				BWAPI::Unit* closestEnemy = Utils::getClosestGroundUnit(unit, &WorldManager::Instance().enemy->getUnits());
 				BWAPI::Unit* closestFriendly = Utils::getClosestUnitNotOfType(unit, &myArmySet);
 				int enemyDistance = unit->getDistance(closestEnemy);
 				int friendlyDistance = unit->getDistance(closestFriendly);
 
-				BWAPI::Broodwar->printf("closestEnemy: %s", closestEnemy->getType().getName().c_str());
-				BWAPI::Broodwar->printf("closestFriendly: %s", closestFriendly->getType().getName().c_str());
+				//BWAPI::Broodwar->printf("closestEnemy: %s", closestEnemy->getType().getName().c_str());
+				//BWAPI::Broodwar->printf("closestFriendly: %s", closestFriendly->getType().getName().c_str());
 				
 				if (unit->isSieged())
 				{

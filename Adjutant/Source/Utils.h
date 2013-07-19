@@ -32,7 +32,7 @@ public:
 
 	static BWAPI::Unit* getClosestUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
 	static BWAPI::Unit* getClosestMovableUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
-	static BWAPI::Unit* getClosestAttackableUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
+	static BWAPI::Unit* getClosestGroundUnit(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
 	static BWAPI::Unit* getClosestUnitNotOfType(BWAPI::Unit* unit, const std::set<BWAPI::Unit*>* otherVector);
 
 	static bool canMakeGivenUnits(BWAPI::UnitType type);
