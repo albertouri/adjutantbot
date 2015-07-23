@@ -1,0 +1,1 @@
+An artificial intelligence (AI) agent that plays Starcraft: Broodwar using the BWAPI
